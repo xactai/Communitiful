@@ -1,0 +1,200 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Companions Anonymous - Calming Healthcare Design System
+Medical-inspired colors for trust, calm, and accessibility
+All colors MUST be HSL.
+*/
+
+@layer base {
+  :root {
+    /* Core backgrounds - soft, medical whites and blues for calming effect */
+    --background: 210 50% 98%;
+    --foreground: 210 50% 10%;
+    --surface: 0 0% 100%;
+    
+    /* Card and popover surfaces */
+    --card: 0 0% 100%;
+    --card-foreground: 210 50% 10%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 210 50% 10%;
+
+    /* Primary - Soothing blue for healthcare trust and calm */
+    --primary: 195 85% 41%;
+    --primary-foreground: 0 0% 100%;
+    --primary-soft: 195 85% 95%;
+    --primary-light: 195 85% 85%;
+
+    /* Secondary - Neutral warm gray */
+    --secondary: 215 16% 94%;
+    --secondary-foreground: 215 25% 16%;
+
+    /* Muted - Subtle backgrounds and disabled states */
+    --muted: 215 16% 96%;
+    --muted-foreground: 215 13% 46%;
+
+    /* Accent - Gentle highlight */
+    --accent: 174 44% 91%;
+    --accent-foreground: 174 64% 25%;
+
+    /* Status colors - Medical safety */
+    --success: 142 71% 45%;
+    --success-foreground: 0 0% 100%;
+    --warning: 38 92% 50%;
+    --warning-foreground: 0 0% 100%;
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 0 0% 100%;
+    --info: 217 91% 60%;
+    --info-foreground: 0 0% 100%;
+
+    /* Borders and inputs */
+    --border: 215 16% 89%;
+    --input: 215 16% 94%;
+    --ring: 174 64% 39%;
+
+    /* Border radius for calming, medical feel */
+    --radius: 1rem;
+    --radius-lg: 1.5rem;
+    --radius-sm: 0.75rem;
+
+    /* Shadows for depth without harshness */
+    --shadow-sm: 0 1px 3px hsl(215 25% 6% / 0.08);
+    --shadow-md: 0 4px 12px hsl(215 25% 6% / 0.12);
+    --shadow-lg: 0 8px 24px hsl(215 25% 6% / 0.15);
+    --shadow-soft: 0 2px 8px hsl(174 64% 39% / 0.15);
+
+    /* Animation timings */
+    --transition-smooth: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    --transition-quick: all 0.15s ease-out;
+
+    /* Touch targets and spacing */
+    --touch-target: 2.75rem; /* 44px minimum */
+    --spacing-safe: 1rem; /* Safe area padding */
+  }
+
+  .dark {
+    --background: 215 25% 8%;
+    --foreground: 215 25% 94%;
+    --surface: 215 25% 10%;
+    
+    --card: 215 25% 10%;
+    --card-foreground: 215 25% 94%;
+    --popover: 215 25% 10%;
+    --popover-foreground: 215 25% 94%;
+
+    --primary: 174 64% 45%;
+    --primary-foreground: 215 25% 6%;
+    --primary-soft: 174 64% 12%;
+    --primary-light: 174 64% 20%;
+
+    --secondary: 215 16% 16%;
+    --secondary-foreground: 215 25% 84%;
+
+    --muted: 215 16% 14%;
+    --muted-foreground: 215 13% 54%;
+
+    --accent: 174 44% 16%;
+    --accent-foreground: 174 64% 75%;
+
+    --success: 142 71% 45%;
+    --warning: 38 92% 50%;
+    --destructive: 0 84% 60%;
+    --info: 217 91% 60%;
+
+    --border: 215 16% 20%;
+    --input: 215 16% 16%;
+    --ring: 174 64% 45%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply bg-background text-foreground font-sans antialiased;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  /* Mobile-first typography */
+  html {
+    font-size: 16px;
+  }
+
+  @media (max-width: 640px) {
+    html {
+      font-size: 16px; /* Ensure minimum readable size */
+    }
+  }
+
+  /* Touch improvements */
+  button, 
+  [role="button"],
+  input,
+  textarea,
+  select {
+    touch-action: manipulation;
+  }
+
+  /* Mobile-specific improvements */
+  @media (max-width: 640px) {
+    /* Ensure buttons are touch-friendly */
+    button {
+      min-height: 44px;
+    }
+    
+    /* Improve text readability on small screens */
+    body {
+      -webkit-text-size-adjust: 100%;
+      text-size-adjust: 100%;
+    }
+    
+    /* Better spacing for mobile */
+    .space-y-6 > * + * {
+      margin-top: 1.25rem;
+    }
+    
+    /* Improve form elements */
+    input, textarea, select {
+      font-size: 16px; /* Prevent zoom on iOS */
+    }
+  }
+
+  /* Focus styles for accessibility */
+  :focus-visible {
+    outline: 2px solid hsl(var(--ring));
+    outline-offset: 2px;
+  }
+
+  /* Reduce motion for accessibility */
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+    }
+  }
+
+  /* Scrollbar styling */
+  ::-webkit-scrollbar {
+    width: 6px;
+  }
+
+  ::-webkit-scrollbar-track {
+    background: hsl(var(--muted));
+  }
+
+  ::-webkit-scrollbar-thumb {
+    background: hsl(var(--muted-foreground) / 0.3);
+    border-radius: 3px;
+  }
+
+  ::-webkit-scrollbar-thumb:hover {
+    background: hsl(var(--muted-foreground) / 0.5);
+  }
+}
