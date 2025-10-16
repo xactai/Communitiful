@@ -13,9 +13,7 @@ import {
   generateNickname 
 } from '@/lib/utils';
 import { 
-  generateAgentResponse, 
-  detectEmergencyKeywords, 
-  detectKeywordTriggers 
+  detectEmergencyKeywords
 } from '@/lib/deepseek';
 import { moderateMessage, ModerationOptions } from '@/lib/moderation';
 import { ModerationBanner } from '@/components/ModerationBanner';
@@ -34,44 +32,29 @@ export function Chat({ onOpenSettings, onOpenRelaxation }: ChatProps) {
   const [showModerationBanner, setShowModerationBanner] = useState(false);
   const [moderationMessage, setModerationMessage] = useState("Moderation Failed");
   const messagesEndRef = useRef<HTMLDivElement>(null);
-  const autoResponseTimerRef = useRef<NodeJS.Timeout | null>(null);
-  const lastUserMessageTimeRef = useRef<number>(0);
+  const [defaultMessagesLoaded, setDefaultMessagesLoaded] = useState(false);
+  const lastUserMessageTimeRef = useRef<number>(Date.now());
   
-  // Charlie virtual agent configuration
-  const charlieAgent = {
-    name: 'Charlie',
-    emoji: '💬'
-  };
-
-  // Subscribe to shared chat and monitor for user messages
+  // Predefined messages to simulate an active chat environment
+  const defaultMessages = [
+    { sender: "🧑‍⚕️ Dr. Mira", message: "Good morning everyone 🌞 Hope you're all feeling stronger today!" },
+    { sender: "🤖 CompanionBot", message: "Hey there! Remember — a deep breath can reset your mind 🌿" },
+    { sender: "👩‍🦰 Ava", message: "Just had my breakfast, feeling a bit sleepy but calm 😴" },
+    { sender: "🧔 Leo", message: "Haha same Ava 😅 these hospital mornings are too quiet sometimes!" },
+    { sender: "👩‍⚕️ Nurse Joy", message: "Morning rounds starting soon, stay positive folks 💚" },
+    { sender: "🧘‍♀️ ZenBot", message: "Tip of the day: Try 4-7-8 breathing — inhale 4s, hold 7s, exhale 8s 💨" },
+    { sender: "👨‍🦱 Max", message: "Thanks ZenBot, that actually helped me calm down last night 🙌" },
+    { sender: "🤖 CompanionBot", message: "If you're new here, say hi 👋 and let's chat about your day!" },
+  ];
+  
+  // Subscribe to shared chat
   useEffect(() => {
     const unsubscribe = sharedChat.subscribe((messages) => {
       setSharedMessages(messages);
-      
-      // Find the latest user message (not system/agent/companion)
-      const userMessages = messages.filter(m => m.authorType === 'user');
-      if (userMessages.length > 0) {
-        const latestUserMessage = userMessages[userMessages.length - 1];
-        const messageTime = latestUserMessage.createdAt.getTime();
-        
-        // If this is a new user message, reset the timer
-        if (messageTime > lastUserMessageTimeRef.current) {
-          lastUserMessageTimeRef.current = messageTime;
-          resetAutoResponseTimer();
-          
-          // Check for keyword triggers in the latest message
-          if (detectKeywordTriggers(latestUserMessage.text)) {
-            triggerCharlieResponse();
-          }
-        }
-      }
     });
     
     return () => {
       unsubscribe();
-      if (autoResponseTimerRef.current) {
-        clearTimeout(autoResponseTimerRef.current);
-      }
     };
   }, []);
 
@@ -80,13 +63,42 @@ export function Chat({ onOpenSettings, onOpenRelaxation }: ChatProps) {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [sharedMessages]);
 
-  // Initialize auto-response timer when component mounts
+  // Load default messages when component mounts
   useEffect(() => {
-    const userMessages = sharedMessages.filter(m => m.authorType === 'user');
-    if (userMessages.length > 0) {
-      resetAutoResponseTimer();
+    if (!defaultMessagesLoaded && session) {
+      // Add default messages with staggered timing
+      const loadMessages = async () => {
+        for (let i = 0; i < defaultMessages.length; i++) {
+          const msg = defaultMessages[i];
+          const messageId = crypto.randomUUID();
+          
+          // Create a message object for each predefined message
+          const predefMessage: Message = {
+            id: messageId,
+            clinicId: session.clinicId,
+            sessionId: `predefined-${i}`, // Use a special session ID for predefined messages
+            authorType: "companion",
+            text: msg.message,
+            createdAt: new Date(Date.now() - (defaultMessages.length - i) * 60000), // Stagger timestamps
+            moderation: { status: 'allowed' },
+            companionIdentity: {
+              name: msg.sender.split(' ')[1] || msg.sender, // Extract name part
+              emoji: msg.sender.split(' ')[0] // Extract emoji part
+            }
+          };
+          
+          sharedChat.addMessage(predefMessage);
+          
+          // Add a small delay between messages for realistic loading
+          await new Promise(resolve => setTimeout(resolve, 300));
+        }
+        
+        setDefaultMessagesLoaded(true);
+      };
+      
+      loadMessages();
     }
-  }, []); // Only run once on mount
+  }, [session, defaultMessagesLoaded]); // Run when session is available and messages not yet loaded
 
   // Get avatar emoji for session
   const getAvatarEmoji = (avatarId: string) => {
@@ -117,64 +129,7 @@ export function Chat({ onOpenSettings, onOpenRelaxation }: ChatProps) {
     return `${adjectives[adjIndex]} ${nouns[nounIndex]}`;
   };
 
-  // Auto-response timer management
-  const resetAutoResponseTimer = () => {
-    // Clear existing timer
-    if (autoResponseTimerRef.current) {
-      clearTimeout(autoResponseTimerRef.current);
-    }
-    
-    // Start new 10-second timer for auto-response
-    autoResponseTimerRef.current = setTimeout(() => {
-      triggerCharlieResponse();
-    }, 10000); // 10 seconds
-  };
-
-  const triggerCharlieResponse = async () => {
-    if (!session) return;
-    
-    // Get the last few messages for context
-    const recentMessages = sharedMessages.slice(-5);
-    const messageContext = recentMessages.map(m => `${m.authorType === 'user' ? getNicknameForSession(m.sessionId) : m.authorType}: ${m.text}`).join('\n');
-    
-    // Show typing indicator first
-    const typingId = crypto.randomUUID();
-    const typingMessage: Message = {
-      id: typingId,
-      clinicId: session.clinicId,
-      sessionId: 'typing',
-      authorType: 'system',
-      text: 'typing...',
-      createdAt: new Date(),
-      moderation: { status: 'allowed' }
-    };
-    sharedChat.addMessage(typingMessage);
-    
-    try {
-      // Generate response using LLM
-      const response = await generateAgentResponse(messageContext, "auto_response");
-      
-      // Remove typing indicator
-      sharedChat.removeMessage(typingId);
-      
-      // Send Charlie's response
-      const charlieMessage: Message = {
-        id: crypto.randomUUID(),
-        clinicId: session.clinicId,
-        sessionId: 'charlie-agent',
-        authorType: 'companion',
-        text: response,
-        createdAt: new Date(),
-        moderation: { status: 'allowed' },
-        companionIdentity: charlieAgent
-      };
-      sharedChat.addMessage(charlieMessage);
-    } catch (error) {
-      console.error('Error generating Charlie response:', error);
-      // Remove typing indicator on error
-      sharedChat.removeMessage(typingId);
-    }
-  };
+  // Auto-response functionality has been removed
 
   // Handle message send
   const handleSend = async () => {
@@ -239,6 +194,10 @@ export function Chat({ onOpenSettings, onOpenRelaxation }: ChatProps) {
       moderation: { status: 'pending' }
     };
 
+    // Update last user message time
+    lastUserMessageTimeRef.current = Date.now();
+    
+    // Add message to both local and shared state
     addMessage(pendingMessage);
     sharedChat.addMessage(pendingMessage);
 
@@ -272,27 +231,8 @@ export function Chat({ onOpenSettings, onOpenRelaxation }: ChatProps) {
         moderation: { status: 'allowed' }
       });
 
-      // Increment user message count but don't send immediate response
+      // Increment user message count
       incrementUserMessageCount();
-      
-      // Reset the auto-response timer since a user just sent a message
-      resetAutoResponseTimer();
-      
-      // Send agent response if needed
-      if (detectKeywordTriggers(messageText)) {
-        // Show typing indicator first
-        const typingId = crypto.randomUUID();
-        const typingMessage: Message = {
-          id: typingId,
-          clinicId: session.clinicId,
-          sessionId: 'typing',
-          authorType: 'system',
-          text: 'typing...',
-          createdAt: new Date(),
-          moderation: { status: 'allowed' }
-        };
-        sharedChat.addMessage(typingMessage);
-      }
     } catch (error) {
       console.error('Moderation error:', error);
       // Fallback: allow message on error
