@@ -155,9 +155,15 @@ export function Chat({ onOpenSettings, onOpenRelaxation }: ChatProps) {
       // Use async moderation with Grok
       const moderationResult = await moderateMessage(inputText, moderationOptions);
       
-      if (!moderationResult.passed) {
-        // Show moderation banner
-        setModerationMessage(moderationResult.reason || "Moderation Failed");
+      // Check for safety alerts (messages that pass but need special handling)
+      if (moderationResult.passed && moderationResult.category === 'safety_alert') {
+        // Allow the message but show safety alert
+        setModerationMessage(moderationResult.reason || "Safety Alert");
+        setShowModerationBanner(true);
+        // Continue with message sending
+      } else if (!moderationResult.passed) {
+        // Show moderation banner for blocked messages
+        setModerationMessage(moderationResult.reason || "Moderation Notice");
         setShowModerationBanner(true);
         
         // Clear the input
@@ -378,8 +384,8 @@ export function Chat({ onOpenSettings, onOpenRelaxation }: ChatProps) {
       <div className="bg-warning/10 border-b border-warning/20 px-4 py-2">
         <p className="text-xs text-center">
           <AlertTriangle size={12} className="inline mr-1" />
-          This chat is for sharing experiences only — not medical advice. 
-          In emergencies, contact hospital staff.
+          This chat is for emotional sharing and companionship, not medical advice.
+          In emergencies, please contact hospital staff.
         </p>
       </div>
 

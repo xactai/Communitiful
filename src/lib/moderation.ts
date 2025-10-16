@@ -68,36 +68,40 @@ export async function moderateMessage(message: string, options: ModerationOption
   }
 }
 
-// Content Filters
+// Content Filters - More empathetic approach
 export function checkContentFilters(message: string): ModerationResult {
+  // Still block profanity and hate speech
   if (containsProfanityOrHateSpeech(message)) {
     return {
       passed: false,
-      reason: "Message contains inappropriate language",
+      reason: "Please keep the conversation friendly and respectful",
       category: "content_filter"
     };
   }
 
+  // Still block severe harassment or bullying
   if (containsHarassmentOrBullying(message)) {
     return {
       passed: false,
-      reason: "Message contains harassment or bullying language",
+      reason: "Let's maintain a supportive environment for everyone",
       category: "content_filter"
     };
   }
 
+  // Only block explicit political propaganda or religious preaching
   if (containsPoliticalOrReligiousContent(message)) {
     return {
       passed: false,
-      reason: "Message contains political or religious content",
+      reason: "Let's keep our chat focused on supporting each other",
       category: "content_filter"
     };
   }
 
+  // Still block medical advice but with a more helpful message
   if (containsMedicalAdvice(message)) {
     return {
       passed: false,
-      reason: "Message appears to contain medical advice",
+      reason: "For medical questions, please speak with your healthcare provider",
       category: "content_filter"
     };
   }
@@ -105,16 +109,14 @@ export function checkContentFilters(message: string): ModerationResult {
   return { passed: true };
 }
 
-// Context Relevance Controls
+// Context Relevance Controls - More permissive for casual conversations
 export function checkContextRelevance(message: string, messageHistory: string[]): ModerationResult {
-  if (isOffTopic(message, messageHistory)) {
-    return {
-      passed: false,
-      reason: "Message appears to be off-topic",
-      category: "context_relevance"
-    };
+  // Allow casual conversations and greetings
+  if (isCasualConversation(message)) {
+    return { passed: true };
   }
-
+  
+  // Still block spam and ads
   if (isSpamOrAd(message)) {
     return {
       passed: false,
@@ -122,11 +124,12 @@ export function checkContextRelevance(message: string, messageHistory: string[])
       category: "context_relevance"
     };
   }
-
-  if (!isContextuallyRelevant(message, messageHistory)) {
+  
+  // More permissive off-topic check - only block extreme cases
+  if (isExtremelyOffTopic(message, messageHistory)) {
     return {
       passed: false,
-      reason: "Message is not contextually relevant to waiting room experience",
+      reason: "Message is extremely off-topic for a companion chat",
       category: "context_relevance"
     };
   }
@@ -134,38 +137,60 @@ export function checkContextRelevance(message: string, messageHistory: string[])
   return { passed: true };
 }
 
-// User Behavior Moderation
+// User Behavior Moderation - Allow emotional sharing
 export function checkUserBehavior(message: string, options: ModerationOptions): ModerationResult {
+  // Redact personal identifiers but don't block the message
   if (containsPersonalDetails(message)) {
+    // In a real implementation, we would redact the personal details here
+    // For now, we'll just pass the message through
+    return { passed: true };
+  }
+
+  // Light rate limiting - only block if sending too many messages in a short time
+  if (options.lastMessageTimestamp && 
+      Date.now() - options.lastMessageTimestamp < 500) { // 500ms between messages
     return {
       passed: false,
-      reason: "Message contains personal details",
+      reason: "Please slow down a bit so everyone can read your messages",
       category: "user_behavior"
     };
   }
 
-  // Rate limiting check would be implemented here
-  // This would use the options.lastMessageTimestamp and current time
-
   return { passed: true };
 }
 
-// Legal & Safety Safeguards
+// Legal & Safety Safeguards - Allow emotional sharing but flag emergencies
 export function checkSafety(message: string): ModerationResult {
-  if (containsUrgentDanger(message)) {
+  // Check for self-harm or emergency indicators but don't block
+  // Instead, we'll handle this with a safety alert in the UI
+  if (containsSelfHarmIndicators(message)) {
+    // We'll pass the message but mark it for special handling
     return {
-      passed: false,
-      reason: "Message indicates urgent danger - please contact staff immediately",
-      category: "safety"
+      passed: true,
+      reason: "SAFETY_ALERT: Please contact healthcare professionals if you're having thoughts of self-harm",
+      category: "safety_alert"
     };
   }
 
-  if (containsPersonalData(message)) {
+  if (containsUrgentDanger(message)) {
+    // We'll pass the message but mark it for special handling
     return {
-      passed: false,
-      reason: "Message contains personal data",
-      category: "safety"
+      passed: true,
+      reason: "SAFETY_ALERT: If this is urgent, please inform the hospital staff right away",
+      category: "safety_alert"
     };
+  }
+
+  // Allow personal emotional sharing
+  if (containsEmotionalSharing(message)) {
+    return { passed: true };
+  }
+
+  // Still check for personal data that could compromise privacy
+  if (containsPersonalData(message)) {
+    // In a real implementation, we would redact the personal data
+    // For now, we'll just pass the message through
+    return { passed: true };
   }
 
   return { passed: true };
@@ -177,24 +202,79 @@ function containsProfanityOrHateSpeech(message: string): boolean {
   const hateSpeechTerms = ['nigger', 'faggot', 'retard', 'spic', 'chink', 'kike', 'wetback', 'towelhead'];
   
   const lowerMessage = message.toLowerCase();
-  return profanityList.some(word => lowerMessage.includes(word)) || 
-         hateSpeechTerms.some(word => lowerMessage.includes(word));
+  return profanityList.some(word => {
+    // Check for whole words to avoid false positives
+    const regex = new RegExp(`\\b${word}\\b`, 'i');
+    return regex.test(lowerMessage);
+  }) || hateSpeechTerms.some(word => lowerMessage.includes(word));
 }
 
 function containsHarassmentOrBullying(message: string): boolean {
-  const bullyingTerms = ['stupid', 'idiot', 'loser', 'ugly', 'fat', 'dumb', 'kill yourself', 'kys', 'die'];
+  // Focus only on severe bullying terms, allow mild criticism
+  const severeBullyingTerms = ['kill yourself', 'kys', 'die', 'hate you'];
   
   const lowerMessage = message.toLowerCase();
-  return bullyingTerms.some(word => lowerMessage.includes(word));
+  return severeBullyingTerms.some(word => lowerMessage.includes(word));
 }
 
 function containsPoliticalOrReligiousContent(message: string): boolean {
-  const politicalTerms = ['democrat', 'republican', 'liberal', 'conservative', 'trump', 'biden', 'election', 'vote', 'congress', 'senate'];
-  const religiousTerms = ['god', 'jesus', 'allah', 'bible', 'quran', 'church', 'mosque', 'temple', 'pray', 'sin', 'heaven', 'hell'];
+  // Only block explicit political propaganda or religious preaching
+  const politicalPropagandaTerms = ['vote for', 'support the', 'against the', 'liberal agenda', 'conservative agenda'];
+  const religiousPreachingTerms = ['you should believe', 'convert to', 'sinners will', 'only path to'];
   
   const lowerMessage = message.toLowerCase();
-  return politicalTerms.some(word => lowerMessage.includes(word)) || 
-         religiousTerms.some(word => lowerMessage.includes(word));
+  return politicalPropagandaTerms.some(word => lowerMessage.includes(word)) || 
+         religiousPreachingTerms.some(word => lowerMessage.includes(word));
+}
+
+// New helper functions for the empathetic moderation system
+function isCasualConversation(message: string): boolean {
+  const casualPhrases = [
+    'hi', 'hello', 'hey', 'good morning', 'good afternoon', 'good evening',
+    'how are you', 'how\'s it going', 'what\'s up', 'feeling', 'better',
+    'thanks', 'thank you', 'nice', 'great', 'awesome', 'cool', 'food',
+    'movie', 'show', 'watch', 'sleep', 'rest', 'tired', 'happy', 'sad',
+    'excited', 'bored', 'hungry', 'thirsty', 'weather', 'today', 'yesterday',
+    'tomorrow', 'weekend', 'week', 'day', 'night', 'morning', 'evening'
+  ];
+  
+  const lowerMessage = message.toLowerCase();
+  return casualPhrases.some(phrase => lowerMessage.includes(phrase));
+}
+
+function isExtremelyOffTopic(message: string, messageHistory: string[]): boolean {
+  // Only block content that's completely unrelated to a hospital waiting room context
+  // or casual conversation between companions
+  const extremelyOffTopicTerms = [
+    'buy now', 'discount', 'offer', 'sale', 'click here', 'earn money',
+    'investment opportunity', 'cryptocurrency', 'bitcoin', 'ethereum',
+    'make money fast', 'get rich', 'lottery', 'casino', 'gambling'
+  ];
+  
+  const lowerMessage = message.toLowerCase();
+  return extremelyOffTopicTerms.some(term => lowerMessage.includes(term));
+}
+
+function containsEmotionalSharing(message: string): boolean {
+  const emotionalTerms = [
+    'feel', 'feeling', 'scared', 'afraid', 'anxious', 'worried', 'nervous',
+    'sad', 'depressed', 'upset', 'angry', 'frustrated', 'annoyed', 'tired',
+    'exhausted', 'pain', 'hurt', 'suffering', 'lonely', 'alone', 'miss',
+    'hope', 'wish', 'dream', 'happy', 'excited', 'grateful', 'thankful'
+  ];
+  
+  const lowerMessage = message.toLowerCase();
+  return emotionalTerms.some(term => lowerMessage.includes(term));
+}
+
+function containsSelfHarmIndicators(message: string): boolean {
+  const selfHarmTerms = [
+    'kill myself', 'suicide', 'end my life', 'don\'t want to live',
+    'want to die', 'harm myself', 'hurt myself', 'self harm', 'cut myself'
+  ];
+  
+  const lowerMessage = message.toLowerCase();
+  return selfHarmTerms.some(term => lowerMessage.includes(term));
 }
 
 function containsMedicalAdvice(message: string): boolean {

@@ -275,6 +275,7 @@ CONTEXT: You're helping companions of patients - family members, friends, and ca
 
 // Detect if message contains emergency/safety keywords
 export function detectEmergencyKeywords(message: string): boolean {
+  // Focus on true emergency situations, not just medical discussions
   const emergencyTerms = [
     'chest pain', 'heart attack', 'stroke', 'severe bleeding', 'unconscious',
     'can\'t breathe', 'breathing problems', 'severe pain', 'emergency',
@@ -282,8 +283,18 @@ export function detectEmergencyKeywords(message: string): boolean {
     'overdose', 'suicide', 'self harm'
   ];
   
+  // Check if message contains emergency keywords
   const lowerMessage = message.toLowerCase();
-  return emergencyTerms.some(term => lowerMessage.includes(term));
+  const hasEmergencyKeywords = emergencyTerms.some(term => lowerMessage.includes(term));
+  
+  // Check if message contains contextual emergency indicators
+  const hasContextualEmergency = lowerMessage.includes('need help') || 
+    lowerMessage.includes('right now') || 
+    lowerMessage.includes('immediately') ||
+    lowerMessage.includes('serious') ||
+    lowerMessage.includes('severe');
+  
+  return hasEmergencyKeywords || hasContextualEmergency;
 }
 
 // Detect keywords for agent triggers
