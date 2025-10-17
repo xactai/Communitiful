@@ -38,14 +38,6 @@ export function HospitalConfirmation({ onComplete }: HospitalConfirmationProps) 
       <div className="flex flex-col items-center justify-center min-h-[80vh] text-center">
         {/* QR Code */}
         <div className="mb-8 border-4 border-primary p-4 rounded-lg">
-          <svg
-            width="200"
-            height="200"
-            viewBox="0 0 200 200"
-            fill="none"
-            xmlns="http://www.w3.org/2000/svg"
-            className="mx-auto"
-          >
             {/* Simple QR code SVG pattern */}
             <rect width="200" height="200" fill="white" />
             <rect x="20" y="20" width="160" height="160" fill="white" stroke="black" strokeWidth="2" />
@@ -54,7 +46,6 @@ export function HospitalConfirmation({ onComplete }: HospitalConfirmationProps) 
             <rect x="40" y="120" width="40" height="40" fill="black" />
             <rect x="100" y="100" width="60" height="60" fill="black" />
             <rect x="60" y="60" width="80" height="20" fill="black" />
-          </svg>
         </div>
 
         {/* Status Message */}
