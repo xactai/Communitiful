@@ -43,7 +43,7 @@ export function Landing({ onStart }: LandingProps) {
               Companions Anonymous
             </h1>
             <p className="text-lg text-muted-foreground max-w-sm mx-auto">
-              Safe space for waiting companions
+              []
             </p>
           </motion.div>
         </div>
