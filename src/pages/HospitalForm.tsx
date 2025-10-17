@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -8,6 +8,7 @@ import { PageContainer } from '@/components/AppLayout';
 import { ArrowLeft, UserRound, Users, Heart, Stethoscope, Building2 } from 'lucide-react';
 import { insertPatient, insertCompanions } from '@/lib/supabaseClient';
 import { motion } from 'framer-motion';
+import { generateRandomPatientData, generateRandomCompanionData, typeText, TypeOptions } from '@/lib/autoFillUtils';
 
 interface HospitalFormProps {
   onBack: () => void;
@@ -36,6 +37,112 @@ export function HospitalForm({ onBack, onSuccess }: HospitalFormProps) {
 
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+  
+  // References to cancel typing animations if needed
+  const typeAnimationsRef = useRef<Array<{ cancel: () => void }>>([]);
+  
+  // Auto-fill the form when the component mounts
+  useEffect(() => {
+    // Generate random data
+    const patientData = generateRandomPatientData();
+    const companionData = generateRandomCompanionData();
+    
+    // Clear any existing animations
+    typeAnimationsRef.current.forEach(animation => animation.cancel());
+    typeAnimationsRef.current = [];
+    
+    // Auto-fill patient name with typing animation
+    const nameAnimation = typeText({
+      text: patientData.name,
+      onUpdate: setPatientName,
+      speed: 70,
+      initialDelay: 500
+    });
+    typeAnimationsRef.current.push(nameAnimation);
+    
+    // Auto-fill patient contact with typing animation
+    const contactAnimation = typeText({
+      text: patientData.contactNumber,
+      onUpdate: setPatientContact,
+      speed: 70,
+      initialDelay: 1200
+    });
+    typeAnimationsRef.current.push(contactAnimation);
+    
+    // Auto-fill purpose of visit after a delay
+    setTimeout(() => {
+      setPurposeOfVisit(patientData.purposeOfVisit);
+    }, 2000);
+    
+    // Auto-fill department after a delay
+    setTimeout(() => {
+      setDepartment(patientData.department);
+    }, 2500);
+    
+    // Auto-fill location with typing animation
+    const locationAnimation = typeText({
+      text: patientData.location,
+      onUpdate: setLocation,
+      speed: 70,
+      initialDelay: 3000
+    });
+    typeAnimationsRef.current.push(locationAnimation);
+    
+    // Auto-fill companion data with typing animation
+    const companionNameAnimation = typeText({
+      text: companionData.name,
+      onUpdate: (text) => {
+        setCompanions(prev => [{
+          ...prev[0],
+          name: text
+        }, ...prev.slice(1)]);
+      },
+      speed: 70,
+      initialDelay: 4000
+    });
+    typeAnimationsRef.current.push(companionNameAnimation);
+    
+    // Auto-fill companion relationship after a delay
+    setTimeout(() => {
+      setCompanions(prev => [{
+        ...prev[0],
+        relationship: companionData.relationship
+      }, ...prev.slice(1)]);
+    }, 5000);
+    
+    // Auto-fill companion number with typing animation
+    const companionNumberAnimation = typeText({
+      text: companionData.number,
+      onUpdate: (text) => {
+        setCompanions(prev => [{
+          ...prev[0],
+          number: text
+        }, ...prev.slice(1)]);
+      },
+      speed: 70,
+      initialDelay: 5500
+    });
+    typeAnimationsRef.current.push(companionNumberAnimation);
+    
+    // Auto-fill companion location with typing animation
+    const companionLocationAnimation = typeText({
+      text: companionData.location,
+      onUpdate: (text) => {
+        setCompanions(prev => [{
+          ...prev[0],
+          location: text
+        }, ...prev.slice(1)]);
+      },
+      speed: 70,
+      initialDelay: 6500
+    });
+    typeAnimationsRef.current.push(companionLocationAnimation);
+    
+    // Cleanup function to cancel any ongoing animations when component unmounts
+    return () => {
+      typeAnimationsRef.current.forEach(animation => animation.cancel());
+    };
+  }, []);
 
   const addCompanion = () => setCompanions((prev) => [...prev, { name: '', relationship: '', number: '', location: '' }]);
   const updateCompanion = (index: number, field: keyof CompanionFormItem, value: string) => {
