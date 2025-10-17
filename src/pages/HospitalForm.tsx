@@ -204,15 +204,28 @@ export function HospitalForm({ onBack, onSuccess }: HospitalFormProps) {
   };
 
   return (
-    <PageContainer>
-      <div className="flex items-center gap-4 mb-8">
-        <Button variant="ghost" size="icon" onClick={onBack} asChild>
-          <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
-            <ArrowLeft size={20} />
-          </motion.div>
-        </Button>
-        <h1 className="text-xl font-semibold">Hospital Registration</h1>
-      </div>
+    <div className="min-h-screen bg-gradient-to-b from-background to-muted/30 py-8 px-4">
+      <div className="max-w-4xl mx-auto space-y-10">
+        
+        {/* Header */}
+        <div className="flex items-center justify-between bg-white/80 p-4 rounded-xl shadow-md">
+          <Button variant="outline" size="icon" className="border-primary/30 hover:bg-primary/5" onClick={onBack} asChild>
+            <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+              <ArrowLeft size={22} className="text-primary" />
+            </motion.div>
+          </Button>
+          <div className="flex items-center gap-4">
+            <img 
+              src="/images/Apollo Logo.png" 
+              alt="Apollo Hospital Logo" 
+              width={60} 
+              height={60} 
+              className="object-contain rounded-lg shadow-md"
+            />
+            <h1 className="text-2xl font-bold text-primary">Hospital Registration</h1>
+          </div>
+          <div className="w-10" /> {/* Spacer for centering */}
+        </div>
 
       <motion.div 
         className="space-y-8"
@@ -220,38 +233,30 @@ export function HospitalForm({ onBack, onSuccess }: HospitalFormProps) {
         animate={{ opacity: 1 }}
         transition={{ duration: 0.5 }}
       >
-        {/* Apollo Logo */}
-        <motion.div 
-          className="text-center"
-          initial={{ y: -20, opacity: 0 }}
-          animate={{ y: 0, opacity: 1 }}
-          transition={{ delay: 0.2 }}
-        >
-          <img 
-            src="/images/Apollo Logo.png" 
-            alt="Apollo Logo" 
-            className="mx-auto h-12 w-auto"
-          />
-        </motion.div>
 
         {/* Patient Details Section */}
         <motion.div 
-          className="space-y-6 p-6 border rounded-lg bg-white/80 shadow-sm"
+          className="space-y-6 p-8 border-2 border-primary/20 rounded-xl bg-white/90 shadow-md"
           initial={{ y: 20, opacity: 0 }}
           animate={{ y: 0, opacity: 1 }}
           transition={{ delay: 0.3 }}
         >
-          <div className="flex items-center gap-3">
-            <div className="w-8 h-8 bg-primary-soft rounded-full flex items-center justify-center shadow-inner">
-              <Stethoscope size={16} className="text-primary" />
+          <div className="flex items-center justify-between border-b border-primary/20 pb-4">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 bg-primary/10 rounded-full flex items-center justify-center shadow-md">
+                <Stethoscope size={20} className="text-primary" />
+              </div>
+              <h2 className="text-xl font-semibold text-primary/90">Patient Details</h2>
             </div>
-            <h2 className="text-lg font-medium">Patient Details</h2>
+            <div className="bg-primary/10 px-3 py-1 rounded-full text-sm text-primary font-medium">
+              Required
+            </div>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <Label htmlFor="patient-name" className="flex items-center gap-1">
-                <UserRound size={12} className="text-primary" />
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 mt-4">
+            <div className="space-y-3">
+              <Label htmlFor="patient-name" className="flex items-center gap-2 text-base font-medium">
+                <UserRound size={16} className="text-primary" />
                 Patient Name *
               </Label>
               <Input
@@ -259,13 +264,14 @@ export function HospitalForm({ onBack, onSuccess }: HospitalFormProps) {
                 placeholder="Enter patient name"
                 value={patientName}
                 onChange={(e) => setPatientName(e.target.value)}
-                className="focus:ring-2 focus:ring-primary/20"
+                className="focus:ring-2 focus:ring-primary/20 py-6 text-base shadow-sm border-primary/20 hover:border-primary/50 transition-colors"
               />
+              {!patientName && <p className="text-xs text-muted-foreground">Full name as per ID proof</p>}
             </div>
 
-            <div className="space-y-2">
-              <Label htmlFor="patient-contact" className="flex items-center gap-1">
-                <Heart size={12} className="text-primary" />
+            <div className="space-y-3">
+              <Label htmlFor="patient-contact" className="flex items-center gap-2 text-base font-medium">
+                <Heart size={16} className="text-primary" />
                 Contact Number *
               </Label>
               <Input
@@ -274,17 +280,18 @@ export function HospitalForm({ onBack, onSuccess }: HospitalFormProps) {
                 placeholder="9876543210"
                 value={patientContact}
                 onChange={(e) => setPatientContact(e.target.value.replace(/\D/g, ''))}
-                className="focus:ring-2 focus:ring-primary/20"
+                className="focus:ring-2 focus:ring-primary/20 py-6 text-base shadow-sm border-primary/20 hover:border-primary/50 transition-colors"
               />
+              {!patientContact && <p className="text-xs text-muted-foreground">Mobile number for communication</p>}
             </div>
 
-            <div className="space-y-2">
-              <Label htmlFor="purpose" className="flex items-center gap-1">
-                <Building2 size={12} className="text-primary" />
+            <div className="space-y-3">
+              <Label htmlFor="purpose" className="flex items-center gap-2 text-base font-medium">
+                <Building2 size={16} className="text-primary" />
                 Purpose of Visit
               </Label>
               <Select value={purposeOfVisit} onValueChange={setPurposeOfVisit}>
-                <SelectTrigger className="focus:ring-2 focus:ring-primary/20">
+                <SelectTrigger className="focus:ring-2 focus:ring-primary/20 py-6 text-base shadow-sm border-primary/20">
                   <SelectValue placeholder="Select purpose" />
                 </SelectTrigger>
                 <SelectContent>
@@ -298,16 +305,16 @@ export function HospitalForm({ onBack, onSuccess }: HospitalFormProps) {
               </Select>
             </div>
 
-            <div className="space-y-2">
-              <Label htmlFor="department" className="flex items-center gap-1">
-                <Stethoscope size={12} className="text-primary" />
+            <div className="space-y-3">
+              <Label htmlFor="department" className="flex items-center gap-2 text-base font-medium">
+                <Building2 size={16} className="text-primary" />
                 Department
               </Label>
               <Select value={department} onValueChange={setDepartment}>
-                <SelectTrigger className="focus:ring-2 focus:ring-primary/20">
+                <SelectTrigger className="focus:ring-2 focus:ring-primary/20 py-6 text-base shadow-sm border-primary/20">
                   <SelectValue placeholder="Select department" />
                 </SelectTrigger>
-                <SelectContent>
+                <SelectContent className="text-base">
                   <SelectItem value="cardiology">Cardiology</SelectItem>
                   <SelectItem value="orthopedics">Orthopedics</SelectItem>
                   <SelectItem value="neurology">Neurology</SelectItem>
@@ -320,9 +327,9 @@ export function HospitalForm({ onBack, onSuccess }: HospitalFormProps) {
               </Select>
             </div>
 
-            <div className="space-y-2 sm:col-span-2">
-              <Label htmlFor="location" className="flex items-center gap-1">
-                <Building2 size={12} className="text-primary" />
+            <div className="space-y-3 sm:col-span-2">
+              <Label htmlFor="location" className="flex items-center gap-2 text-base font-medium">
+                <Building2 size={16} className="text-primary" />
                 Location/Address
               </Label>
               <Input
@@ -330,24 +337,29 @@ export function HospitalForm({ onBack, onSuccess }: HospitalFormProps) {
                 placeholder="Enter location or address"
                 value={location}
                 onChange={(e) => setLocation(e.target.value)}
-                className="focus:ring-2 focus:ring-primary/20"
+                className="focus:ring-2 focus:ring-primary/20 py-6 text-base shadow-sm border-primary/20 hover:border-primary/50 transition-colors"
               />
             </div>
           </div>
         </motion.div>
 
-        {/* Companion Details Section */}
+        {/* Companions Section */}
         <motion.div 
-          className="space-y-6 p-6 border rounded-lg bg-white/80 shadow-sm"
+          className="space-y-6 p-8 border-2 border-primary/20 rounded-xl bg-white/90 shadow-md"
           initial={{ y: 20, opacity: 0 }}
           animate={{ y: 0, opacity: 1 }}
           transition={{ delay: 0.4 }}
         >
-          <div className="flex items-center gap-3">
-            <div className="w-8 h-8 bg-primary-soft rounded-full flex items-center justify-center shadow-inner">
-              <Users size={16} className="text-primary" />
+          <div className="flex items-center justify-between border-b border-primary/20 pb-4">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 bg-primary/10 rounded-full flex items-center justify-center shadow-md">
+                <Users size={20} className="text-primary" />
+              </div>
+              <h2 className="text-xl font-semibold text-primary/90">Companions</h2>
             </div>
-            <h2 className="text-lg font-medium">Companion Details</h2>
+            <div className="bg-primary/10 px-3 py-1 rounded-full text-sm text-primary font-medium">
+              Optional
+            </div>
           </div>
 
           <div className="space-y-6">
@@ -379,10 +391,10 @@ export function HospitalForm({ onBack, onSuccess }: HospitalFormProps) {
                   )}
                 </div>
 
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <Label htmlFor={`companion-name-${idx}`} className="flex items-center gap-1">
-                      <UserRound size={12} className="text-primary" />
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                  <div className="space-y-3">
+                    <Label htmlFor={`companion-name-${idx}`} className="flex items-center gap-2 text-base font-medium">
+                      <UserRound size={16} className="text-primary" />
                       Name *
                     </Label>
                     <Input
@@ -390,20 +402,20 @@ export function HospitalForm({ onBack, onSuccess }: HospitalFormProps) {
                       placeholder="Enter companion name"
                       value={c.name}
                       onChange={(e) => updateCompanion(idx, 'name', e.target.value)}
-                      className="focus:ring-2 focus:ring-primary/20"
+                      className="focus:ring-2 focus:ring-primary/20 py-6 text-base shadow-sm border-primary/20 hover:border-primary/50 transition-colors"
                     />
                   </div>
 
-                  <div className="space-y-2">
-                    <Label htmlFor={`companion-relationship-${idx}`} className="flex items-center gap-1">
-                      <Users size={12} className="text-primary" />
+                  <div className="space-y-3">
+                    <Label htmlFor={`companion-relationship-${idx}`} className="flex items-center gap-2 text-base font-medium">
+                      <Heart size={16} className="text-primary" />
                       Relationship
                     </Label>
                     <Select value={c.relationship} onValueChange={(value) => updateCompanion(idx, 'relationship', value)}>
-                      <SelectTrigger className="focus:ring-2 focus:ring-primary/20">
+                      <SelectTrigger className="focus:ring-2 focus:ring-primary/20 py-6 text-base shadow-sm border-primary/20 hover:border-primary/50 transition-colors">
                         <SelectValue placeholder="Select relationship" />
                       </SelectTrigger>
-                      <SelectContent>
+                      <SelectContent className="text-base">
                         <SelectItem value="spouse">Spouse</SelectItem>
                         <SelectItem value="parent">Parent</SelectItem>
                         <SelectItem value="child">Child</SelectItem>
@@ -468,14 +480,14 @@ export function HospitalForm({ onBack, onSuccess }: HospitalFormProps) {
 
         {/* Submit Button */}
         <motion.div 
-          className="space-y-4"
+          className="space-y-4 mt-8"
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.5 }}
         >
           {error && (
             <motion.p 
-              className="text-sm text-destructive text-center"
+              className="text-base text-destructive text-center p-3 bg-destructive/10 rounded-lg"
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               transition={{ duration: 0.3 }}
@@ -486,25 +498,27 @@ export function HospitalForm({ onBack, onSuccess }: HospitalFormProps) {
           <Button
             onClick={handleSubmit}
             disabled={loading}
-            className="w-full shadow-md hover:shadow-lg transition-shadow"
+            className="w-full shadow-lg hover:shadow-xl transition-all bg-primary hover:bg-primary/90 py-7 relative overflow-hidden group"
             size="lg"
             asChild
           >
             <motion.div
               whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.98 }}
-              className="flex items-center justify-center gap-2"
+              className="flex items-center justify-center gap-3"
             >
               {loading ? 'Submitting...' : (
                 <>
-                  <Heart size={18} className="text-white" />
-                  Submit Registration
+                  <Heart size={22} className="text-white animate-pulse" />
+                  <span className="text-lg font-bold">Submit Registration</span>
+                  <div className="absolute inset-0 w-full h-full bg-white/20 transform -translate-x-full group-hover:translate-x-full transition-transform duration-700"></div>
                 </>
               )}
             </motion.div>
           </Button>
         </motion.div>
       </motion.div>
-    </PageContainer>
+    </div>
+  </div>
   );
 }
