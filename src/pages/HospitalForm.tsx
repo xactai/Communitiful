@@ -253,7 +253,7 @@ export function HospitalForm({ onBack, onSuccess }: HospitalFormProps) {
             </div>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 mt-4">
+          <div className="grid grid-cols-1 gap-6 mt-4">
             <div className="space-y-3">
               <Label htmlFor="patient-name" className="flex items-center gap-2 text-base font-medium">
                 <UserRound size={16} className="text-primary" />
@@ -267,22 +267,6 @@ export function HospitalForm({ onBack, onSuccess }: HospitalFormProps) {
                 className="focus:ring-2 focus:ring-primary/20 py-6 text-base shadow-sm border-primary/20 hover:border-primary/50 transition-colors"
               />
               {!patientName && <p className="text-xs text-muted-foreground">Full name as per ID proof</p>}
-            </div>
-
-            <div className="space-y-3">
-              <Label htmlFor="patient-contact" className="flex items-center gap-2 text-base font-medium">
-                <Heart size={16} className="text-primary" />
-                Contact Number *
-              </Label>
-              <Input
-                id="patient-contact"
-                type="tel"
-                placeholder="9876543210"
-                value={patientContact}
-                onChange={(e) => setPatientContact(e.target.value.replace(/\D/g, ''))}
-                className="focus:ring-2 focus:ring-primary/20 py-6 text-base shadow-sm border-primary/20 hover:border-primary/50 transition-colors"
-              />
-              {!patientContact && <p className="text-xs text-muted-foreground">Mobile number for communication</p>}
             </div>
 
             <div className="space-y-3">
@@ -305,42 +289,8 @@ export function HospitalForm({ onBack, onSuccess }: HospitalFormProps) {
               </Select>
             </div>
 
-            <div className="space-y-3">
-              <Label htmlFor="department" className="flex items-center gap-2 text-base font-medium">
-                <Building2 size={16} className="text-primary" />
-                Department
-              </Label>
-              <Select value={department} onValueChange={setDepartment}>
-                <SelectTrigger className="focus:ring-2 focus:ring-primary/20 py-6 text-base shadow-sm border-primary/20">
-                  <SelectValue placeholder="Select department" />
-                </SelectTrigger>
-                <SelectContent className="text-base">
-                  <SelectItem value="cardiology">Cardiology</SelectItem>
-                  <SelectItem value="orthopedics">Orthopedics</SelectItem>
-                  <SelectItem value="neurology">Neurology</SelectItem>
-                  <SelectItem value="oncology">Oncology</SelectItem>
-                  <SelectItem value="pediatrics">Pediatrics</SelectItem>
-                  <SelectItem value="general">General Medicine</SelectItem>
-                  <SelectItem value="emergency">Emergency</SelectItem>
-                  <SelectItem value="other">Other</SelectItem>
-                </SelectContent>
-              </Select>
             </div>
 
-            <div className="space-y-3 sm:col-span-2">
-              <Label htmlFor="location" className="flex items-center gap-2 text-base font-medium">
-                <Building2 size={16} className="text-primary" />
-                Location/Address
-              </Label>
-              <Input
-                id="location"
-                placeholder="Enter location or address"
-                value={location}
-                onChange={(e) => setLocation(e.target.value)}
-                className="focus:ring-2 focus:ring-primary/20 py-6 text-base shadow-sm border-primary/20 hover:border-primary/50 transition-colors"
-              />
-            </div>
-          </div>
         </motion.div>
 
         {/* Companions Section */}
