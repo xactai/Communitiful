@@ -1,76 +1,73 @@
-# Welcome to your Lovable project
+Companions Anonymous — README
+Overview
 
-## Project info
+Companions Anonymous is a privacy-first application built to support companions of hospital patients through an anonymous, moderated, and geo-fenced chat platform.
+The app operates in two modes — Hospital Mode and Companion Mode — seamlessly integrated through a Supabase backend.
 
-**URL**: https://lovable.dev/projects/eee9a0bb-7f63-42de-a5a5-dcc4d1a61048
+1. Hospital Mode
 
-## How can I edit this code?
+Used by hospitals to register patient and companion details at the time of a visit.
 
-There are several ways of editing your application.
+Key Features
 
-**Use Lovable**
+Registration form for Patient and Companion details.
 
-Simply visit the [Lovable Project](https://lovable.dev/projects/eee9a0bb-7f63-42de-a5a5-dcc4d1a61048) and start prompting.
+Companion’s mobile number used for later authentication.
 
-Changes made via Lovable will be committed automatically to this repo.
+Records stored securely in Supabase.
 
-**Use your preferred IDE**
+Optimized for mobile and tablet hospital desks.
 
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
+Validations to prevent duplicate entries and ensure clean data.
 
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
+2. Companion Mode
 
-Follow these steps:
+Accessible only to companions registered through Hospital Mode.
 
-```sh
-# Step 1: Clone the repository using the project's Git URL.
-git clone <YOUR_GIT_URL>
+Key Features
 
-# Step 2: Navigate to the project directory.
-cd <YOUR_PROJECT_NAME>
+Authentication: Login via registered mobile number (verified through Supabase).
 
-# Step 3: Install the necessary dependencies.
-npm i
+Anonymity: System assigns a random name and avatar — fixed per session, non-editable.
 
-# Step 4: Start the development server with auto-reloading and an instant preview.
-npm run dev
-```
+Chatroom: Real-time messaging with peers; anonymous environment maintained.
 
-**Edit a file directly in GitHub**
+Virtual Agent: Responds automatically during inactivity to keep conversations active.
 
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
+Moderation: Filters block abusive, off-topic, or unsafe messages before posting.
 
-**Use GitHub Codespaces**
+Geo-Fencing: Access restricted to hospital premises; users auto-signed out if they exit the zone.
 
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
+Privacy & Security
 
-## What technologies are used for this project?
+Minimal data stored; no PII displayed in chat.
 
-This project is built with:
+All communication is encrypted (in-transit & at-rest).
 
-- Vite
-- TypeScript
-- React
-- shadcn-ui
-- Tailwind CSS
+Explicit user consent required for participation and location tracking.
 
-## How can I deploy this project?
+Comprehensive logging and retention policy implemented for compliance.
 
-Simply open [Lovable](https://lovable.dev/projects/eee9a0bb-7f63-42de-a5a5-dcc4d1a61048) and click on Share -> Publish.
+Tech Stack
 
-## Can I connect a custom domain to my Lovable project?
+Frontend: React (responsive for mobile & web)
 
-Yes, you can!
+Backend: Supabase (auth, database, real-time updates)
 
-To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
+Moderation: Custom logic integrated pre-message post
 
-Read more here: [Setting up a custom domain](https://docs.lovable.dev/tips-tricks/custom-domain#step-by-step-guide)
+Virtual Agent: LLM-based automated responder
 
-## Testing_thecommunitiful_netlfiy_deploy
+Geo-Fencing: Client-side location with server validation
 
+Current Status
+
+✅ Development completed
+✅ Supabase integration live
+✅ Chatroom, moderation, and virtual agent tested
+✅ Geo-fence and session management active
+✅ Ready for pilot deployment in hospital environments
+
+Purpose
+
+To create a safe, supportive, and private space for companions of patients — combining emotional connection, digital privacy, and hospital-led engagement.
