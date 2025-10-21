@@ -5,7 +5,7 @@ import { Label } from '@/components/ui/label';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { PageContainer } from '@/components/AppLayout';
-import { ArrowLeft, UserRound, Users, Heart, Stethoscope, Building2 } from 'lucide-react';
+import { ArrowLeft, UserRound, Users, Heart, Stethoscope, Building2, MapPin, Loader2 } from 'lucide-react';
 import { insertPatient, insertCompanions } from '@/lib/supabaseClient';
 import { motion } from 'framer-motion';
 import { generateRandomPatientData, generateRandomCompanionData, typeText, TypeOptions } from '@/lib/autoFillUtils';
@@ -38,8 +38,18 @@ export function HospitalForm({ onBack, onSuccess }: HospitalFormProps) {
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   
+  // Location fetching state for companions
+  const [locationFetchingStates, setLocationFetchingStates] = useState<boolean[]>([]);
+  const [locationFetchedStates, setLocationFetchedStates] = useState<boolean[]>([]);
+  
   // References to cancel typing animations if needed
   const typeAnimationsRef = useRef<Array<{ cancel: () => void }>>([]);
+  
+  // Initialize location states when companions change
+  useEffect(() => {
+    setLocationFetchingStates(new Array(companions.length).fill(false));
+    setLocationFetchedStates(new Array(companions.length).fill(false));
+  }, [companions.length]);
   
   // Auto-fill the form when the component mounts
   useEffect(() => {
@@ -147,6 +157,35 @@ export function HospitalForm({ onBack, onSuccess }: HospitalFormProps) {
   const addCompanion = () => setCompanions((prev) => [...prev, { name: '', relationship: '', number: '', location: '' }]);
   const updateCompanion = (index: number, field: keyof CompanionFormItem, value: string) => {
     setCompanions((prev) => prev.map((c, i) => i === index ? { ...c, [field]: value } : c));
+  };
+
+  const fetchLocation = async (index: number) => {
+    // Set fetching state
+    setLocationFetchingStates(prev => {
+      const newStates = [...prev];
+      newStates[index] = true;
+      return newStates;
+    });
+
+    // Simulate location fetching for 2-3 seconds
+    await new Promise(resolve => setTimeout(resolve, 2500));
+
+    // Update companion location
+    updateCompanion(index, 'location', 'Greenwich, Apollo Hospital');
+
+    // Set fetched state
+    setLocationFetchedStates(prev => {
+      const newStates = [...prev];
+      newStates[index] = true;
+      return newStates;
+    });
+
+    // Clear fetching state
+    setLocationFetchingStates(prev => {
+      const newStates = [...prev];
+      newStates[index] = false;
+      return newStates;
+    });
   };
 
   const handleSubmit = async () => {
@@ -398,13 +437,52 @@ export function HospitalForm({ onBack, onSuccess }: HospitalFormProps) {
                       <Building2 size={12} className="text-primary" />
                       Location
                     </Label>
-                    <Input
-                      id={`companion-location-${idx}`}
-                      placeholder="Enter location"
-                      value={c.location}
-                      onChange={(e) => updateCompanion(idx, 'location', e.target.value)}
-                      className="focus:ring-2 focus:ring-primary/20"
-                    />
+                    <div className="space-y-3">
+                      <Button
+                        type="button"
+                        variant={locationFetchedStates[idx] ? "secondary" : "outline"}
+                        onClick={() => fetchLocation(idx)}
+                        disabled={locationFetchingStates[idx] || locationFetchedStates[idx]}
+                        className="w-full flex items-center justify-center gap-2"
+                        asChild
+                      >
+                        <motion.div
+                          whileHover={!locationFetchingStates[idx] && !locationFetchedStates[idx] ? { scale: 1.02 } : {}}
+                          whileTap={!locationFetchingStates[idx] && !locationFetchedStates[idx] ? { scale: 0.98 } : {}}
+                        >
+                          {locationFetchingStates[idx] ? (
+                            <>
+                              <Loader2 size={16} className="animate-spin" />
+                              Fetching Location...
+                            </>
+                          ) : locationFetchedStates[idx] ? (
+                            <>
+                              <MapPin size={16} className="text-green-600" />
+                              Location Fetched
+                            </>
+                          ) : (
+                            <>
+                              <MapPin size={16} />
+                              Fetch Location
+                            </>
+                          )}
+                        </motion.div>
+                      </Button>
+                      
+                      {locationFetchedStates[idx] && (
+                        <motion.div
+                          initial={{ opacity: 0, y: 10 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          transition={{ duration: 0.5, ease: "easeOut" }}
+                          className="text-sm text-center p-3 bg-green-50 border border-green-200 rounded-md"
+                        >
+                          <div className="flex items-center justify-center gap-2 text-green-700">
+                            <MapPin size={14} />
+                            <span className="font-medium">You're at Greenwich, Apollo Hospital. Submit the registration to experience the chat room.</span>
+                          </div>
+                        </motion.div>
+                      )}
+                    </div>
                   </div>
                 </div>
               </motion.div>

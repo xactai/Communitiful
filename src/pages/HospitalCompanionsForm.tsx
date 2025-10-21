@@ -1,8 +1,9 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { PageContainer } from '@/components/AppLayout';
-import { ArrowLeft, Users, X } from 'lucide-react';
+import { ArrowLeft, Users, X, MapPin, Loader2 } from 'lucide-react';
+import { motion } from 'framer-motion';
 
 interface CompanionFormItem {
   name: string;
@@ -21,6 +22,16 @@ export function HospitalCompanionsForm({ onBack, onNext }: HospitalCompanionsFor
     name: '', relationship: '', number: '', location: ''
   }]);
   const [error, setError] = useState('');
+  
+  // Location fetching state for companions
+  const [locationFetchingStates, setLocationFetchingStates] = useState<boolean[]>([]);
+  const [locationFetchedStates, setLocationFetchedStates] = useState<boolean[]>([]);
+
+  // Initialize location states when companions change
+  useEffect(() => {
+    setLocationFetchingStates(new Array(companions.length).fill(false));
+    setLocationFetchedStates(new Array(companions.length).fill(false));
+  }, [companions.length]);
 
   const addCompanion = () =>
     setCompanions((prev) => [...prev, { name: '', relationship: '', number: '', location: '' }]);
@@ -31,6 +42,35 @@ export function HospitalCompanionsForm({ onBack, onNext }: HospitalCompanionsFor
 
   const update = (index: number, field: keyof CompanionFormItem, value: string) => {
     setCompanions((prev) => prev.map((c, i) => (i === index ? { ...c, [field]: value } : c)));
+  };
+
+  const fetchLocation = async (index: number) => {
+    // Set fetching state
+    setLocationFetchingStates(prev => {
+      const newStates = [...prev];
+      newStates[index] = true;
+      return newStates;
+    });
+
+    // Simulate location fetching for 2-3 seconds
+    await new Promise(resolve => setTimeout(resolve, 2500));
+
+    // Update companion location
+    update(index, 'location', 'Greenwich, Apollo Hospital');
+
+    // Set fetched state
+    setLocationFetchedStates(prev => {
+      const newStates = [...prev];
+      newStates[index] = true;
+      return newStates;
+    });
+
+    // Clear fetching state
+    setLocationFetchingStates(prev => {
+      const newStates = [...prev];
+      newStates[index] = false;
+      return newStates;
+    });
   };
 
   const handleNext = () => {
@@ -90,11 +130,52 @@ export function HospitalCompanionsForm({ onBack, onNext }: HospitalCompanionsFor
                     update(idx, 'number', e.target.value.replace(/\D/g, ''))
                   }
                 />
-                <Input
-                  placeholder="Location"
-                  value={c.location}
-                  onChange={(e) => update(idx, 'location', e.target.value)}
-                />
+                <div className="space-y-3">
+                  <Button
+                    type="button"
+                    variant={locationFetchedStates[idx] ? "secondary" : "outline"}
+                    onClick={() => fetchLocation(idx)}
+                    disabled={locationFetchingStates[idx] || locationFetchedStates[idx]}
+                    className="w-full flex items-center justify-center gap-2"
+                    asChild
+                  >
+                    <motion.div
+                      whileHover={!locationFetchingStates[idx] && !locationFetchedStates[idx] ? { scale: 1.02 } : {}}
+                      whileTap={!locationFetchingStates[idx] && !locationFetchedStates[idx] ? { scale: 0.98 } : {}}
+                    >
+                      {locationFetchingStates[idx] ? (
+                        <>
+                          <Loader2 size={16} className="animate-spin" />
+                          Fetching Location...
+                        </>
+                      ) : locationFetchedStates[idx] ? (
+                        <>
+                          <MapPin size={16} className="text-green-600" />
+                          Location Fetched
+                        </>
+                      ) : (
+                        <>
+                          <MapPin size={16} />
+                          Fetch Location
+                        </>
+                      )}
+                    </motion.div>
+                  </Button>
+                  
+                  {locationFetchedStates[idx] && (
+                    <motion.div
+                      initial={{ opacity: 0, y: 10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ duration: 0.5, ease: "easeOut" }}
+                      className="text-sm text-center p-3 bg-green-50 border border-green-200 rounded-md"
+                    >
+                      <div className="flex items-center justify-center gap-2 text-green-700">
+                        <MapPin size={14} />
+                        <span className="font-medium">You're at Greenwich, Apollo Hospital. Submit the registration to experience the chat room.</span>
+                      </div>
+                    </motion.div>
+                  )}
+                </div>
               </div>
             </div>
           ))}
