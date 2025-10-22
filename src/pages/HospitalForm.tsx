@@ -261,7 +261,7 @@ export function HospitalForm({ onBack, onSuccess }: HospitalFormProps) {
               height={60} 
               className="object-contain rounded-lg shadow-md"
             />
-            <h1 className="text-2xl font-bold text-primary">Hospital Registration</h1>
+            <h1 className="text-2xl font-bold text-primary">Apollo HOSPITALS</h1>
           </div>
           <div className="w-10" /> {/* Spacer for centering */}
         </div>
@@ -287,15 +287,11 @@ export function HospitalForm({ onBack, onSuccess }: HospitalFormProps) {
               </div>
               <h2 className="text-xl font-semibold text-primary/90">Patient Details</h2>
             </div>
-            <div className="bg-primary/10 px-3 py-1 rounded-full text-sm text-primary font-medium">
-              Required
-            </div>
           </div>
 
           <div className="grid grid-cols-1 gap-6 mt-4">
             <div className="space-y-3">
-              <Label htmlFor="patient-name" className="flex items-center gap-2 text-base font-medium">
-                <UserRound size={16} className="text-primary" />
+              <Label htmlFor="patient-name" className="text-base font-medium">
                 Patient Name *
               </Label>
               <Input
@@ -309,8 +305,7 @@ export function HospitalForm({ onBack, onSuccess }: HospitalFormProps) {
             </div>
 
             <div className="space-y-3">
-              <Label htmlFor="purpose" className="flex items-center gap-2 text-base font-medium">
-                <Building2 size={16} className="text-primary" />
+              <Label htmlFor="purpose" className="text-base font-medium">
                 Purpose of Visit
               </Label>
               <Select value={purposeOfVisit} onValueChange={setPurposeOfVisit}>
@@ -346,9 +341,6 @@ export function HospitalForm({ onBack, onSuccess }: HospitalFormProps) {
               </div>
               <h2 className="text-xl font-semibold text-primary/90">Companions</h2>
             </div>
-            <div className="bg-primary/10 px-3 py-1 rounded-full text-sm text-primary font-medium">
-              Optional
-            </div>
           </div>
 
           <div className="space-y-6">
@@ -361,8 +353,7 @@ export function HospitalForm({ onBack, onSuccess }: HospitalFormProps) {
                 transition={{ delay: 0.1 * idx + 0.5 }}
               >
                 <div className="flex items-center justify-between">
-                  <h3 className="font-medium flex items-center gap-2">
-                    <Heart size={14} className="text-primary" />
+                  <h3 className="font-medium">
                     Companion {idx + 1}
                   </h3>
                   {companions.length > 1 && (
@@ -382,8 +373,7 @@ export function HospitalForm({ onBack, onSuccess }: HospitalFormProps) {
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
                   <div className="space-y-3">
-                    <Label htmlFor={`companion-name-${idx}`} className="flex items-center gap-2 text-base font-medium">
-                      <UserRound size={16} className="text-primary" />
+                    <Label htmlFor={`companion-name-${idx}`} className="text-base font-medium">
                       Name *
                     </Label>
                     <Input
@@ -396,8 +386,7 @@ export function HospitalForm({ onBack, onSuccess }: HospitalFormProps) {
                   </div>
 
                   <div className="space-y-3">
-                    <Label htmlFor={`companion-relationship-${idx}`} className="flex items-center gap-2 text-base font-medium">
-                      <Heart size={16} className="text-primary" />
+                    <Label htmlFor={`companion-relationship-${idx}`} className="text-base font-medium">
                       Relationship
                     </Label>
                     <Select value={c.relationship} onValueChange={(value) => updateCompanion(idx, 'relationship', value)}>
@@ -418,8 +407,7 @@ export function HospitalForm({ onBack, onSuccess }: HospitalFormProps) {
                   </div>
 
                   <div className="space-y-2">
-                    <Label htmlFor={`companion-number-${idx}`} className="flex items-center gap-1">
-                      <Heart size={12} className="text-primary" />
+                    <Label htmlFor={`companion-number-${idx}`}>
                       Mobile Number *
                     </Label>
                     <Input
@@ -433,8 +421,7 @@ export function HospitalForm({ onBack, onSuccess }: HospitalFormProps) {
                   </div>
 
                   <div className="space-y-2">
-                    <Label htmlFor={`companion-location-${idx}`} className="flex items-center gap-1">
-                      <Building2 size={12} className="text-primary" />
+                    <Label htmlFor={`companion-location-${idx}`}>
                       Location
                     </Label>
                     <div className="space-y-3">

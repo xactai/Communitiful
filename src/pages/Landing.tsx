@@ -10,7 +10,7 @@ interface LandingProps {
 }
 
 export function Landing({ onStart }: LandingProps) {
-  const [hospitalMode, setHospitalMode] = useState(false);
+  const [hospitalMode, setHospitalMode] = useState(true);
   return (
     <PageContainer className="justify-center bg-gradient-to-b from-primary-soft to-white">
       <motion.div 
