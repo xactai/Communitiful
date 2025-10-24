@@ -4,8 +4,9 @@ import { sharedChat } from '@/lib/sharedChat';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { PageContainer } from '@/components/AppLayout';
-import { Settings, Send, AlertTriangle, MessageCircle } from 'lucide-react';
+import { Settings, Send, AlertTriangle, MessageCircle, Users } from 'lucide-react';
 import { Message, AVATARS, TEST_CLINIC } from '@/lib/types';
+import { UserPresence } from '@/lib/userPresence';
 import { 
   preFilterMessage, 
   RateLimiter, 
@@ -26,6 +27,7 @@ interface ChatProps {
 export function Chat({ onOpenSettings, onOpenRelaxation }: ChatProps) {
   const { session, messages, addMessage, updateMessage, userMessageCount, incrementUserMessageCount } = useAppStore();
   const [sharedMessages, setSharedMessages] = useState<Message[]>([]);
+  const [onlineUsers, setOnlineUsers] = useState<UserPresence[]>([]);
   const [inputText, setInputText] = useState('');
   const [sending, setSending] = useState(false);
   const [rateLimiter] = useState(() => new RateLimiter(5, 60000)); // 5 messages per minute
@@ -34,6 +36,10 @@ export function Chat({ onOpenSettings, onOpenRelaxation }: ChatProps) {
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const [defaultMessagesLoaded, setDefaultMessagesLoaded] = useState(false);
   const lastUserMessageTimeRef = useRef<number>(Date.now());
+  const [showUserJoinNotification, setShowUserJoinNotification] = useState(false);
+  const [userJoinMessage, setUserJoinMessage] = useState('');
+  const [typingUsers, setTypingUsers] = useState<UserPresence[]>([]);
+  const typingTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   
   // Predefined messages to simulate an active chat environment
   const defaultMessages = [
@@ -57,6 +63,47 @@ export function Chat({ onOpenSettings, onOpenRelaxation }: ChatProps) {
       unsubscribe();
     };
   }, []);
+
+  // Subscribe to user presence updates
+  useEffect(() => {
+    const unsubscribe = sharedChat.subscribeToPresence((users) => {
+      const previousCount = onlineUsers.length;
+      const newCount = users.length;
+      
+      // Show notification when user count changes
+      if (previousCount > 0 && newCount > previousCount) {
+        setUserJoinMessage(`${newCount - previousCount} companion${newCount - previousCount > 1 ? 's' : ''} joined the chat`);
+        setShowUserJoinNotification(true);
+        setTimeout(() => setShowUserJoinNotification(false), 3000);
+      } else if (previousCount > 0 && newCount < previousCount) {
+        setUserJoinMessage(`${previousCount - newCount} companion${previousCount - newCount > 1 ? 's' : ''} left the chat`);
+        setShowUserJoinNotification(true);
+        setTimeout(() => setShowUserJoinNotification(false), 3000);
+      }
+      
+      setOnlineUsers(users);
+      setTypingUsers(sharedChat.getTypingUsers());
+    });
+    
+    return () => {
+      unsubscribe();
+    };
+  }, [onlineUsers.length]);
+
+  // Set current user in presence system when session is available
+  useEffect(() => {
+    if (session) {
+      sharedChat.setCurrentUser(session);
+    }
+    
+    // Cleanup on unmount
+    return () => {
+      sharedChat.removeCurrentUser();
+      if (typingTimeoutRef.current) {
+        clearTimeout(typingTimeoutRef.current);
+      }
+    };
+  }, [session]);
 
   // Auto-scroll to bottom
   useEffect(() => {
@@ -254,6 +301,32 @@ export function Chat({ onOpenSettings, onOpenRelaxation }: ChatProps) {
     }
   };
 
+  // Handle input change with typing indicator
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    setInputText(value);
+    
+    // Set typing status
+    if (value.trim()) {
+      sharedChat.setTypingStatus(true);
+      
+      // Clear existing timeout
+      if (typingTimeoutRef.current) {
+        clearTimeout(typingTimeoutRef.current);
+      }
+      
+      // Stop typing after 3 seconds of inactivity
+      typingTimeoutRef.current = setTimeout(() => {
+        sharedChat.setTypingStatus(false);
+      }, 3000);
+    } else {
+      sharedChat.setTypingStatus(false);
+      if (typingTimeoutRef.current) {
+        clearTimeout(typingTimeoutRef.current);
+      }
+    }
+  };
+
   // Handle key press
   const handleKeyPress = (e: React.KeyboardEvent) => {
     if (e.key === 'Enter' && !e.shiftKey) {
@@ -354,6 +427,16 @@ export function Chat({ onOpenSettings, onOpenRelaxation }: ChatProps) {
         message={moderationMessage}
         onClose={() => setShowModerationBanner(false)}
       />
+
+      {/* User Join/Leave Notification */}
+      {showUserJoinNotification && (
+        <div className="bg-info/10 border-b border-info/20 px-4 py-2 animate-in slide-in-from-top duration-300">
+          <p className="text-xs text-center text-info">
+            <Users size={12} className="inline mr-1" />
+            {userJoinMessage}
+          </p>
+        </div>
+      )}
       
       {/* Header */}
       <div className="bg-surface border-b px-4 py-3 flex items-center justify-between">
@@ -368,6 +451,12 @@ export function Chat({ onOpenSettings, onOpenRelaxation }: ChatProps) {
               {TEST_CLINIC.name}
             </div>
           </div>
+        </div>
+        
+        {/* Online Users Count */}
+        <div className="flex items-center gap-2 text-xs text-muted-foreground bg-muted/50 px-2 py-1 rounded-full">
+          <Users size={12} />
+          <span>{onlineUsers.length} online</span>
         </div>
         
         <div className="flex items-center gap-1 sm:gap-2 flex-shrink-0">
@@ -399,6 +488,29 @@ export function Chat({ onOpenSettings, onOpenRelaxation }: ChatProps) {
         )}
         
         {sharedMessages.map(renderMessage)}
+        
+        {/* Typing indicators */}
+        {typingUsers.length > 0 && (
+          <div className="flex justify-start mb-4">
+            <div className="max-w-xs bg-muted/50 border rounded-lg p-3">
+              <div className="flex items-center gap-2 mb-1">
+                <div className="w-4 h-4 text-sm">💭</div>
+                <span className="text-xs font-medium text-muted-foreground">
+                  {typingUsers.length === 1 
+                    ? `${typingUsers[0].nick} is typing...`
+                    : `${typingUsers.length} companions are typing...`
+                  }
+                </span>
+              </div>
+              <div className="flex gap-1">
+                <div className="w-1 h-1 bg-muted-foreground rounded-full animate-bounce"></div>
+                <div className="w-1 h-1 bg-muted-foreground rounded-full animate-bounce" style={{ animationDelay: '0.1s' }}></div>
+                <div className="w-1 h-1 bg-muted-foreground rounded-full animate-bounce" style={{ animationDelay: '0.2s' }}></div>
+              </div>
+            </div>
+          </div>
+        )}
+        
         <div ref={messagesEndRef} />
       </div>
 
@@ -408,7 +520,7 @@ export function Chat({ onOpenSettings, onOpenRelaxation }: ChatProps) {
           <div className="flex-1 min-w-0">
             <Input
               value={inputText}
-              onChange={(e) => setInputText(e.target.value)}
+              onChange={handleInputChange}
               onKeyPress={handleKeyPress}
               placeholder="Share with fellow companions..."
               disabled={sending}

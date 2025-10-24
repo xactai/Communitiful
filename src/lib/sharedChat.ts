@@ -1,4 +1,5 @@
 import { Message } from './types';
+import { UserPresenceManager } from './userPresence';
 
 export class SharedChatManager {
   private listeners: Set<(messages: Message[]) => void> = new Set();
@@ -7,11 +8,13 @@ export class SharedChatManager {
   private storageKey: string;
   private lastMessageTimestamp = 0;
   private storageListener: (e: StorageEvent) => void;
+  private userPresence: UserPresenceManager;
 
   constructor(roomId: string = 'default') {
     this.roomId = roomId;
     this.storageKey = `shared-chat-${roomId}`;
     this.broadcastChannel = new BroadcastChannel(`chat-room-${roomId}`);
+    this.userPresence = new UserPresenceManager(roomId);
     
     // Listen for messages from other tabs/windows
     this.broadcastChannel.onmessage = (event) => {
@@ -153,12 +156,44 @@ export class SharedChatManager {
   getRoomInfo() {
     return {
       roomId: this.roomId,
-      messageCount: this.getMessages().length
+      messageCount: this.getMessages().length,
+      onlineUserCount: this.userPresence.getOnlineUserCount()
     };
+  }
+
+  // Set current user for presence tracking
+  setCurrentUser(session: any) {
+    this.userPresence.setCurrentUser(session);
+  }
+
+  // Remove current user from presence
+  removeCurrentUser() {
+    this.userPresence.removeCurrentUser();
+  }
+
+  // Subscribe to user presence updates
+  subscribeToPresence(callback: (users: any[]) => void) {
+    return this.userPresence.subscribe(callback);
+  }
+
+  // Get online user count
+  getOnlineUserCount(): number {
+    return this.userPresence.getOnlineUserCount();
+  }
+
+  // Set typing status for current user
+  setTypingStatus(isTyping: boolean) {
+    this.userPresence.setTypingStatus(isTyping);
+  }
+
+  // Get users who are currently typing
+  getTypingUsers() {
+    return this.userPresence.getTypingUsers();
   }
 
   // Cleanup
   destroy() {
+    this.userPresence.destroy();
     this.broadcastChannel.close();
     this.listeners.clear();
     window.removeEventListener('storage', this.storageListener);
