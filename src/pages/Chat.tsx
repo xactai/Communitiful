@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { useAppStore } from '@/stores/useAppStore';
 import { sharedChat } from '@/lib/sharedChat';
+import { realtimeChat } from '@/lib/realtimeChat';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { PageContainer } from '@/components/AppLayout';
@@ -53,14 +54,31 @@ export function Chat({ onOpenSettings, onOpenRelaxation }: ChatProps) {
     { sender: "🤖 CompanionBot", message: "If you're new here, say hi 👋 and let's chat about your day!" },
   ];
   
-  // Subscribe to shared chat
+  // Initialize real-time chat and subscribe to messages
   useEffect(() => {
-    const unsubscribe = sharedChat.subscribe((messages) => {
-      setSharedMessages(messages);
-    });
+    let unsubscribe: (() => void) | null = null;
+    
+    const initializeChat = async () => {
+      try {
+        await realtimeChat.initialize();
+        unsubscribe = realtimeChat.subscribe((messages) => {
+          setSharedMessages(messages);
+        });
+      } catch (error) {
+        console.error('Failed to initialize real-time chat:', error);
+        // Fallback to local chat
+        unsubscribe = sharedChat.subscribe((messages) => {
+          setSharedMessages(messages);
+        });
+      }
+    };
+    
+    initializeChat();
     
     return () => {
-      unsubscribe();
+      if (unsubscribe) {
+        unsubscribe();
+      }
     };
   }, []);
 
@@ -134,7 +152,13 @@ export function Chat({ onOpenSettings, onOpenRelaxation }: ChatProps) {
             }
           };
           
-          sharedChat.addMessage(predefMessage);
+          try {
+            await realtimeChat.addMessage(predefMessage);
+          } catch (error) {
+            console.error('Failed to add predefined message to real-time chat:', error);
+            // Fallback to local chat
+            sharedChat.addMessage(predefMessage);
+          }
           
           // Add a small delay between messages for realistic loading
           await new Promise(resolve => setTimeout(resolve, 300));
@@ -250,15 +274,22 @@ export function Chat({ onOpenSettings, onOpenRelaxation }: ChatProps) {
     // Update last user message time
     lastUserMessageTimeRef.current = Date.now();
     
-    // Add message to both local and shared state
+    // Add message to both local and real-time state
     addMessage(pendingMessage);
-    sharedChat.addMessage(pendingMessage);
+    
+    try {
+      await realtimeChat.addMessage(pendingMessage);
+    } catch (error) {
+      console.error('Failed to send message to real-time chat:', error);
+      // Fallback to local chat
+      sharedChat.addMessage(pendingMessage);
+    }
 
     try {
       // Check for emergency keywords first
       if (detectEmergencyKeywords(messageText)) {
         // Immediately show safety message
-        setTimeout(() => {
+        setTimeout(async () => {
           const agentMessage: Message = {
             id: crypto.randomUUID(),
             clinicId: session.clinicId,
@@ -268,7 +299,14 @@ export function Chat({ onOpenSettings, onOpenRelaxation }: ChatProps) {
             createdAt: new Date(),
             moderation: { status: 'allowed' }
           };
-              sharedChat.addMessage(agentMessage);
+          
+          try {
+            await realtimeChat.addMessage(agentMessage);
+          } catch (error) {
+            console.error('Failed to send agent message to real-time chat:', error);
+            // Fallback to local chat
+            sharedChat.addMessage(agentMessage);
+          }
         }, 500);
       }
 
@@ -279,10 +317,18 @@ export function Chat({ onOpenSettings, onOpenRelaxation }: ChatProps) {
         moderation: { status: 'allowed' }
       });
         
-      // Update the message via SharedChatManager
-      sharedChat.updateMessage(messageId, {
-        moderation: { status: 'allowed' }
-      });
+      // Update the message via real-time chat
+      try {
+        await realtimeChat.updateMessage(messageId, {
+          moderation: { status: 'allowed' }
+        });
+      } catch (error) {
+        console.error('Failed to update message in real-time chat:', error);
+        // Fallback to local chat
+        sharedChat.updateMessage(messageId, {
+          moderation: { status: 'allowed' }
+        });
+      }
 
       // Increment user message count
       incrementUserMessageCount();
@@ -292,10 +338,18 @@ export function Chat({ onOpenSettings, onOpenRelaxation }: ChatProps) {
       updateMessage(messageId, {
         moderation: { status: 'allowed' }
       });
-      // Update the message via SharedChatManager on error
-      sharedChat.updateMessage(messageId, {
-        moderation: { status: 'allowed' }
-      });
+      // Update the message via real-time chat on error
+      try {
+        await realtimeChat.updateMessage(messageId, {
+          moderation: { status: 'allowed' }
+        });
+      } catch (error) {
+        console.error('Failed to update message in real-time chat:', error);
+        // Fallback to local chat
+        sharedChat.updateMessage(messageId, {
+          moderation: { status: 'allowed' }
+        });
+      }
     } finally {
       setSending(false);
     }
