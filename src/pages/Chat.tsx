@@ -60,12 +60,24 @@ export function Chat({ onOpenSettings, onOpenRelaxation }: ChatProps) {
     
     const initializeChat = async () => {
       try {
+        // First check database health
+        const healthCheck = await realtimeChat.checkDatabaseHealth();
+        console.log('🔍 Database health check:', healthCheck);
+        
+        if (healthCheck.status === 'error') {
+          console.error('❌ Database issue:', healthCheck.message);
+          console.log('💡 Solution:', healthCheck.solution);
+          throw new Error(healthCheck.message);
+        }
+        
         await realtimeChat.initialize();
         unsubscribe = realtimeChat.subscribe((messages) => {
           setSharedMessages(messages);
         });
+        console.log('✅ Real-time chat initialized successfully');
       } catch (error) {
-        console.error('Failed to initialize real-time chat:', error);
+        console.error('❌ Failed to initialize real-time chat:', error);
+        console.log('🔄 Falling back to local chat');
         // Fallback to local chat
         unsubscribe = sharedChat.subscribe((messages) => {
           setSharedMessages(messages);

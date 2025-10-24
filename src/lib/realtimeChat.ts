@@ -13,25 +13,32 @@ export class RealtimeChatManager {
 
   // Initialize real-time subscription
   async initialize() {
-    // Subscribe to real-time changes
-    this.subscription = supabase
-      .channel(`chat-${this.roomId}`)
-      .on('postgres_changes', 
-        { 
-          event: '*', 
-          schema: 'public', 
-          table: 'messages',
-          filter: `room_id=eq.${this.roomId}`
-        }, 
-        (payload) => {
-          console.log('Real-time update:', payload);
-          this.handleRealtimeUpdate(payload);
-        }
-      )
-      .subscribe();
+    try {
+      // First, try to load existing messages to check if table exists
+      await this.loadMessages();
+      
+      // Subscribe to real-time changes
+      this.subscription = supabase
+        .channel(`chat-${this.roomId}`)
+        .on('postgres_changes', 
+          { 
+            event: '*', 
+            schema: 'public', 
+            table: 'messages',
+            filter: `room_id=eq.${this.roomId}`
+          }, 
+          (payload) => {
+            console.log('Real-time update:', payload);
+            this.handleRealtimeUpdate(payload);
+          }
+        )
+        .subscribe();
 
-    // Load existing messages
-    await this.loadMessages();
+      console.log('Real-time chat initialized successfully');
+    } catch (error) {
+      console.error('Failed to initialize real-time chat:', error);
+      throw new Error('Real-time chat initialization failed. Please ensure the messages table exists in your Supabase database.');
+    }
   }
 
   // Handle real-time updates
@@ -93,13 +100,17 @@ export class RealtimeChatManager {
 
       if (error) {
         console.error('Error loading messages:', error);
-        return;
+        if (error.message.includes('relation "public.messages" does not exist')) {
+          throw new Error('Messages table does not exist. Please run the database migration first.');
+        }
+        throw error;
       }
 
       this.currentMessages = data.map(msg => this.transformDatabaseMessage(msg));
       this.notifyListeners();
     } catch (error) {
       console.error('Error loading messages:', error);
+      throw error;
     }
   }
 
@@ -231,6 +242,43 @@ export class RealtimeChatManager {
       roomId: this.roomId,
       messageCount: this.currentMessages.length
     };
+  }
+
+  // Check if database table exists
+  async checkDatabaseHealth() {
+    try {
+      const { data, error } = await supabase
+        .from('messages')
+        .select('id')
+        .limit(1);
+
+      if (error) {
+        if (error.message.includes('relation "public.messages" does not exist')) {
+          return {
+            status: 'error',
+            message: 'Messages table does not exist. Please run the database migration.',
+            solution: 'Run the SQL script in DATABASE_SETUP_GUIDE.md in your Supabase dashboard.'
+          };
+        }
+        return {
+          status: 'error',
+          message: `Database error: ${error.message}`,
+          solution: 'Check your Supabase connection and permissions.'
+        };
+      }
+
+      return {
+        status: 'success',
+        message: 'Database table exists and is accessible.',
+        solution: 'Real-time chat should work correctly.'
+      };
+    } catch (error) {
+      return {
+        status: 'error',
+        message: `Connection error: ${error}`,
+        solution: 'Check your Supabase URL and API key.'
+      };
+    }
   }
 
   // Cleanup

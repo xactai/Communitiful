@@ -1,4 +1,7 @@
--- Create messages table for real-time chat
+-- Quick setup script for messages table
+-- Copy and paste this into your Supabase SQL Editor
+
+-- Step 1: Create the messages table
 CREATE TABLE IF NOT EXISTS public.messages (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   room_id TEXT NOT NULL DEFAULT 'default',
@@ -12,17 +15,20 @@ CREATE TABLE IF NOT EXISTS public.messages (
   companion_identity JSONB
 );
 
--- Create index for efficient queries
+-- Step 2: Create indexes for performance
 CREATE INDEX IF NOT EXISTS idx_messages_room_id ON public.messages(room_id);
 CREATE INDEX IF NOT EXISTS idx_messages_created_at ON public.messages(created_at);
 CREATE INDEX IF NOT EXISTS idx_messages_clinic_id ON public.messages(clinic_id);
 
--- Enable Row Level Security
+-- Step 3: Enable Row Level Security
 ALTER TABLE public.messages ENABLE ROW LEVEL SECURITY;
 
--- Create policy to allow all operations (for now - can be made more restrictive later)
+-- Step 4: Create a permissive policy (for development)
 CREATE POLICY "Allow all operations on messages" ON public.messages
   FOR ALL USING (true);
 
--- Enable real-time subscriptions
+-- Step 5: Enable real-time subscriptions
 ALTER PUBLICATION supabase_realtime ADD TABLE public.messages;
+
+-- Step 6: Verify the table was created
+SELECT 'Messages table created successfully!' as status;
