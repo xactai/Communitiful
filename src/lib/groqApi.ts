@@ -1,8 +1,21 @@
 // Groq API service for content moderation
 // Uses Llama 3.3 70B Versatile model for moderation decisions
 
-const GROQ_API_KEY = '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';
+// Get API key from environment variables with fallback
+const GROQ_API_KEY = (import.meta as any)?.env?.VITE_GROQ_API_KEY || 'your_groq_api_key_here';
 const GROQ_API_URL = 'https://api.groq.com/openai/v1/chat/completions';
+
+// Validate that the API key is available
+function validateGroqApiKey(): void {
+  if (!GROQ_API_KEY || GROQ_API_KEY === 'your_groq_api_key_here') {
+    console.warn('⚠️ Groq API key not configured. Using fallback moderation.');
+  } else {
+    console.log('✅ Groq API key loaded successfully');
+  }
+}
+
+// Call validation on module load
+validateGroqApiKey();
 
 export interface GroqModerationResult {
   passed: boolean;
@@ -26,6 +39,13 @@ export async function moderateWithGroq(
   message: string,
   options: GroqModerationOptions
 ): Promise<GroqModerationResult> {
+  
+  // Check if API key is available
+  if (!GROQ_API_KEY || GROQ_API_KEY.includes('your_groq_api_key_here')) {
+    console.warn('Groq API key not configured, skipping Groq moderation');
+    return { passed: true }; // Allow message if no API key
+  }
+
   try {
     // Create context from message history if available
     const context = options.messageHistory 
