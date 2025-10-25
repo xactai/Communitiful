@@ -1,73 +1,76 @@
-Companions Anonymous — README
-Overview
+# 🏥 Companions Anonymous — README
 
-Companions Anonymous is a privacy-first application built to support companions of hospital patients through an anonymous, moderated, and geo-fenced chat platform.
-The app operates in two modes — Hospital Mode and Companion Mode — seamlessly integrated through a Supabase backend.
+## 📘 Overview
+**Companions Anonymous** is a **privacy-first application** built to support companions of hospital patients through an **anonymous, moderated, and geo-fenced chat platform**.  
 
-1. Hospital Mode
+The app operates in two distinct modes — **Hospital Mode** and **Companion Mode** — seamlessly integrated through a **Supabase backend** to ensure secure, real-time communication and compliance with data privacy standards.
 
-Used by hospitals to register patient and companion details at the time of a visit.
+---
 
-Key Features
+## 🏥 1. Hospital Mode
 
-Registration form for Patient and Companion details.
+Used by hospitals to **register patient and companion details** during visits.
 
-Companion’s mobile number used for later authentication.
+### ✳️ Key Features
+- 📋 Registration form for both **Patient** and **Companion** details  
+- 📱 Companion’s **mobile number** used for later authentication  
+- 🔒 Records stored **securely in Supabase**  
+- 💻 Optimized for **mobile and tablet** hospital desks  
+- 🧩 Built-in **validations** to prevent duplicate entries and ensure clean data  
 
-Records stored securely in Supabase.
+---
 
-Optimized for mobile and tablet hospital desks.
+## 💬 2. Companion Mode
 
-Validations to prevent duplicate entries and ensure clean data.
+Accessible **only to companions** registered through Hospital Mode.
 
-2. Companion Mode
+### ✳️ Key Features
+- 🔐 **Authentication:** Login via registered mobile number (verified through Supabase)  
+- 🕵️ **Anonymity:** System assigns a random name and avatar — fixed per session, non-editable  
+- 💭 **Chatroom:** Real-time messaging with peers in a completely anonymous environment  
+- 🤖 **Virtual Agent:** Auto-responds during low activity to keep conversations active  
+- 🧰 **Moderation:** Pre-message filtering blocks abusive, off-topic, or unsafe content  
+- 📍 **Geo-Fencing:** Access restricted to hospital premises; users auto-signed out if they leave the area  
 
-Accessible only to companions registered through Hospital Mode.
+---
 
-Key Features
+## 🔒 Privacy & Security
 
-Authentication: Login via registered mobile number (verified through Supabase).
+| Principle | Description |
+|------------|--------------|
+| **Minimal Data Storage** | Only essential, non-sensitive information is stored |
+| **Anonymity** | No personally identifiable information (PII) displayed or shared |
+| **Encryption** | All data encrypted both **in transit** and **at rest** |
+| **Consent-Driven** | Explicit consent required for chat participation and location tracking |
+| **Audit & Retention** | Comprehensive logging and defined data retention policies for compliance |
 
-Anonymity: System assigns a random name and avatar — fixed per session, non-editable.
+---
 
-Chatroom: Real-time messaging with peers; anonymous environment maintained.
+## 🧱 Tech Stack
 
-Virtual Agent: Responds automatically during inactivity to keep conversations active.
+| Layer | Technology |
+|--------|-------------|
+| **Frontend** | React (responsive design for mobile and web) |
+| **Backend** | Supabase (authentication, database, real-time updates) |
+| **Moderation** | Custom pre-message validation and filtering logic |
+| **Virtual Agent** | LLM-based automated responder for engagement |
+| **Geo-Fencing** | Client-side location APIs + server-side validation |
 
-Moderation: Filters block abusive, off-topic, or unsafe messages before posting.
+---
 
-Geo-Fencing: Access restricted to hospital premises; users auto-signed out if they exit the zone.
+## 🚀 Current Status
+✅ Development completed  
+✅ Supabase integration live  
+✅ Chatroom, moderation, and virtual agent fully tested  
+✅ Geo-fencing and session management active  
+✅ Ready for **pilot deployment** in hospital environments  
 
-Privacy & Security
+---
 
-Minimal data stored; no PII displayed in chat.
+## 🎯 Purpose
+To create a **safe, supportive, and private digital space** for companions of hospital patients —  
+blending **emotional connection**, **digital privacy**, and **hospital-led engagement**.
 
-All communication is encrypted (in-transit & at-rest).
+---
 
-Explicit user consent required for participation and location tracking.
-
-Comprehensive logging and retention policy implemented for compliance.
-
-Tech Stack
-
-Frontend: React (responsive for mobile & web)
-
-Backend: Supabase (auth, database, real-time updates)
-
-Moderation: Custom logic integrated pre-message post
-
-Virtual Agent: LLM-based automated responder
-
-Geo-Fencing: Client-side location with server validation
-
-Current Status
-
-✅ Development completed
-✅ Supabase integration live
-✅ Chatroom, moderation, and virtual agent tested
-✅ Geo-fence and session management active
-✅ Ready for pilot deployment in hospital environments
-
-Purpose
-
-To create a safe, supportive, and private space for companions of patients — combining emotional connection, digital privacy, and hospital-led engagement.
+**Built with ❤️ using React + Supabase**
