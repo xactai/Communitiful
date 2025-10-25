@@ -5,7 +5,7 @@ import { Label } from '@/components/ui/label';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { PageContainer } from '@/components/AppLayout';
-import { ArrowLeft, UserRound, Users, Heart, Stethoscope, Building2, MapPin, Loader2 } from 'lucide-react';
+import { ArrowLeft, UserRound, Users, Building2, MapPin, Loader2 } from 'lucide-react';
 import { insertPatient, insertCompanions } from '@/lib/supabaseClient';
 import { motion } from 'framer-motion';
 import { generateRandomPatientData, generateRandomCompanionData, typeText, TypeOptions } from '@/lib/autoFillUtils';
@@ -282,9 +282,6 @@ export function HospitalForm({ onBack, onSuccess }: HospitalFormProps) {
         >
           <div className="flex items-center justify-between border-b border-primary/20 pb-4">
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 bg-primary/10 rounded-full flex items-center justify-center shadow-md">
-                <Stethoscope size={20} className="text-primary" />
-              </div>
               <h2 className="text-xl font-semibold text-primary/90">Patient Details</h2>
             </div>
           </div>
@@ -336,9 +333,6 @@ export function HospitalForm({ onBack, onSuccess }: HospitalFormProps) {
         >
           <div className="flex items-center justify-between border-b border-primary/20 pb-4">
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 bg-primary/10 rounded-full flex items-center justify-center shadow-md">
-                <Users size={20} className="text-primary" />
-              </div>
               <h2 className="text-xl font-semibold text-primary/90">Companions</h2>
             </div>
           </div>
@@ -524,7 +518,6 @@ export function HospitalForm({ onBack, onSuccess }: HospitalFormProps) {
             >
               {loading ? 'Submitting...' : (
                 <>
-                  <Heart size={22} className="text-white animate-pulse" />
                   <span className="text-lg font-bold">Submit Registration</span>
                   <div className="absolute inset-0 w-full h-full bg-white/20 transform -translate-x-full group-hover:translate-x-full transition-transform duration-700"></div>
                 </>
