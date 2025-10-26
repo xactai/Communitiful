@@ -15,4 +15,6 @@ export default defineConfig(({ mode }) => ({
       "@": path.resolve(__dirname, "./src"),
     },
   },
+  // 👇 Add this line
+  base: "/Communitiful/",
 }));
