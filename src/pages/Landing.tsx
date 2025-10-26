@@ -43,7 +43,7 @@ export function Landing({ onStart }: LandingProps) {
               Companions Anonymous
             </h1>
             <p className="text-lg text-muted-foreground max-w-sm mx-auto">
-              []
+            For every companion who waits — you’re not alone.”
             </p>
           </motion.div>
         </div>
