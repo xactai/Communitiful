@@ -30,7 +30,7 @@ export interface GroqModerationOptions {
 }
 
 /**
- * Moderates a message using Groq's Llama 3.3 70B Versatile model
+ * Moderates a messages using Groq's Llama 3.3 70B Versatile model
  * @param message The message to moderate
  * @param options Moderation options including context
  * @returns Promise with moderation result
