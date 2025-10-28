@@ -17,7 +17,7 @@ import {
 import { 
   detectEmergencyKeywords
 } from '@/lib/deepseek';
-import { moderateMessage, ModerationOptions } from '@/lib/moderation';
+import { moderateMessageNLP, ModerationOptions, NLPModerationResult } from '@/lib/nlpModeration';
 import { ModerationBanner } from '@/components/ModerationBanner';
 
 interface ChatProps {
@@ -33,7 +33,9 @@ export function Chat({ onOpenSettings, onOpenRelaxation }: ChatProps) {
   const [sending, setSending] = useState(false);
   const [rateLimiter] = useState(() => new RateLimiter(5, 60000)); // 5 messages per minute
   const [showModerationBanner, setShowModerationBanner] = useState(false);
-  const [moderationMessage, setModerationMessage] = useState("Moderation Failed");
+  const [moderationMessage, setModerationMessage] = useState("Moderation Notice");
+  const [moderationType, setModerationType] = useState<'block' | 'warn' | 'safety'>('warn');
+  const [moderationSuggestions, setModerationSuggestions] = useState<string[]>([]);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const [defaultMessagesLoaded, setDefaultMessagesLoaded] = useState(false);
   const lastUserMessageTimeRef = useRef<number>(Date.now());
@@ -235,26 +237,30 @@ export function Chat({ onOpenSettings, onOpenRelaxation }: ChatProps) {
     };
     
     try {
-      // Use async moderation with Grok
-      const moderationResult = await moderateMessage(inputText, moderationOptions);
+      // Use NLP-based moderation
+      const moderationResult: NLPModerationResult = await moderateMessageNLP(inputText, moderationOptions);
       
-      // Check for safety alerts (messages that pass but need special handling)
-      if (moderationResult.passed && moderationResult.category === 'safety_alert') {
-        // Allow the message but show safety alert
-        setModerationMessage(moderationResult.reason || "Safety Alert");
+      // Handle different moderation actions
+      if (moderationResult.action === 'block') {
+        // Block the message and show reason
+        setModerationMessage(moderationResult.reason || "Message blocked for safety");
+        setModerationType('block');
+        setModerationSuggestions(moderationResult.suggestions || []);
         setShowModerationBanner(true);
-        // Continue with message sending
-      } else if (!moderationResult.passed) {
-        // Show moderation banner for blocked messages
-        setModerationMessage(moderationResult.reason || "Moderation Notice");
-        setShowModerationBanner(true);
-        
-        // Clear the input
         setInputText('');
         return;
+      } else if (moderationResult.action === 'warn') {
+        // Allow the message but show a gentle warning
+        setModerationMessage(moderationResult.reason || "Gentle reminder");
+        setModerationType('warn');
+        setModerationSuggestions(moderationResult.suggestions || []);
+        setShowModerationBanner(true);
+        // Continue with message sending but show warning
       }
+      // If action is 'allow', continue normally without any banner
+      
     } catch (error) {
-      console.error("Error in message handling:", error);
+      console.error("Error in NLP moderation:", error);
       // Continue with message sending if moderation fails
     }
 
@@ -491,6 +497,8 @@ export function Chat({ onOpenSettings, onOpenRelaxation }: ChatProps) {
       <ModerationBanner 
         visible={showModerationBanner} 
         message={moderationMessage}
+        type={moderationType}
+        suggestions={moderationSuggestions}
         onClose={() => setShowModerationBanner(false)}
       />
 
