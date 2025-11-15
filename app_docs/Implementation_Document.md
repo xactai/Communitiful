@@ -58,10 +58,10 @@ No personal or identifiable information is ever displayed or retrievable during 
 - Encourages emotional support through an empathetic chat environment
 
 #### 🧰 Content Moderation
-- Every message passes through a **content moderation layer**
-- Filters out harassment, abuse, or off-topic content
-- Violating messages are **blocked** and users are **notified**
-- Ensures a **safe, respectful, and purpose-driven** chat environment
+- Every message is screened by **Gemini 1.5 Flash** via the Gemini API before it reaches the room
+- The moderator blocks harassment, hate, spam, irrelevant or negative rants, and unsafe requests
+- Blocked attempts return a **clear reason** in the chat UI while keeping the text local for editing
+- Ensures a **safe, respectful, and purpose-driven** chat environment with real-time transparency
 
 #### 📍 Geo-Fencing
 - Chatroom participation restricted to **hospital premises**

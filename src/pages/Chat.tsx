@@ -17,8 +17,8 @@ import {
 import { 
   detectEmergencyKeywords
 } from '@/lib/deepseek';
-import { moderateMessageNLP, ModerationOptions, NLPModerationResult } from '@/lib/nlpModeration';
 import { ModerationBanner } from '@/components/ModerationBanner';
+import { moderateWithGemini } from '@/lib/geminiModeration';
 
 interface ChatProps {
   onOpenSettings: () => void;
@@ -26,7 +26,7 @@ interface ChatProps {
 }
 
 export function Chat({ onOpenSettings, onOpenRelaxation }: ChatProps) {
-  const { session, messages, addMessage, updateMessage, userMessageCount, incrementUserMessageCount } = useAppStore();
+  const { session, addMessage, updateMessage, incrementUserMessageCount } = useAppStore();
   const [sharedMessages, setSharedMessages] = useState<Message[]>([]);
   const [onlineUsers, setOnlineUsers] = useState<UserPresence[]>([]);
   const [inputText, setInputText] = useState('');
@@ -228,54 +228,39 @@ export function Chat({ onOpenSettings, onOpenRelaxation }: ChatProps) {
     }
     
     // Run moderation checks
-    const messageHistory = sharedMessages.map(m => m.text);
-    const moderationOptions: ModerationOptions = {
-      sessionId: session.id,
-      clinicId: session.clinicId,
-      messageHistory: messageHistory,
-      lastMessageTimestamp: lastUserMessageTimeRef.current
-    };
-    
-    try {
-      // Use NLP-based moderation
-      const moderationResult: NLPModerationResult = await moderateMessageNLP(inputText, moderationOptions);
-      
-      // Handle different moderation actions
-      if (moderationResult.action === 'block') {
-        // Block the message and show reason
-        setModerationMessage(moderationResult.reason || "Message blocked for safety");
-        setModerationType('block');
-        setModerationSuggestions(moderationResult.suggestions || []);
-        setShowModerationBanner(true);
-        setInputText('');
-        return;
-      } else if (moderationResult.action === 'warn') {
-        // Allow the message but show a gentle warning
-        setModerationMessage(moderationResult.reason || "Gentle reminder");
-        setModerationType('warn');
-        setModerationSuggestions(moderationResult.suggestions || []);
-        setShowModerationBanner(true);
-        // Continue with message sending but show warning
-      }
-      // If action is 'allow', continue normally without any banner
-      
-    } catch (error) {
-      console.error("Error in NLP moderation:", error);
-      // Continue with message sending if moderation fails
-    }
-
     const messageText = inputText.trim();
-    setInputText('');
-    setSending(true);
-
-    // Pre-filter
+    
+    // Pre-filter before network calls
     const preFilter = preFilterMessage(messageText);
     if (!preFilter.allowed) {
       alert(preFilter.reason);
-      setSending(false);
-      setInputText(messageText); // Restore text for editing
       return;
     }
+
+    setSending(true);
+    
+    // Run Gemini moderation before posting
+    try {
+      const geminiResult = await moderateWithGemini(messageText, {
+        sessionId: session.id,
+        clinicId: session.clinicId,
+        messageHistory: sharedMessages.map(m => m.text)
+      });
+
+      if (!geminiResult.allowed) {
+        setModerationMessage(geminiResult.reason || "Message blocked for safety");
+        setModerationType('block');
+        setModerationSuggestions([]);
+        setShowModerationBanner(true);
+        setSending(false);
+        return;
+      }
+    } catch (error) {
+      console.error("Gemini moderation error:", error);
+      // Allow message if moderation service fails
+    }
+
+    setInputText('');
 
     // Create pending message
     const messageId = crypto.randomUUID();
@@ -286,7 +271,7 @@ export function Chat({ onOpenSettings, onOpenRelaxation }: ChatProps) {
       authorType: 'user',
       text: messageText,
       createdAt: new Date(),
-      moderation: { status: 'pending' }
+      moderation: { status: 'allowed' }
     };
 
     // Update last user message time
@@ -328,44 +313,22 @@ export function Chat({ onOpenSettings, onOpenRelaxation }: ChatProps) {
         }, 500);
       }
 
-      // No need to moderate again, already done before sending
-      // Just update the message status
-      const updatedMessage = { ...pendingMessage, moderation: { status: 'allowed' } };
-      updateMessage(messageId, {
-        moderation: { status: 'allowed' }
-      });
-        
-      // Update the message via real-time chat
-      try {
-        await realtimeChat.updateMessage(messageId, {
-          moderation: { status: 'allowed' }
-        });
-      } catch (error) {
-        console.error('Failed to update message in real-time chat:', error);
-        // Fallback to local chat
-        sharedChat.updateMessage(messageId, {
-          moderation: { status: 'allowed' }
-        });
-      }
-
       // Increment user message count
       incrementUserMessageCount();
     } catch (error) {
-      console.error('Moderation error:', error);
-      // Fallback: allow message on error
+      console.error('Message send error:', error);
+      // Attempt to roll back local state on failure
       updateMessage(messageId, {
-        moderation: { status: 'allowed' }
+        moderation: { status: 'blocked', reason: 'Failed to send message. Please try again.' }
       });
-      // Update the message via real-time chat on error
       try {
         await realtimeChat.updateMessage(messageId, {
-          moderation: { status: 'allowed' }
+          moderation: { status: 'blocked', reason: 'Delivery failed' }
         });
       } catch (error) {
         console.error('Failed to update message in real-time chat:', error);
-        // Fallback to local chat
         sharedChat.updateMessage(messageId, {
-          moderation: { status: 'allowed' }
+          moderation: { status: 'blocked', reason: 'Delivery failed' }
         });
       }
     } finally {
