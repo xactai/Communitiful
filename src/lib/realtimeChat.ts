@@ -49,18 +49,13 @@ export class RealtimeChatManager {
       case 'INSERT':
         if (newRecord) {
           const message = this.transformDatabaseMessage(newRecord);
-          this.currentMessages.push(message);
-          this.notifyListeners();
+          this.upsertMessage(message);
         }
         break;
       case 'UPDATE':
         if (newRecord) {
           const message = this.transformDatabaseMessage(newRecord);
-          const index = this.currentMessages.findIndex(m => m.id === message.id);
-          if (index >= 0) {
-            this.currentMessages[index] = message;
-            this.notifyListeners();
-          }
+          this.upsertMessage(message);
         }
         break;
       case 'DELETE':
@@ -106,7 +101,16 @@ export class RealtimeChatManager {
         throw error;
       }
 
-      this.currentMessages = data.map(msg => this.transformDatabaseMessage(msg));
+      const uniqueMessages = data
+        .map(msg => this.transformDatabaseMessage(msg))
+        .reduce<Map<string, Message>>((map, message) => {
+          map.set(message.id, message);
+          return map;
+        }, new Map());
+      
+      this.currentMessages = Array.from(uniqueMessages.values()).sort(
+        (a, b) => a.createdAt.getTime() - b.createdAt.getTime()
+      );
       this.notifyListeners();
     } catch (error) {
       console.error('Error loading messages:', error);
@@ -281,6 +285,20 @@ export class RealtimeChatManager {
     }
   }
 
+  // Helper functions
+  private upsertMessage(message: Message) {
+    const index = this.currentMessages.findIndex(m => m.id === message.id);
+    
+    if (index >= 0) {
+      this.currentMessages[index] = message;
+    } else {
+      this.currentMessages.push(message);
+    }
+    
+    this.currentMessages.sort((a, b) => a.createdAt.getTime() - b.createdAt.getTime());
+    this.notifyListeners();
+  }
+
   // Cleanup
   destroy() {
     if (this.subscription) {
@@ -289,7 +307,6 @@ export class RealtimeChatManager {
     this.listeners.clear();
   }
 }
-
 // Create room-specific real-time chat manager
 export function createRealtimeChat(roomId: string) {
   return new RealtimeChatManager(roomId);

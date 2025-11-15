@@ -506,6 +506,22 @@ export function Chat({ onOpenSettings, onOpenRelaxation }: ChatProps) {
         </div>
       </div>
 
+      {/* Apollo branding */}
+      <div className="bg-white border-b px-4 py-3 flex items-center gap-3 sm:gap-4 shadow-[inset_0_-1px_0_rgba(15,23,42,0.05)]">
+        <div className="flex-shrink-0 w-16 h-16 rounded-full border border-primary/20 bg-white flex items-center justify-center p-2">
+          <img 
+            src="/images/Apollo Logo.png" 
+            alt="Apollo Hospital logo"
+            className="w-full h-full object-contain"
+          />
+        </div>
+        <div className="text-left">
+          <p className="text-xs uppercase tracking-[0.2em] text-muted-foreground">Partner Hospital</p>
+          <p className="text-base font-semibold text-primary leading-tight">Apollo Hospital</p>
+          <p className="text-xs text-muted-foreground">Companion lounge · Bengaluru</p>
+        </div>
+      </div>
+
       {/* Disclaimer banner */}
       <div className="bg-warning/10 border-b border-warning/20 px-4 py-2">
         <p className="text-xs text-center">

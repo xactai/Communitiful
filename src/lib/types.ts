@@ -87,7 +87,7 @@ export const AVATARS = [
 
 export const TEST_CLINIC: Clinic = {
   id: 'test-clinic-1',
-  name: 'General Hospital',
+  name: 'Apollo Hospital',
   lat: 12.919837049875678, // Bangalore coordinates
   lng: 77.64497976254331,
   radiusMeters: 1000000, // 1000 km radius
