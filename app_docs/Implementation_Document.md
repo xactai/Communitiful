@@ -58,7 +58,7 @@ No personal or identifiable information is ever displayed or retrievable during 
 - Encourages emotional support through an empathetic chat environment
 
 #### 🧰 Content Moderation
-- Every message is screened by **Gemini 1.5 Flash** via the Gemini API before it reaches the room
+- Every message is screened by **Gemini 1.5 Flash Latest** via the Gemini API before it reaches the room
 - The moderator blocks harassment, hate, spam, irrelevant or negative rants, and unsafe requests
 - Blocked attempts return a **clear reason** in the chat UI while keeping the text local for editing
 - Ensures a **safe, respectful, and purpose-driven** chat environment with real-time transparency

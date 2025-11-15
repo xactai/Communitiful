@@ -21,7 +21,7 @@ const GEMINI_API_KEY =
   DEFAULT_GEMINI_API_KEY;
 
 const GEMINI_API_URL =
-  'https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent';
+  'https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent';
 
 export async function moderateWithGemini(
   message: string,
