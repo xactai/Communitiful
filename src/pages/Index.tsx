@@ -14,6 +14,7 @@ import { HospitalForm } from '@/pages/HospitalForm';
 import { HospitalConfirmation } from '@/pages/HospitalConfirmation';
 import { toast } from "@/components/ui/use-toast";
 import { WhatIsThis } from '@/pages/WhatIsThis';
+import { PrivacyTerms } from '@/pages/PrivacyTerms';
 
 const Index = () => {
   const { 
@@ -88,13 +89,26 @@ const Index = () => {
   // Render current step
   switch (currentStep) {
     case 'landing':
-      return <Landing onStart={handleStart} onShowAbout={() => setCurrentStep('about')} />;
+      return (
+        <Landing 
+          onStart={handleStart} 
+          onShowAbout={() => setCurrentStep('about')} 
+          onShowPrivacy={() => setCurrentStep('privacy')}
+        />
+      );
     
     case 'about':
       return (
         <WhatIsThis 
           onBack={() => setCurrentStep('landing')}
           onStart={() => handleStart('companion')}
+        />
+      );
+
+    case 'privacy':
+      return (
+        <PrivacyTerms 
+          onBack={() => setCurrentStep('landing')}
         />
       );
       

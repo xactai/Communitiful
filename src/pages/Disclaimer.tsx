@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
 import { PageContainer } from '@/components/AppLayout';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
-import { ArrowLeft, AlertTriangle, Shield, Users, Heart, MessageCircle, Clock, Stethoscope } from 'lucide-react';
+import { ArrowLeft, AlertTriangle, Users, MessageCircle, Clock } from 'lucide-react';
 
 interface DisclaimerProps {
   onBack: () => void;
@@ -35,12 +35,11 @@ export function Disclaimer({ onBack, onAccept }: DisclaimerProps) {
             </Button>
           </motion.div>
           <motion.h1 
-            className="text-xl font-semibold flex items-center gap-2 text-primary"
+            className="text-xl font-semibold text-primary"
             initial={{ x: -20, opacity: 0 }}
             animate={{ x: 0, opacity: 1 }}
             transition={{ delay: 0.1, duration: 0.4 }}
           >
-            <Stethoscope size={18} className="text-primary" />
             Important Information
           </motion.h1>
         </motion.div>
@@ -60,20 +59,18 @@ export function Disclaimer({ onBack, onAccept }: DisclaimerProps) {
             transition={{ delay: 0.2, duration: 0.4 }}
           >
             <motion.div 
-              className="flex justify-center items-center bg-primary/20 rounded-full w-16 h-16 mx-auto mb-4 shadow-inner"
+              className="flex justify-center items-center bg-primary/20 rounded-full w-16 h-16 mx-auto mb-4 shadow-inner text-3xl"
               whileHover={{ scale: 1.05, rotate: 5 }}
             >
-              <Heart size={32} className="text-primary" />
+              <span role="img" aria-label="warm welcome">🤗</span>
             </motion.div>
             <motion.h2 
-              className="text-lg font-semibold text-primary mb-2 flex items-center justify-center gap-2"
+              className="text-lg font-semibold text-primary mb-2"
               initial={{ y: 10, opacity: 0 }}
               animate={{ y: 0, opacity: 1 }}
               transition={{ delay: 0.3, duration: 0.4 }}
             >
-              <Heart size={16} className="text-primary" />
               Welcome, Friend
-              <Heart size={16} className="text-primary" />
             </motion.h2>
             <motion.p 
               className="text-sm text-foreground leading-relaxed"
@@ -100,7 +97,9 @@ export function Disclaimer({ onBack, onAccept }: DisclaimerProps) {
                   whileHover={{ scale: 1.03, y: -5 }}
                   whileTap={{ scale: 0.98 }}
                 >
-                  <Shield size={24} className="text-primary mx-auto mb-2 sm:mb-3 sm:w-7 sm:h-7" />
+                  <div className="w-12 h-12 mx-auto mb-2 sm:mb-3 rounded-full bg-white/70 text-xl flex items-center justify-center">
+                    <span role="img" aria-label="shielded chat">🛡️</span>
+                  </div>
                   <h3 className="font-medium text-xs sm:text-sm">Anonymous & Safe</h3>
                 </motion.div>
               </TooltipTrigger>
@@ -118,7 +117,9 @@ export function Disclaimer({ onBack, onAccept }: DisclaimerProps) {
                   whileHover={{ scale: 1.03, y: -5 }}
                   whileTap={{ scale: 0.98 }}
                 >
-                  <Heart size={24} className="text-accent-foreground mx-auto mb-2 sm:mb-3 sm:w-7 sm:h-7" />
+                  <div className="w-12 h-12 mx-auto mb-2 sm:mb-3 rounded-full bg-white/70 text-xl flex items-center justify-center">
+                    <span role="img" aria-label="supportive hands">🤝</span>
+                  </div>
                   <h3 className="font-medium text-xs sm:text-sm">Supportive Space</h3>
                 </motion.div>
               </TooltipTrigger>
@@ -136,7 +137,9 @@ export function Disclaimer({ onBack, onAccept }: DisclaimerProps) {
                   whileHover={{ scale: 1.03, y: -5 }}
                   whileTap={{ scale: 0.98 }}
                 >
-                  <Stethoscope size={24} className="text-info mx-auto mb-2 sm:mb-3 sm:w-7 sm:h-7" />
+                  <div className="w-12 h-12 mx-auto mb-2 sm:mb-3 rounded-full bg-white/70 text-xl flex items-center justify-center">
+                    <span role="img" aria-label="chat bubble">💬</span>
+                  </div>
                   <h3 className="font-medium text-xs sm:text-sm">Experience Only</h3>
                 </motion.div>
               </TooltipTrigger>
@@ -150,7 +153,7 @@ export function Disclaimer({ onBack, onAccept }: DisclaimerProps) {
 
           {/* Quick rules */}
           <motion.div 
-            className="flex flex-wrap justify-center gap-2 sm:gap-4 text-xs text-muted-foreground"
+            className="flex flex-wrap justify-center gap-3 sm:gap-4 text-xs"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ delay: 0.6, duration: 0.4 }}
@@ -158,8 +161,8 @@ export function Disclaimer({ onBack, onAccept }: DisclaimerProps) {
             <Tooltip>
               <TooltipTrigger asChild>
                 <motion.div 
-                  className="flex items-center gap-1 cursor-pointer bg-primary/5 px-3 py-1.5 rounded-full"
-                  whileHover={{ scale: 1.05, backgroundColor: "rgba(var(--primary), 0.1)" }}
+                  className="flex items-center gap-1.5 cursor-pointer bg-white border border-primary/20 text-slate-700 px-3.5 py-1.5 rounded-full shadow-sm"
+                  whileHover={{ scale: 1.03 }}
                 >
                   <Users size={12} className="text-primary" />
                   <span>Be Respectful</span>
@@ -173,8 +176,8 @@ export function Disclaimer({ onBack, onAccept }: DisclaimerProps) {
             <Tooltip>
               <TooltipTrigger asChild>
                 <motion.div 
-                  className="flex items-center gap-1 cursor-pointer bg-primary/5 px-3 py-1.5 rounded-full"
-                  whileHover={{ scale: 1.05, backgroundColor: "rgba(var(--primary), 0.1)" }}
+                  className="flex items-center gap-1.5 cursor-pointer bg-white border border-primary/20 text-slate-700 px-3.5 py-1.5 rounded-full shadow-sm"
+                  whileHover={{ scale: 1.03 }}
                 >
                   <Clock size={12} className="text-primary" />
                   <span>Share Waiting</span>
@@ -188,8 +191,8 @@ export function Disclaimer({ onBack, onAccept }: DisclaimerProps) {
             <Tooltip>
               <TooltipTrigger asChild>
                 <motion.div 
-                  className="flex items-center gap-1 cursor-pointer bg-primary/5 px-3 py-1.5 rounded-full"
-                  whileHover={{ scale: 1.05, backgroundColor: "rgba(var(--primary), 0.1)" }}
+                  className="flex items-center gap-1.5 cursor-pointer bg-white border border-primary/20 text-slate-700 px-3.5 py-1.5 rounded-full shadow-sm"
+                  whileHover={{ scale: 1.03 }}
                 >
                   <AlertTriangle size={12} className="text-primary" />
                   <span>No Medical Advice</span>
@@ -220,10 +223,9 @@ export function Disclaimer({ onBack, onAccept }: DisclaimerProps) {
               />
               <label
                 htmlFor="accept"
-                className="text-sm leading-relaxed cursor-pointer max-w-sm text-left flex items-start gap-1"
+                className="text-sm leading-relaxed cursor-pointer max-w-sm text-left"
               >
-                <Heart size={14} className="text-primary mt-0.5 flex-shrink-0" />
-                <span>I understand this is for sharing experiences only, not medical advice.</span>
+                I understand this is for sharing experiences only, not medical advice.
               </label>
             </motion.div>
 
@@ -236,9 +238,8 @@ export function Disclaimer({ onBack, onAccept }: DisclaimerProps) {
                 size="touch"
                 onClick={onAccept}
                 disabled={!accepted}
-                className="w-full max-w-sm shadow-md hover:shadow-lg flex items-center gap-2 focus:ring-2 focus:ring-primary/20"
+                className="w-full max-w-sm shadow-md hover:shadow-lg focus:ring-2 focus:ring-primary/20"
               >
-                <Heart size={16} className={accepted ? "text-primary-foreground" : "text-muted"} />
                 Continue
               </Button>
             </motion.div>

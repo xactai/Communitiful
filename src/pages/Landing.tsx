@@ -8,9 +8,10 @@ import { motion } from 'framer-motion';
 interface LandingProps {
   onStart: (mode: 'companion' | 'hospital') => void;
   onShowAbout: () => void;
+  onShowPrivacy: () => void;
 }
 
-export function Landing({ onStart, onShowAbout }: LandingProps) {
+export function Landing({ onStart, onShowAbout, onShowPrivacy }: LandingProps) {
   const [hospitalMode, setHospitalMode] = useState(true);
   return (
     <PageContainer className="justify-center bg-gradient-to-b from-primary-soft to-white">
@@ -158,7 +159,7 @@ export function Landing({ onStart, onShowAbout }: LandingProps) {
             
             <button 
               className="text-primary hover:underline"
-              onClick={() => alert('Privacy: We do not collect personal information. Your nickname and avatar are anonymous. Location is only used to verify you are at the clinic. Terms: This is for sharing experiences only, not medical advice. In emergencies, contact hospital staff immediately.')}
+              onClick={onShowPrivacy}
             >
               Privacy & Terms
             </button>
