@@ -20,8 +20,9 @@ const GEMINI_API_KEY =
   (typeof process !== 'undefined' ? process.env?.VITE_GEMINI_API_KEY : undefined) ||
   DEFAULT_GEMINI_API_KEY;
 
-const GEMINI_API_URL =
-  'https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent';
+const GEMINI_BASE_URL = 'https://generativelanguage.googleapis.com/v1beta/models';
+const GEMINI_PRIMARY_MODEL = 'gemini-2.5-flash';
+const GEMINI_FALLBACK_MODEL = 'gemini-2.5-pro';
 
 export async function moderateWithGemini(
   message: string,
@@ -46,15 +47,23 @@ export async function moderateWithGemini(
     .filter(Boolean)
     .join('\n');
 
-  const prompt = `
+const prompt = `
 You are moderating a live chat between companions waiting in a hospital lobby.
 The conversation must stay supportive, safe, and relevant to hospital waiting experiences.
 
 Task: Decide if the user's message can be posted.
-Rules:
-- Block toxicity, harassment, hate, self-harm encouragement, medical advice, spam/ads, or irrelevant/negative rants.
-- Block content that could harm safety or privacy.
-- Allow empathetic sharing.
+Block ANY message that includes:
+- abusive, insulting, or harassing language (personal attacks, name-calling, bullying, mocking illnesses/age/gender/caste/religion/any attribute)
+- hate speech or discrimination targeting religion, caste, ethnicity, nationality, gender identity, sexual orientation, disabilities, or age groups
+- violence or threats (including encouragement of harm toward companions or hospital staff)
+- sexual content (explicit, flirtatious, jokes, innuendo, adult references)
+- self-harm mentions, suicidal intent, or encouragement of self-harm
+- medical misinformation (fake advice, unverified cures, dangerous suggestions)
+- spam, scams, promotions, requests for money, external links, ads, or chain messages
+- irrelevant/off-topic chatter (politics, religious preaching, non-care gossip, offensive humor) that distracts from supportive waiting-room conversation
+- extremely negative, disturbing, or fear-inducing content likely to increase stress for waiting families
+
+Allow empathetic sharing that stays supportive and relevant.
 
 Respond ONLY with valid JSON matching:
 {
@@ -71,32 +80,30 @@ ${contextSummary || 'No additional context'}
 `.trim();
 
   try {
-    const response = await fetch(`${GEMINI_API_URL}?key=${GEMINI_API_KEY}`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({
-        contents: [
-          {
-            role: 'user',
-            parts: [{ text: prompt }]
-          }
-        ],
-        generationConfig: {
-          temperature: 0.1,
-          maxOutputTokens: 150,
-          topP: 0.8
+    const apiPayload = {
+      contents: [
+        {
+          role: 'user',
+          parts: [{ text: prompt }]
         }
-      })
-    });
+      ],
+      generationConfig: {
+        temperature: 0.1,
+        maxOutputTokens: 150,
+        topP: 0.8
+      }
+    };
 
-    if (!response.ok) {
-      console.error('Gemini API error:', response.status, await response.text());
+    const response = await callGeminiGenerateContent(
+      GEMINI_PRIMARY_MODEL,
+      apiPayload
+    );
+
+    const data = await parseGeminiResponse(response, apiPayload);
+    if (!data) {
       return { allowed: true };
     }
 
-    const data = await response.json();
     const rawText =
       data?.candidates?.[0]?.content?.parts
         ?.map((part: any) => part?.text ?? '')
@@ -121,5 +128,44 @@ ${contextSummary || 'No additional context'}
     console.error('Gemini moderation failed:', error);
     return { allowed: true };
   }
+}
+
+async function callGeminiGenerateContent(model: string, payload: any) {
+  const url = `${GEMINI_BASE_URL}/${model}:generateContent?key=${GEMINI_API_KEY}`;
+  return fetch(url, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify(payload)
+  });
+}
+
+async function parseGeminiResponse(response: Response, payload: any) {
+  if (response.ok) {
+    return response.json();
+  }
+
+  const errorText = await response.text();
+  console.error(`Gemini API error (${response.status}):`, errorText);
+
+  if (response.status === 404 && !response.url.includes(GEMINI_FALLBACK_MODEL)) {
+    console.warn('Primary Gemini model unavailable. Falling back to stable model.');
+    const fallbackResponse = await callGeminiGenerateContent(
+      GEMINI_FALLBACK_MODEL,
+      payload
+    );
+
+    if (fallbackResponse.ok) {
+      return fallbackResponse.json();
+    }
+
+    console.error(
+      `Gemini fallback model error (${fallbackResponse.status}):`,
+      await fallbackResponse.text()
+    );
+  }
+
+  return null;
 }
 
