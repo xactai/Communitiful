@@ -33,7 +33,7 @@ interface AppState {
   isLoading: boolean;
   setLoading: (loading: boolean) => void;
   
-  currentStep: 'landing' | 'mode-select' | 'location' | 'companion-auth' | 'disclaimer' | 'avatar-display' | 'chat' | 'relaxation' | 'settings' | 'hospital-form';
+  currentStep: 'landing' | 'mode-select' | 'location' | 'companion-auth' | 'disclaimer' | 'avatar-display' | 'chat' | 'relaxation' | 'settings' | 'hospital-form' | 'about';
   setCurrentStep: (step: AppState['currentStep']) => void;
   
   // OTP state

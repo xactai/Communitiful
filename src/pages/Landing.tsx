@@ -1,15 +1,16 @@
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { PageContainer } from '@/components/AppLayout';
-import { Shield, Users, Building2, HeartHandshake } from 'lucide-react';
+import { Building2, HeartHandshake } from 'lucide-react';
 import { Label } from '@/components/ui/label';
 import { motion } from 'framer-motion';
 
 interface LandingProps {
   onStart: (mode: 'companion' | 'hospital') => void;
+  onShowAbout: () => void;
 }
 
-export function Landing({ onStart }: LandingProps) {
+export function Landing({ onStart, onShowAbout }: LandingProps) {
   const [hospitalMode, setHospitalMode] = useState(true);
   return (
     <PageContainer className="justify-center bg-gradient-to-b from-primary-soft to-white">
@@ -56,8 +57,8 @@ export function Landing({ onStart }: LandingProps) {
             transition={{ delay: 0.3, duration: 0.5 }}
             className="flex items-center gap-3 text-left"
           >
-            <div className="w-10 h-10 bg-primary-soft rounded-full flex items-center justify-center flex-shrink-0">
-              <Shield size={18} className="text-primary" />
+            <div className="w-10 h-10 bg-primary-soft rounded-full flex items-center justify-center flex-shrink-0 text-lg">
+              <span role="img" aria-label="shielded chat">🛡️</span>
             </div>
             <div className="text-sm min-w-0">
               <div className="font-medium">Anonymous and Private</div>
@@ -71,8 +72,8 @@ export function Landing({ onStart }: LandingProps) {
             transition={{ delay: 0.4, duration: 0.5 }}
             className="flex items-center gap-3 text-left"
           >
-            <div className="w-10 h-10 bg-primary-soft rounded-full flex items-center justify-center flex-shrink-0">
-              <Users size={18} className="text-primary" />
+            <div className="w-10 h-10 bg-primary-soft rounded-full flex items-center justify-center flex-shrink-0 text-lg">
+              <span role="img" aria-label="supportive circle">🤝</span>
             </div>
             <div className="text-sm min-w-0">
               <div className="font-medium">Connect with Others</div>
@@ -148,7 +149,7 @@ export function Landing({ onStart }: LandingProps) {
           <div className="space-y-2 text-sm">
             <button 
               className="text-primary hover:underline"
-              onClick={() => alert('Companions Anonymous provides a moderated chat space for companions waiting at medical facilities. All conversations are anonymous and focused on sharing waiting experiences.')}
+              onClick={onShowAbout}
             >
               What is this?
             </button>

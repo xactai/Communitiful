@@ -13,6 +13,7 @@ import { generateNickname } from '@/lib/utils';
 import { HospitalForm } from '@/pages/HospitalForm';
 import { HospitalConfirmation } from '@/pages/HospitalConfirmation';
 import { toast } from "@/components/ui/use-toast";
+import { WhatIsThis } from '@/pages/WhatIsThis';
 
 const Index = () => {
   const { 
@@ -87,7 +88,15 @@ const Index = () => {
   // Render current step
   switch (currentStep) {
     case 'landing':
-      return <Landing onStart={handleStart} />;
+      return <Landing onStart={handleStart} onShowAbout={() => setCurrentStep('about')} />;
+    
+    case 'about':
+      return (
+        <WhatIsThis 
+          onBack={() => setCurrentStep('landing')}
+          onStart={() => handleStart('companion')}
+        />
+      );
       
     case 'location':
       return (
