@@ -34,14 +34,24 @@ export function Disclaimer({ onBack, onAccept }: DisclaimerProps) {
               <ArrowLeft size={20} />
             </Button>
           </motion.div>
-          <motion.h1 
-            className="text-xl font-semibold text-primary"
-            initial={{ x: -20, opacity: 0 }}
-            animate={{ x: 0, opacity: 1 }}
-            transition={{ delay: 0.1, duration: 0.4 }}
-          >
-            Important Information
-          </motion.h1>
+          <div>
+            <motion.p 
+              className="text-xs uppercase tracking-[0.3em] text-primary"
+              initial={{ x: -20, opacity: 0 }}
+              animate={{ x: 0, opacity: 1 }}
+              transition={{ delay: 0.05, duration: 0.3 }}
+            >
+              Step 2
+            </motion.p>
+            <motion.h1 
+              className="text-xl font-semibold text-primary"
+              initial={{ x: -20, opacity: 0 }}
+              animate={{ x: 0, opacity: 1 }}
+              transition={{ delay: 0.15, duration: 0.4 }}
+            >
+              Important Information
+            </motion.h1>
+          </div>
         </motion.div>
 
         {/* Main content container with animation */}

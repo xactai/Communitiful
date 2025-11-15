@@ -15,6 +15,7 @@ import { HospitalConfirmation } from '@/pages/HospitalConfirmation';
 import { toast } from "@/components/ui/use-toast";
 import { WhatIsThis } from '@/pages/WhatIsThis';
 import { PrivacyTerms } from '@/pages/PrivacyTerms';
+import { AboutCompanions } from '@/pages/AboutCompanions';
 
 const Index = () => {
   const { 
@@ -109,6 +110,13 @@ const Index = () => {
       return (
         <PrivacyTerms 
           onBack={() => setCurrentStep('landing')}
+        />
+      );
+
+    case 'about-details':
+      return (
+        <AboutCompanions 
+          onBack={() => setCurrentStep('settings')}
         />
       );
       

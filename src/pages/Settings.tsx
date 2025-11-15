@@ -10,50 +10,10 @@ interface SettingsProps {
 }
 
 export function Settings({ onBack, onLeaveRoom }: SettingsProps) {
-  const { settings, updateSettings } = useAppStore();
+  const { settings, updateSettings, setCurrentStep } = useAppStore();
 
   const handleSettingChange = (key: keyof typeof settings, value: any) => {
     updateSettings({ [key]: value });
-  };
-
-  const showPrivacyInfo = () => {
-    alert(`Privacy Policy:
-
-• We do not collect personal information
-• Your nickname and avatar are anonymous
-• Location is only used to verify clinic proximity
-• Messages are moderated for safety
-• No chat history is permanently stored
-• You can leave at any time
-
-This service is designed to protect your privacy while providing support.`);
-  };
-
-  const showTermsInfo = () => {
-    alert(`Terms of Service:
-
-• This chat is for sharing experiences only
-• Not for medical advice or emergencies
-• Be respectful to other users
-• No personal information sharing
-• Follow community guidelines
-• Report inappropriate behavior
-
-For medical emergencies, contact hospital staff immediately.`);
-  };
-
-  const showAboutInfo = () => {
-    alert(`About Companions Anonymous:
-
-A safe, moderated chat space for companions waiting at medical facilities.
-
-• Anonymous and private
-• AI-moderated for safety
-• Calming resources included
-• Mobile-first design
-• No accounts required
-
-Built with compassion for those who wait.`);
   };
 
   const handleLeaveRoom = () => {
@@ -124,7 +84,7 @@ Built with compassion for those who wait.`);
             <Button 
               variant="ghost" 
               className="w-full justify-start" 
-              onClick={showPrivacyInfo}
+              onClick={() => setCurrentStep('privacy')}
             >
               <Shield size={16} className="mr-3" />
               Privacy Policy
@@ -133,7 +93,7 @@ Built with compassion for those who wait.`);
             <Button 
               variant="ghost" 
               className="w-full justify-start" 
-              onClick={showTermsInfo}
+              onClick={() => setCurrentStep('privacy')}
             >
               <HelpCircle size={16} className="mr-3" />
               Terms of Service
@@ -142,7 +102,7 @@ Built with compassion for those who wait.`);
             <Button 
               variant="ghost" 
               className="w-full justify-start" 
-              onClick={showAboutInfo}
+              onClick={() => setCurrentStep('about-details')}
             >
               <Heart size={16} className="mr-3" />
               About Companions Anonymous

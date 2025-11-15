@@ -17,6 +17,7 @@ export function AvatarDisplay({ avatarId, nickname, onContinue }: AvatarDisplayP
       <div className="flex flex-col items-center justify-center space-y-8 text-center py-8">
         {/* Header */}
         <div className="space-y-2">
+          <p className="text-xs uppercase tracking-[0.3em] text-primary">Step 3</p>
           <Sparkles size={24} className="text-primary mx-auto mb-2" />
           <h1 className="text-2xl font-semibold">Your Anonymous Identity</h1>
           <p className="text-muted-foreground text-sm">

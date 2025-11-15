@@ -455,7 +455,7 @@ export function Chat({ onOpenSettings, onOpenRelaxation }: ChatProps) {
   }
 
   return (
-    <div className="flex flex-col h-screen bg-background max-w-md mx-auto sm:max-w-lg md:max-w-2xl lg:max-w-4xl">
+    <div className="flex flex-col h-screen max-w-md mx-auto sm:max-w-lg md:max-w-2xl lg:max-w-4xl bg-gradient-to-b from-[#eef2ff] via-white to-white">
       {/* Moderation Banner */}
       <ModerationBanner 
         visible={showModerationBanner} 
