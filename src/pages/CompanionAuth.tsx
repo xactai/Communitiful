@@ -40,7 +40,8 @@ export function CompanionAuth({ onBack, onSuccess }: CompanionAuthProps) {
     }
 
     setLoading(true);
-    const { data, error } = await findCompanionByMobile(cleaned);
+    const formattedNumber = `${countryCode}${cleaned}`;
+    const { data, error } = await findCompanionByMobile(formattedNumber, cleaned);
     setLoading(false);
 
     if (error) {

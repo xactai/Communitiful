@@ -1,14 +1,14 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useMemo } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { PageContainer } from '@/components/AppLayout';
-import { ArrowLeft, UserRound, Users, Building2, MapPin, Loader2 } from 'lucide-react';
+import { ArrowLeft, Users, MapPin, Loader2 } from 'lucide-react';
 import { insertPatient, insertCompanions } from '@/lib/supabaseClient';
 import { motion } from 'framer-motion';
-import { generateRandomPatientData, generateRandomCompanionData, typeText, TypeOptions } from '@/lib/autoFillUtils';
+import { generateRandomPatientData, generateRandomCompanionData, typeText } from '@/lib/autoFillUtils';
 
 interface HospitalFormProps {
   onBack: () => void;
@@ -22,10 +22,20 @@ interface CompanionFormItem {
   location: string;
 }
 
+const COUNTRY_CODES = [
+  { code: '+91', country: 'India', flag: '🇮🇳' },
+  { code: '+1', country: 'United States', flag: '🇺🇸' },
+  { code: '+44', country: 'United Kingdom', flag: '🇬🇧' },
+  { code: '+61', country: 'Australia', flag: '🇦🇺' },
+  { code: '+65', country: 'Singapore', flag: '🇸🇬' },
+  { code: '+971', country: 'UAE', flag: '🇦🇪' },
+] as const;
+
 export function HospitalForm({ onBack, onSuccess }: HospitalFormProps) {
   // Patient fields
   const [patientName, setPatientName] = useState('');
   const [patientContact, setPatientContact] = useState('');
+  const [patientCountryCode, setPatientCountryCode] = useState('+91');
   const [purposeOfVisit, setPurposeOfVisit] = useState('');
   const [department, setDepartment] = useState('');
   const [location, setLocation] = useState('');
@@ -34,6 +44,11 @@ export function HospitalForm({ onBack, onSuccess }: HospitalFormProps) {
   const [companions, setCompanions] = useState<CompanionFormItem[]>([{
     name: '', relationship: '', number: '', location: ''
   }]);
+  const [companionCountryCodes, setCompanionCountryCodes] = useState<string[]>(['+91']);
+  const patientCountry = useMemo(
+    () => COUNTRY_CODES.find(c => c.code === patientCountryCode) ?? COUNTRY_CODES[0],
+    [patientCountryCode]
+  );
 
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
@@ -49,6 +64,16 @@ export function HospitalForm({ onBack, onSuccess }: HospitalFormProps) {
   useEffect(() => {
     setLocationFetchingStates(new Array(companions.length).fill(false));
     setLocationFetchedStates(new Array(companions.length).fill(false));
+  }, [companions.length]);
+  
+  useEffect(() => {
+    setCompanionCountryCodes((prev) => {
+      if (prev.length === companions.length) return prev;
+      if (companions.length > prev.length) {
+        return [...prev, ...new Array(companions.length - prev.length).fill('+91')];
+      }
+      return prev.slice(0, companions.length);
+    });
   }, [companions.length]);
   
   // Auto-fill the form when the component mounts
@@ -154,9 +179,19 @@ export function HospitalForm({ onBack, onSuccess }: HospitalFormProps) {
     };
   }, []);
 
-  const addCompanion = () => setCompanions((prev) => [...prev, { name: '', relationship: '', number: '', location: '' }]);
+  const addCompanion = () => {
+    setCompanions((prev) => [...prev, { name: '', relationship: '', number: '', location: '' }]);
+    setCompanionCountryCodes((prev) => [...prev, '+91']);
+  };
   const updateCompanion = (index: number, field: keyof CompanionFormItem, value: string) => {
     setCompanions((prev) => prev.map((c, i) => i === index ? { ...c, [field]: value } : c));
+  };
+  const handleCompanionCountryChange = (index: number, value: string) => {
+    setCompanionCountryCodes((prev) => prev.map((code, i) => i === index ? value : code));
+  };
+  const removeCompanion = (index: number) => {
+    setCompanions((prev) => prev.filter((_, i) => i !== index));
+    setCompanionCountryCodes((prev) => prev.filter((_, i) => i !== index));
   };
 
   const fetchLocation = async (index: number) => {
@@ -193,13 +228,13 @@ export function HospitalForm({ onBack, onSuccess }: HospitalFormProps) {
 
     // Validate patient fields
     if (!patientName.trim()) return setError('Patient name is required');
-    const cleanedContact = patientContact.replace(/\D/g, '');
+  const cleanedContact = patientContact.replace(/\D/g, '');
     if (cleanedContact.length !== 10) return setError('Valid 10-digit patient contact required');
 
     // Validate companions
     for (const c of companions) {
       if (!c.name.trim()) return setError('All companion names are required');
-      const cleaned = c.number.replace(/\D/g, '');
+  const cleaned = c.number.replace(/\D/g, '');
       if (cleaned.length !== 10) return setError('All companions must have valid 10-digit mobile numbers');
     }
 
@@ -208,7 +243,7 @@ export function HospitalForm({ onBack, onSuccess }: HospitalFormProps) {
     // Insert patient
     const { data: patientRow, error: patientErr } = await insertPatient({
       name: patientName.trim(),
-      patient_contact_number: cleanedContact,
+      patient_contact_number: `${patientCountryCode}${cleanedContact}`,
       purpose_of_visit: purposeOfVisit || null,
       department: department || null,
       location: location || null,
@@ -223,11 +258,11 @@ export function HospitalForm({ onBack, onSuccess }: HospitalFormProps) {
     const patient_id = patientRow.patient_id as string;
 
     // Insert companions
-    const companionRows = companions.map((c) => ({
+    const companionRows = companions.map((c, idx) => ({
       patient_id,
       name: c.name,
       relationship: c.relationship,
-      number: c.number.replace(/\D/g, ''),
+      number: `${companionCountryCodes[idx] || '+91'}${c.number.replace(/\D/g, '')}`,
       location: c.location || null,
     }));
 
@@ -302,6 +337,50 @@ export function HospitalForm({ onBack, onSuccess }: HospitalFormProps) {
             </div>
 
             <div className="space-y-3">
+              <Label className="text-base font-medium">
+                Patient Mobile Number *
+              </Label>
+              <div className="flex flex-col sm:flex-row gap-2 sm:items-center">
+                <Select value={patientCountryCode} onValueChange={setPatientCountryCode}>
+                  <SelectTrigger className="sm:max-w-[150px] bg-white/90 border-primary/20 hover:border-primary/40">
+                    <SelectValue>
+                      <div className="flex items-center gap-2 text-sm">
+                        <span className="text-lg">{patientCountry.flag}</span>
+                        <span>{patientCountry.code}</span>
+                      </div>
+                    </SelectValue>
+                  </SelectTrigger>
+                  <SelectContent className="bg-white/95 backdrop-blur-sm">
+                    {COUNTRY_CODES.map(({ code, country, flag }) => (
+                      <SelectItem key={code} value={code}>
+                        <div className="flex items-center gap-2">
+                          <span className="text-lg">{flag}</span>
+                          <span>{country}</span>
+                          <span className="text-muted-foreground text-xs">{code}</span>
+                        </div>
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                <Input
+                  type="tel"
+                  inputMode="numeric"
+                  placeholder="98765 43210"
+                  value={patientContact}
+                  onChange={(e) => {
+                    const cleaned = e.target.value.replace(/\D/g, '');
+                    if (cleaned.length <= 10) {
+                      setPatientContact(cleaned);
+                      setError('');
+                    }
+                  }}
+                  className="flex-1 focus:ring-2 focus:ring-primary/20 py-6 text-base shadow-sm border-primary/20 hover:border-primary/50 transition-colors"
+                />
+              </div>
+              <p className="text-xs text-muted-foreground">Only used for verification; never shared.</p>
+            </div>
+
+            <div className="space-y-3">
               <Label htmlFor="purpose" className="text-base font-medium">
                 Purpose of Visit
               </Label>
@@ -354,7 +433,7 @@ export function HospitalForm({ onBack, onSuccess }: HospitalFormProps) {
                     <Button
                       variant="outline"
                       size="sm"
-                      onClick={() => setCompanions((prev) => prev.filter((_, i) => i !== idx))}
+                      onClick={() => removeCompanion(idx)}
                       className="hover:bg-destructive/10 transition-colors"
                       asChild
                     >
@@ -404,14 +483,52 @@ export function HospitalForm({ onBack, onSuccess }: HospitalFormProps) {
                     <Label htmlFor={`companion-number-${idx}`}>
                       Mobile Number *
                     </Label>
-                    <Input
-                      id={`companion-number-${idx}`}
-                      type="tel"
-                      placeholder="9876543210"
-                      value={c.number}
-                      onChange={(e) => updateCompanion(idx, 'number', e.target.value.replace(/\D/g, ''))}
-                      className="focus:ring-2 focus:ring-primary/20"
-                    />
+                    <div className="flex flex-col sm:flex-row gap-2 sm:items-center">
+                      <Select
+                        value={companionCountryCodes[idx] || '+91'}
+                        onValueChange={(value) => handleCompanionCountryChange(idx, value)}
+                      >
+                        <SelectTrigger className="sm:max-w-[140px] bg-white border-primary/20 hover:border-primary/40">
+                          <SelectValue>
+                            {(() => {
+                              const companionCountry = COUNTRY_CODES.find(c => c.code === (companionCountryCodes[idx] || '+91')) ?? COUNTRY_CODES[0];
+                              return (
+                                <div className="flex items-center gap-2 text-sm">
+                                  <span className="text-lg">{companionCountry.flag}</span>
+                                  <span>{companionCountry.code}</span>
+                                </div>
+                              );
+                            })()}
+                          </SelectValue>
+                        </SelectTrigger>
+                        <SelectContent className="bg-white/95 backdrop-blur-sm">
+                          {COUNTRY_CODES.map(({ code, country, flag }) => (
+                            <SelectItem key={code} value={code}>
+                              <div className="flex items-center gap-2">
+                                <span className="text-lg">{flag}</span>
+                                <span>{country}</span>
+                                <span className="text-muted-foreground text-xs">{code}</span>
+                              </div>
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                      <Input
+                        id={`companion-number-${idx}`}
+                        type="tel"
+                        inputMode="numeric"
+                        placeholder="98765 43210"
+                        value={c.number}
+                        onChange={(e) => {
+                          const cleaned = e.target.value.replace(/\D/g, '');
+                          if (cleaned.length <= 10) {
+                            updateCompanion(idx, 'number', cleaned);
+                            setError('');
+                          }
+                        }}
+                        className="flex-1 focus:ring-2 focus:ring-primary/20"
+                      />
+                    </div>
                   </div>
 
                   <div className="space-y-2">

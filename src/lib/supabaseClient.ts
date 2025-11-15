@@ -8,11 +8,12 @@ const supabaseKey = (import.meta as any)?.env?.VITE_SUPABASE_ANON_KEY || 'eyJhbG
 export const supabase = createClient(supabaseUrl, supabaseKey);
 
 // Database helper functions
-export async function findCompanionByMobile(mobileNumber: string) {
+export async function findCompanionByMobile(primaryNumber: string, fallbackNumber?: string) {
+  const numbers = fallbackNumber ? [primaryNumber, fallbackNumber] : [primaryNumber];
   return supabase
     .from('companions')
     .select('*')
-    .eq('number', mobileNumber)
+    .in('number', numbers)
     .maybeSingle();
 }
 
