@@ -1,36 +1,66 @@
 # 🏥 Companions Anonymous — README
 
 ## 📘 Overview
-**Companions Anonymous** is a **privacy-first application** built to support companions of hospital patients through an **anonymous, moderated, and geo-fenced chat platform**.  
+Companions Anonymous is a privacy-first, geo-aware chat app that supports companions waiting in hospital lobbies. The experience is anonymous, safety-moderated, and optimized for mobile. The app runs in two modes:
+- Hospital Mode: registration desk captures patient and companion details
+- Companion Mode: verified companions access a moderated, anonymous chatroom on-site
 
-The app operates in two distinct modes — **Hospital Mode** and **Companion Mode** — seamlessly integrated through a **Supabase backend** to ensure secure, real-time communication and compliance with data privacy standards.
-
----
-
-## 🏥 1. Hospital Mode
-
-Used by hospitals to **register patient and companion details** during visits.
-
-### ✳️ Key Features
-- 📋 Registration form for both **Patient** and **Companion** details  
-- 📱 Companion’s **mobile number** used for later authentication  
-- 🔒 Records stored **securely in Supabase**  
-- 💻 Optimized for **mobile and tablet** hospital desks  
-- 🧩 Built-in **validations** to prevent duplicate entries and ensure clean data  
+Backend services are powered by Supabase (database + realtime). Content moderation is enforced via Google Gemini before messages are posted.
 
 ---
 
-## 💬 2. Companion Mode
+## 🏥 Hospital Mode (Registration)
 
-Accessible **only to companions** registered through Hospital Mode.
+Used by hospital staff to register the visiting patient and their companions.
 
 ### ✳️ Key Features
-- 🔐 **Authentication:** Login via registered mobile number (verified through Supabase)  
-- 🕵️ **Anonymity:** System assigns a random name and avatar — fixed per session, non-editable  
-- 💭 **Chatroom:** Real-time messaging with peers in a completely anonymous environment  
-- 🤖 **Virtual Agent:** Auto-responds during low activity to keep conversations active  
-- 🧰 **Moderation:** Pre-message filtering blocks abusive, off-topic, or unsafe content  
-- 📍 **Geo-Fencing:** Access restricted to hospital premises; users auto-signed out if they leave the area  
+- 📋 Patient + Companion registration with validations
+- 🌍 International mobile number input:
+  - Country code selector with flag (default: 🇮🇳 +91)
+  - Numbers stored as `{countryCode}{localNumber}` for consistency
+- 🔐 Data stored securely in Supabase
+- 📱 Mobile and tablet friendly UI
+- 🧩 Clean data controls: duplicates and basic field checks
+
+---
+
+## 💬 Companion Mode (On-site Chat)
+
+Accessible only to companions registered via Hospital Mode and physically present at partner hospitals.
+
+### ✳️ Flow
+1) Location Scan (visual simulation)
+   - Subtle animated radar/sweep bar indicating access verification
+   - “Location check passed” acknowledgment
+   - “Powered by Google Maps” badge for credibility
+2) Companion Verification
+   - Login with the registered phone number
+   - Accepts full international format and legacy 10-digit records for compatibility
+3) Disclaimer and Identity
+   - Clear usage disclaimer (no medical advice)
+   - Anonymous nickname and emoji avatar assigned for the session
+4) Chatroom
+   - Real-time messaging with peers
+   - Apollo branding for partner hospital context
+
+### ✳️ Chat UX
+- Softer, rounded message bubbles with subtle elevation
+- Primary gradient styling for your messages
+- Timestamp chips and pending “Checking…” indicator for moderation state
+- Presence and typing indicators
+
+---
+
+## 🛡️ Moderation & Safety
+
+All messages are screened before posting:
+- 🔎 Primary: Gemini 2.5 Flash (latest) moderation with a structured JSON contract
+- 🔁 Fallback: Gemini 2.5 Pro if “latest” is unavailable
+- 🧭 Blocks: abuse/harassment, hate, violence/threats, sexual content, self-harm, medical misinformation, spam/ads/links, off-topic/religious/political content, and highly disturbing negativity
+- 💡 On block: message isn’t posted; user sees a clear reason
+- ⚠️ Safety nudges for emergencies redirect to hospital staff
+
+If the moderation API fails, the app safely degrades to permissive behavior while logging errors.
 
 ---
 
@@ -38,11 +68,13 @@ Accessible **only to companions** registered through Hospital Mode.
 
 | Principle | Description |
 |------------|--------------|
-| **Minimal Data Storage** | Only essential, non-sensitive information is stored |
-| **Anonymity** | No personally identifiable information (PII) displayed or shared |
-| **Encryption** | All data encrypted both **in transit** and **at rest** |
-| **Consent-Driven** | Explicit consent required for chat participation and location tracking |
-| **Audit & Retention** | Comprehensive logging and defined data retention policies for compliance |
+| Minimal Data Storage | Only essential information is collected and retained |
+| Anonymity | Avatars and nicknames conceal identity; no PII displayed |
+| Encryption | Data encrypted in transit and at rest |
+| Consent-Driven | Explicit consent for chat participation and location checks |
+| Access Scope | Chat is restricted to hospital premises |
+
+Dedicated Privacy & Terms page is accessible from Landing and Settings.
 
 ---
 
@@ -50,27 +82,63 @@ Accessible **only to companions** registered through Hospital Mode.
 
 | Layer | Technology |
 |--------|-------------|
-| **Frontend** | React (responsive design for mobile and web) |
-| **Backend** | Supabase (authentication, database, real-time updates) |
-| **Moderation** | Custom pre-message validation and filtering logic |
-| **Virtual Agent** | LLM-based automated responder for engagement |
-| **Geo-Fencing** | Client-side location APIs + server-side validation |
+| Frontend | React + Vite, Tailwind variants, Framer Motion |
+| Backend | Supabase (DB, Realtime, Auth bootstrap) |
+| Moderation | Google Gemini 2.5 Flash Latest (fallback: 2.5 Pro) |
+| Realtime Chat | Supabase realtime channel on `messages` table |
+| Location UX | Animated simulation + Google Maps credit |
 
 ---
 
-## 🚀 Current Status
-✅ Development completed  
+## 🗄️ Data Model (Core)
+
+- patients
+  - patient_id (uuid, client-generated)
+  - name
+  - patient_contact_number (stored as “+<country_code><local>”)
+  - purpose_of_visit, department, location
+- companions
+  - patient_id (fk)
+  - name, relationship
+  - number (stored as “+<country_code><local>”)
+  - location
+- messages
+  - id (uuid), room_id, clinic_id, session_id, author_type
+  - text, created_at
+  - moderation_status, moderation_reason
+
+Lookup logic for verification now supports both “+<country_code><local>” and legacy 10-digit values for backward compatibility.
+
+---
+
+## 🔁 Realtime & De-duplication
+
+Realtime updates listen to Supabase `INSERT/UPDATE/DELETE` on `messages`. Duplicate render issues are prevented by ID-based upsert logic before notifying listeners.
+
+---
+
+## 🎨 UX Highlights
+
+- Landing: gentle animations, clean visual hierarchy, clear entry points
+- Location Scan: animated radar/sweep, Maps credit, auto-continue
+- Companion Auth: international phone input (flag + code + number)
+- Settings: direct navigation to Privacy & Terms and About Companions pages
+- About & Privacy: minimalist cards with calm motion and clear purpose statements
+
+---
+
+## 🚀 Deployment & Status
 ✅ Supabase integration live  
-✅ Chatroom, moderation, and virtual agent fully tested  
-✅ Geo-fencing and session management active  
-✅ Ready for **pilot deployment** in hospital environments  
+✅ Location scan and on-site access flow integrated  
+✅ Moderation enforced pre-post via Gemini  
+✅ Realtime chat, presence, and typing indicators  
+✅ Ready for pilot deployment with hospital partners  
 
 ---
 
-## 🎯 Purpose
-To create a **safe, supportive, and private digital space** for companions of hospital patients —  
-blending **emotional connection**, **digital privacy**, and **hospital-led engagement**.
+## 🧭 Purpose
+Provide a calm, anonymous space that supports companions emotionally during hospital waits, while keeping safety, privacy, and on-site relevance at the core.
 
 ---
 
-**Built with ❤️ using React + Supabase**
+Built with ❤️ using React + Supabase + Gemini
