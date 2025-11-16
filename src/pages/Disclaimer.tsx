@@ -16,7 +16,7 @@ export function Disclaimer({ onBack, onAccept }: DisclaimerProps) {
 
   return (
     <TooltipProvider>
-      <PageContainer>
+      <PageContainer className="bg-gradient-to-b from-[#eef2ff] via-white to-white">
         {/* Header */}
         <motion.div 
           className="flex items-center gap-4 mb-8"
@@ -56,14 +56,14 @@ export function Disclaimer({ onBack, onAccept }: DisclaimerProps) {
 
         {/* Main content container with animation */}
         <motion.div 
-          className="text-center space-y-8"
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ duration: 0.5 }}
+          className="max-w-lg mx-auto text-center space-y-8 rounded-2xl border border-primary/20 bg-white/90 backdrop-blur-sm shadow-[0_18px_50px_rgba(15,23,42,0.08)] p-6"
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.4 }}
         >
           {/* Central visual welcome */}
           <motion.div 
-            className="bg-primary/10 border border-primary/20 rounded-xl p-6 shadow-md"
+            className="bg-primary/10 border border-primary/20 rounded-xl p-6 shadow-inner"
             initial={{ y: 20, opacity: 0 }}
             animate={{ y: 0, opacity: 1 }}
             transition={{ delay: 0.2, duration: 0.4 }}
@@ -104,10 +104,10 @@ export function Disclaimer({ onBack, onAccept }: DisclaimerProps) {
               <TooltipTrigger asChild>
                 <motion.div 
                   className="bg-primary/10 rounded-xl p-4 sm:p-6 cursor-pointer hover:bg-primary/15 transition-colors shadow-md"
-                  whileHover={{ scale: 1.03, y: -5 }}
+                  whileHover={{ scale: 1.02, y: -3 }}
                   whileTap={{ scale: 0.98 }}
                 >
-                  <div className="w-12 h-12 mx-auto mb-2 sm:mb-3 rounded-full bg-white/70 text-xl flex items-center justify-center">
+                  <div className="w-12 h-12 mx-auto mb-2 sm:mb-3 rounded-full bg-white/70 text-xl flex items-center justify-center shadow">
                     <span role="img" aria-label="shielded chat">🛡️</span>
                   </div>
                   <h3 className="font-medium text-xs sm:text-sm">Anonymous & Safe</h3>
@@ -124,10 +124,10 @@ export function Disclaimer({ onBack, onAccept }: DisclaimerProps) {
               <TooltipTrigger asChild>
                 <motion.div 
                   className="bg-accent/30 rounded-xl p-4 sm:p-6 cursor-pointer hover:bg-accent/40 transition-colors shadow-md"
-                  whileHover={{ scale: 1.03, y: -5 }}
+                  whileHover={{ scale: 1.02, y: -3 }}
                   whileTap={{ scale: 0.98 }}
                 >
-                  <div className="w-12 h-12 mx-auto mb-2 sm:mb-3 rounded-full bg-white/70 text-xl flex items-center justify-center">
+                  <div className="w-12 h-12 mx-auto mb-2 sm:mb-3 rounded-full bg-white/70 text-xl flex items-center justify-center shadow">
                     <span role="img" aria-label="supportive hands">🤝</span>
                   </div>
                   <h3 className="font-medium text-xs sm:text-sm">Supportive Space</h3>
@@ -144,10 +144,10 @@ export function Disclaimer({ onBack, onAccept }: DisclaimerProps) {
               <TooltipTrigger asChild>
                 <motion.div 
                   className="bg-info/10 rounded-xl p-4 sm:p-6 cursor-pointer hover:bg-info/15 transition-colors shadow-md"
-                  whileHover={{ scale: 1.03, y: -5 }}
+                  whileHover={{ scale: 1.02, y: -3 }}
                   whileTap={{ scale: 0.98 }}
                 >
-                  <div className="w-12 h-12 mx-auto mb-2 sm:mb-3 rounded-full bg-white/70 text-xl flex items-center justify-center">
+                    <div className="w-12 h-12 mx-auto mb-2 sm:mb-3 rounded-full bg-white/70 text-xl flex items-center justify-center shadow">
                     <span role="img" aria-label="chat bubble">💬</span>
                   </div>
                   <h3 className="font-medium text-xs sm:text-sm">Experience Only</h3>
@@ -171,8 +171,8 @@ export function Disclaimer({ onBack, onAccept }: DisclaimerProps) {
             <Tooltip>
               <TooltipTrigger asChild>
                 <motion.div 
-                  className="flex items-center gap-1.5 cursor-pointer bg-white border border-primary/20 text-slate-700 px-3.5 py-1.5 rounded-full shadow-sm"
-                  whileHover={{ scale: 1.03 }}
+                  className="flex items-center gap-1.5 cursor-pointer bg-white/90 border border-primary/20 text-slate-700 px-3.5 py-1.5 rounded-full shadow-sm"
+                  whileHover={{ scale: 1.02 }}
                 >
                   <Users size={12} className="text-primary" />
                   <span>Be Respectful</span>
@@ -186,8 +186,8 @@ export function Disclaimer({ onBack, onAccept }: DisclaimerProps) {
             <Tooltip>
               <TooltipTrigger asChild>
                 <motion.div 
-                  className="flex items-center gap-1.5 cursor-pointer bg-white border border-primary/20 text-slate-700 px-3.5 py-1.5 rounded-full shadow-sm"
-                  whileHover={{ scale: 1.03 }}
+                  className="flex items-center gap-1.5 cursor-pointer bg-white/90 border border-primary/20 text-slate-700 px-3.5 py-1.5 rounded-full shadow-sm"
+                  whileHover={{ scale: 1.02 }}
                 >
                   <Clock size={12} className="text-primary" />
                   <span>Share Waiting</span>
@@ -201,8 +201,8 @@ export function Disclaimer({ onBack, onAccept }: DisclaimerProps) {
             <Tooltip>
               <TooltipTrigger asChild>
                 <motion.div 
-                  className="flex items-center gap-1.5 cursor-pointer bg-white border border-primary/20 text-slate-700 px-3.5 py-1.5 rounded-full shadow-sm"
-                  whileHover={{ scale: 1.03 }}
+                  className="flex items-center gap-1.5 cursor-pointer bg-white/90 border border-primary/20 text-slate-700 px-3.5 py-1.5 rounded-full shadow-sm"
+                  whileHover={{ scale: 1.02 }}
                 >
                   <AlertTriangle size={12} className="text-primary" />
                   <span>No Medical Advice</span>
@@ -248,7 +248,7 @@ export function Disclaimer({ onBack, onAccept }: DisclaimerProps) {
                 size="touch"
                 onClick={onAccept}
                 disabled={!accepted}
-                className="w-full max-w-sm shadow-md hover:shadow-lg focus:ring-2 focus:ring-primary/20"
+                className="w-full max-w-sm rounded-2xl text-base font-semibold shadow-[0_15px_35px_rgba(79,70,229,0.25)] hover:shadow-lg focus:ring-2 focus:ring-primary/20"
               >
                 Continue
               </Button>
