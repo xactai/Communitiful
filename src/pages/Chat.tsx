@@ -601,17 +601,17 @@ export function Chat({ onOpenSettings, onOpenRelaxation }: ChatProps) {
           <span>{onlineUsers.length} {t('chat.online')}</span>
         </div>
         
-        <div className="flex items-center gap-1 sm:gap-2 flex-shrink-0">
-          <Button variant="ghost" size="icon" className="h-8 w-8 sm:h-10 sm:w-10" onClick={onOpenRelaxation}>
+        <div className="flex items-center gap-1 sm:gap-2 flex-shrink-0 ml-4 sm:ml-6">
+          <Button variant="outline" size="icon" className="h-8 w-8 sm:h-10 sm:w-10 border-2 border-primary/30 hover:border-primary/50 hover:bg-primary/5" onClick={onOpenRelaxation}>
             🧘
           </Button>
-          <Button variant="ghost" size="icon" className="h-8 w-8 sm:h-10 sm:w-10" onClick={onOpenSettings}>
+          <Button variant="outline" size="icon" className="h-8 w-8 sm:h-10 sm:w-10 border-2 border-primary/30 hover:border-primary/50 hover:bg-primary/5" onClick={onOpenSettings}>
             <Settings size={16} />
           </Button>
           <Button 
-            variant="ghost" 
+            variant="outline" 
             size="icon" 
-            className="h-8 w-8 sm:h-10 sm:w-10" 
+            className="h-8 w-8 sm:h-10 sm:w-10 border-2 border-primary/30 hover:border-primary/50 hover:bg-primary/5" 
             onClick={() => { setFeedbackStage('form'); setShowExitFeedback(true); }}
             aria-label="Leave chat"
             title="Leave chat"
