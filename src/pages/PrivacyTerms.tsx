@@ -2,12 +2,14 @@ import { PageContainer } from '@/components/AppLayout';
 import { Button } from '@/components/ui/button';
 import { motion } from 'framer-motion';
 import { Lock, MapPin, Feather } from 'lucide-react';
+import { useTranslation } from '@/hooks/useTranslation';
 
 interface PrivacyTermsProps {
   onBack: () => void;
 }
 
 export function PrivacyTerms({ onBack }: PrivacyTermsProps) {
+  const { t } = useTranslation();
   return (
     <PageContainer className="bg-gradient-to-b from-white via-slate-50 to-white relative overflow-hidden">
       <div className="absolute inset-0 pointer-events-none">
@@ -31,14 +33,13 @@ export function PrivacyTerms({ onBack }: PrivacyTermsProps) {
       >
         <div className="space-y-3">
           <p className="text-xs uppercase tracking-[0.4em] text-primary font-semibold">
-            Privacy & Terms
+            {t('privacyTerms.title')}
           </p>
           <h1 className="text-2xl md:text-3xl font-semibold text-slate-900">
-            Minimal data. Maximum care. Built for calming wait times.
+            {t('privacyTerms.heading')}
           </h1>
           <p className="text-sm md:text-base text-muted-foreground max-w-3xl mx-auto">
-            We collect only what is needed to keep the chat safe, relevant, and anchored to your hospital visit.
-            Every element — from avatars to location checks — is opt-in, short-lived, and transparent.
+            {t('privacyTerms.description')}
           </p>
         </div>
 
@@ -46,18 +47,18 @@ export function PrivacyTerms({ onBack }: PrivacyTermsProps) {
           {[
             {
               icon: Lock,
-              title: 'No Personal IDs',
-              body: 'Nicknames and avatars are randomly assigned. We never display or store personal identifiers.'
+              title: t('privacyTerms.card1Title'),
+              body: t('privacyTerms.card1Body')
             },
             {
               icon: MapPin,
-              title: 'Purposeful Location',
-              body: 'Location is used one time to confirm you are within the hospital radius and is then discarded.'
+              title: t('privacyTerms.card2Title'),
+              body: t('privacyTerms.card2Body')
             },
             {
               icon: Feather,
-              title: 'Gentle Conduct',
-              body: 'All messages must stay supportive and on-topic. Moderation blocks spam, advice, or harmful content.'
+              title: t('privacyTerms.card3Title'),
+              body: t('privacyTerms.card3Body')
             }
           ].map((card, idx) => (
             <motion.div
@@ -84,13 +85,13 @@ export function PrivacyTerms({ onBack }: PrivacyTermsProps) {
           transition={{ delay: 0.5, duration: 0.35 }}
           className="space-y-2 text-xs md:text-sm text-muted-foreground"
         >
-          <p>We never share data with advertisers or third parties.</p>
-          <p>All conversations are moderated for safety and relevance.</p>
-          <p>For emergencies or medical advice, please reach hospital staff immediately.</p>
+          <p>{t('privacyTerms.note1')}</p>
+          <p>{t('privacyTerms.note2')}</p>
+          <p>{t('privacyTerms.note3')}</p>
         </motion.div>
 
         <Button variant="ghost" className="mx-auto" onClick={onBack}>
-          Back
+          {t('privacyTerms.back')}
         </Button>
       </motion.div>
     </PageContainer>

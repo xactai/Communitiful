@@ -5,6 +5,7 @@ import { PageContainer } from '@/components/AppLayout';
 import { ArrowLeft, Smartphone, ShieldCheck } from 'lucide-react';
 import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { findCompanionByMobile } from '@/lib/supabaseClient';
+import { useTranslation } from '@/hooks/useTranslation';
 
 const COUNTRY_CODES = [
   { code: '+91', country: 'India', flag: '🇮🇳' },
@@ -21,6 +22,7 @@ interface CompanionAuthProps {
 }
 
 export function CompanionAuth({ onBack, onSuccess }: CompanionAuthProps) {
+  const { t } = useTranslation();
   const [countryCode, setCountryCode] = useState('+91');
   const [mobile, setMobile] = useState('');
   const [error, setError] = useState('');
@@ -35,7 +37,7 @@ export function CompanionAuth({ onBack, onSuccess }: CompanionAuthProps) {
     setError('');
     const cleaned = mobile.replace(/\D/g, '');
     if (cleaned.length !== 10) {
-      setError('Please enter a valid 10-digit phone number');
+      setError(t('companionAuth.errorInvalid'));
       return;
     }
 
@@ -45,12 +47,12 @@ export function CompanionAuth({ onBack, onSuccess }: CompanionAuthProps) {
     setLoading(false);
 
     if (error) {
-      setError('Error contacting server. Please try again.');
+      setError(t('companionAuth.errorServer'));
       return;
     }
 
     if (!data) {
-      setError('No registration found for this number. Please contact hospital staff to register.');
+      setError(t('companionAuth.errorNotFound'));
       return;
     }
 
@@ -70,8 +72,8 @@ export function CompanionAuth({ onBack, onSuccess }: CompanionAuthProps) {
             <ArrowLeft size={20} />
           </Button>
           <div>
-            <p className="text-xs uppercase tracking-[0.3em] text-primary">Step 1</p>
-            <h1 className="text-xl font-semibold">Companion Verification</h1>
+            <p className="text-xs uppercase tracking-[0.3em] text-primary">{t('companionAuth.step')}</p>
+            <h1 className="text-xl font-semibold">{t('companionAuth.title')}</h1>
           </div>
         </div>
 
@@ -81,15 +83,15 @@ export function CompanionAuth({ onBack, onSuccess }: CompanionAuthProps) {
               <Smartphone size={28} className="text-primary" />
             </div>
             <div>
-              <h2 className="text-lg font-semibold text-slate-900">Enter Your Registered Number</h2>
+              <h2 className="text-lg font-semibold text-slate-900">{t('companionAuth.enterNumber')}</h2>
               <p className="text-sm text-muted-foreground max-w-xs mx-auto">
-                We only use this to confirm your hospital registration. No marketing calls, ever.
+                {t('companionAuth.privacyNote')}
               </p>
             </div>
           </div>
 
           <div className="space-y-4">
-            <label className="text-xs uppercase tracking-[0.3em] text-muted-foreground">Mobile Number</label>
+            <label className="text-xs uppercase tracking-[0.3em] text-muted-foreground">{t('companionAuth.mobileNumber')}</label>
             <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
               <Select value={countryCode} onValueChange={setCountryCode}>
                 <SelectTrigger className="sm:max-w-[140px] bg-white/90">
@@ -136,7 +138,7 @@ export function CompanionAuth({ onBack, onSuccess }: CompanionAuthProps) {
 
             <div className="flex items-center gap-2 text-xs text-muted-foreground bg-muted/20 rounded-xl px-3 py-2">
               <ShieldCheck size={14} className="text-primary" />
-              Messages stay anonymous. Only verified companions can join.
+              {t('companionAuth.anonymousNote')}
             </div>
           </div>
 
@@ -147,7 +149,7 @@ export function CompanionAuth({ onBack, onSuccess }: CompanionAuthProps) {
             disabled={loading || mobile.replace(/\D/g, '').length !== 10}
             className="w-full rounded-2xl text-base font-semibold shadow-[0_15px_35px_rgba(79,70,229,0.25)]"
           >
-            {loading ? 'Checking...' : 'Continue'}
+            {loading ? t('companionAuth.checking') : t('companionAuth.continue')}
           </Button>
         </div>
       </div>

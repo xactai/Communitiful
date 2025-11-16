@@ -12,12 +12,14 @@ import {
   Sparkles,
   Palette
 } from 'lucide-react';
+import { useTranslation } from '@/hooks/useTranslation';
 
 interface RelaxationProps {
   onBack: () => void;
 }
 
 export function Relaxation({ onBack }: RelaxationProps) {
+  const { t } = useTranslation();
   // Game selection
   const [selectedGame, setSelectedGame] = useState<
     'breathing' | 'grounding' | 'memory' | 'gratitude' | 'color'
@@ -27,11 +29,11 @@ export function Relaxation({ onBack }: RelaxationProps) {
     'breathing' | 'grounding' | 'memory' | 'gratitude' | 'color',
     { title: string }
   > = {
-    breathing: { title: 'Breathing' },
-    grounding: { title: 'Grounding' },
-    memory: { title: 'Memory' },
-    gratitude: { title: 'Gratitude' },
-    color: { title: 'Color Focus' },
+    breathing: { title: t('relaxation.breathingExercise') },
+    grounding: { title: t('relaxation.grounding') },
+    memory: { title: t('relaxation.memoryMatch') },
+    gratitude: { title: t('relaxation.gratitude') },
+    color: { title: t('relaxation.colorFocus') },
   };
 
   const [breathingActive, setBreathingActive] = useState(false);
@@ -109,11 +111,11 @@ export function Relaxation({ onBack }: RelaxationProps) {
   const getInstruction = () => {
     switch (breathingPhase) {
       case 'inhale':
-        return 'Breathe in slowly...';
+        return t('relaxation.breatheIn');
       case 'hold':
-        return 'Hold your breath...';
+        return t('relaxation.hold');
       case 'exhale':
-        return 'Breathe out gently...';
+        return t('relaxation.breatheOut');
     }
   };
 
@@ -207,10 +209,10 @@ export function Relaxation({ onBack }: RelaxationProps) {
 
   // Gratitude prompts
   const gratitudePrompts = [
-    "Name one person you're grateful for today.",
-    "Recall a small kindness you noticed recently.",
-    "What's one thing in this room that brings comfort?",
-    "Think of a strength you've shown this week.",
+    t('relaxation.gratitudePrompt1'),
+    t('relaxation.gratitudePrompt2'),
+    t('relaxation.gratitudePrompt3'),
+    t('relaxation.gratitudePrompt4'),
   ];
   const [gratitudeIndex, setGratitudeIndex] = useState(0);
   const nextGratitude = () =>
@@ -228,13 +230,13 @@ export function Relaxation({ onBack }: RelaxationProps) {
         <Button variant="ghost" size="icon" onClick={onBack}>
           <ArrowLeft size={20} />
         </Button>
-        <h1 className="text-xl font-semibold">Relaxation Corner</h1>
+        <h1 className="text-xl font-semibold">{t('relaxation.title')}</h1>
       </div>
 
       <div className="space-y-6">
         {/* Game selector grid (minimal) */}
         <div>
-          <h2 className="text-base font-medium mb-3">Choose an activity</h2>
+          <h2 className="text-base font-medium mb-3">{t('relaxation.selectGame')}</h2>
           <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
             <button
               className={`bg-surface border rounded-lg p-3 text-left hover:bg-primary-soft/30 transition ${
@@ -306,7 +308,7 @@ export function Relaxation({ onBack }: RelaxationProps) {
         {/* Breathing Exercise */}
         {selectedGame === 'breathing' && (
         <div className="bg-primary-soft/30 rounded-lg p-6 text-center">
-          <h2 className="text-lg font-medium mb-4">Breathing Exercise</h2>
+          <h2 className="text-lg font-medium mb-4">{t('relaxation.breathingExercise')}</h2>
           
           {/* Breathing Circle */}
           <div className="relative w-24 h-24 sm:w-32 sm:h-32 mx-auto mb-6">
@@ -333,7 +335,7 @@ export function Relaxation({ onBack }: RelaxationProps) {
           <div className="space-y-2 mb-4">
             <p className="font-medium">{getInstruction()}</p>
             <p className="text-sm text-muted-foreground capitalize">
-              {breathingPhase} phase
+              {breathingPhase} {t('relaxation.phase')}
             </p>
           </div>
 
@@ -342,25 +344,25 @@ export function Relaxation({ onBack }: RelaxationProps) {
             {!breathingActive ? (
               <Button variant="default" size="lg" onClick={startBreathing} className="w-full sm:w-auto">
                 <Play size={16} />
-                Start
+                {t('relaxation.start')}
               </Button>
             ) : (
               <Button variant="secondary" size="lg" onClick={stopBreathing} className="w-full sm:w-auto">
                 <Pause size={16} />
-                Pause
+                {t('relaxation.pause')}
               </Button>
             )}
             
             <Button variant="ghost" size="lg" onClick={resetBreathing} className="w-full sm:w-auto">
               <RotateCcw size={16} />
-              Reset
+              {t('relaxation.reset')}
             </Button>
           </div>
 
           {/* Timer */}
           {totalTime > 0 && (
             <p className="text-sm text-muted-foreground">
-              Total time: {formatTime(totalTime)}
+              {t('relaxation.totalTime')} {formatTime(totalTime)}
             </p>
           )}
 
@@ -369,7 +371,7 @@ export function Relaxation({ onBack }: RelaxationProps) {
             <div className="mt-4 p-3 bg-success/10 border border-success/20 rounded-lg">
               <div className="text-success mb-1">🎉</div>
               <p className="text-sm text-success-foreground">
-                Great job! You've completed a full minute of breathing.
+                {t('relaxation.completionMessage')}
               </p>
             </div>
           )}
@@ -379,22 +381,22 @@ export function Relaxation({ onBack }: RelaxationProps) {
         {/* Grounding (interactive counter) */}
         {selectedGame === 'grounding' && (
           <div className="bg-surface border rounded-lg p-6 text-center">
-            <h2 className="text-lg font-medium mb-1">Grounding 5-4-3-2-1</h2>
+            <h2 className="text-lg font-medium mb-1">{t('relaxation.groundingTitle')}</h2>
             <p className="text-sm text-muted-foreground mb-4">
-              Tap to count. Progress resets after 1.
+              {t('relaxation.groundingDesc')}
             </p>
             <div className="flex items-center justify-center gap-6 mb-4">
               <div className="text-center">
-                <div className="text-xs text-muted-foreground mb-1">Current target</div>
+                <div className="text-xs text-muted-foreground mb-1">{t('relaxation.currentTarget')}</div>
                 <div className="text-2xl font-semibold">{groundingStep}</div>
               </div>
               <div className="text-center">
-                <div className="text-xs text-muted-foreground mb-1">Count</div>
+                <div className="text-xs text-muted-foreground mb-1">{t('relaxation.count')}</div>
                 <div className="text-2xl font-semibold">{groundingCount}</div>
               </div>
             </div>
             <Button variant="default" onClick={advanceGrounding}>
-              Tap
+              {t('relaxation.tap')}
             </Button>
           </div>
         )}
@@ -403,11 +405,11 @@ export function Relaxation({ onBack }: RelaxationProps) {
         {selectedGame === 'memory' && (
           <div className="bg-surface border rounded-lg p-6">
             <div className="flex items-center justify-between mb-3">
-              <h2 className="text-lg font-medium">Memory Match</h2>
-              <Button variant="ghost" size="sm" onClick={resetMemory}>Reset</Button>
+              <h2 className="text-lg font-medium">{t('relaxation.memoryMatch')}</h2>
+              <Button variant="ghost" size="sm" onClick={resetMemory}>{t('relaxation.resetGame')}</Button>
             </div>
             <p className="text-sm text-muted-foreground mb-4">
-              Find all pairs. Matched: {matches}/3
+              {t('relaxation.findPairs')} {matches}/3
             </p>
             <div className="grid grid-cols-3 gap-3">
               {deck.map((card, idx) => (
@@ -424,7 +426,7 @@ export function Relaxation({ onBack }: RelaxationProps) {
             </div>
             {matches === 3 && (
               <div className="mt-4 p-3 bg-success/10 border border-success/20 rounded-lg text-center">
-                🎉 Nicely done! All pairs found.
+                {t('relaxation.allPairsFound')}
               </div>
             )}
           </div>
@@ -433,10 +435,10 @@ export function Relaxation({ onBack }: RelaxationProps) {
         {/* Gratitude Prompt */}
         {selectedGame === 'gratitude' && (
           <div className="bg-primary-soft/20 border border-primary/10 rounded-lg p-6 text-center">
-            <h2 className="text-lg font-medium mb-2">Gratitude Moment</h2>
+            <h2 className="text-lg font-medium mb-2">{t('relaxation.gratitudeMoment')}</h2>
             <p className="text-sm mb-4">{gratitudePrompts[gratitudeIndex]}</p>
             <Button variant="default" onClick={nextGratitude}>
-              New Prompt
+              {t('relaxation.newPrompt')}
             </Button>
           </div>
         )}
@@ -444,9 +446,9 @@ export function Relaxation({ onBack }: RelaxationProps) {
         {/* Color Focus */}
         {selectedGame === 'color' && (
           <div className="bg-surface border rounded-lg p-6 text-center">
-            <h2 className="text-lg font-medium mb-3">Color Focus</h2>
+            <h2 className="text-lg font-medium mb-3">{t('relaxation.colorFocus')}</h2>
             <p className="text-sm text-muted-foreground mb-4">
-              Gaze softly at the color. Tap to shift hues.
+              {t('relaxation.gazeSoftly')}
             </p>
             <button
               onClick={cycleColor}
@@ -464,7 +466,7 @@ export function Relaxation({ onBack }: RelaxationProps) {
 
         {/* Back to chat */}
         <Button variant="outline" size="touch" onClick={onBack} className="w-full">
-          Return to Chat
+          {t('relaxation.returnToChat')}
         </Button>
       </div>
     </PageContainer>

@@ -12,6 +12,7 @@ import {
   DialogDescription, 
   DialogFooter 
 } from '@/components/ui/dialog';
+import { useTranslation } from '@/hooks/useTranslation';
 
 interface SettingsProps {
   onBack: () => void;
@@ -19,6 +20,7 @@ interface SettingsProps {
 }
 
 export function Settings({ onBack, onLeaveRoom }: SettingsProps) {
+  const { t } = useTranslation();
   const { settings, updateSettings, setCurrentStep, clearMessages } = useAppStore();
   const [showExitFeedback, setShowExitFeedback] = useState(false);
   const [feedbackStage, setFeedbackStage] = useState<'form' | 'thanks'>('form');
@@ -42,20 +44,20 @@ export function Settings({ onBack, onLeaveRoom }: SettingsProps) {
         <Button variant="ghost" size="icon" onClick={onBack}>
           <ArrowLeft size={20} />
         </Button>
-        <h1 className="text-xl font-semibold">Settings</h1>
+        <h1 className="text-xl font-semibold">{t('settings.title')}</h1>
       </div>
 
       <div className="space-y-6">
         {/* Accessibility Settings */}
         <div className="space-y-4">
-          <h2 className="font-medium">Accessibility</h2>
+          <h2 className="font-medium">{t('settings.accessibility')}</h2>
           
           <div className="space-y-4">
             <div className="flex items-start justify-between gap-4">
               <div className="flex-1 min-w-0">
-                <p className="font-medium">Larger Text</p>
+                <p className="font-medium">{t('settings.largerText')}</p>
                 <p className="text-sm text-muted-foreground">
-                  Increase text size for better readability
+                  {t('settings.largerTextDesc')}
                 </p>
               </div>
               <Switch
@@ -66,9 +68,9 @@ export function Settings({ onBack, onLeaveRoom }: SettingsProps) {
             
             <div className="flex items-start justify-between gap-4">
               <div className="flex-1 min-w-0">
-                <p className="font-medium">Reduce Motion</p>
+                <p className="font-medium">{t('settings.reduceMotion')}</p>
                 <p className="text-sm text-muted-foreground">
-                  Minimize animations and transitions
+                  {t('settings.reduceMotionDesc')}
                 </p>
               </div>
               <Switch
@@ -79,19 +81,19 @@ export function Settings({ onBack, onLeaveRoom }: SettingsProps) {
           </div>
         </div>
 
-        {/* Language (placeholder) */}
+        {/* Language */}
         <div className="space-y-3">
-          <h2 className="font-medium">Language</h2>
+          <h2 className="font-medium">{t('settings.language')}</h2>
           <div className="bg-muted/30 rounded-lg p-3">
             <p className="text-sm text-muted-foreground">
-              English (US) - More languages coming soon
+              {settings.language === 'en' ? 'English (US)' : 'हिंदी (Hindi)'}
             </p>
           </div>
         </div>
 
         {/* Information */}
         <div className="space-y-3">
-          <h2 className="font-medium">Information</h2>
+          <h2 className="font-medium">{t('settings.information')}</h2>
           
           <div className="space-y-2">
             <Button 
@@ -100,7 +102,7 @@ export function Settings({ onBack, onLeaveRoom }: SettingsProps) {
               onClick={() => setCurrentStep('privacy')}
             >
               <Shield size={16} className="mr-3" />
-              Privacy Policy
+              {t('settings.privacyPolicy')}
             </Button>
             
             <Button 
@@ -109,7 +111,7 @@ export function Settings({ onBack, onLeaveRoom }: SettingsProps) {
               onClick={() => setCurrentStep('privacy')}
             >
               <HelpCircle size={16} className="mr-3" />
-              Terms of Service
+              {t('settings.termsOfService')}
             </Button>
             
             <Button 
@@ -118,19 +120,18 @@ export function Settings({ onBack, onLeaveRoom }: SettingsProps) {
               onClick={() => setCurrentStep('about-details')}
             >
               <Heart size={16} className="mr-3" />
-              About Companions Anonymous
+              {t('settings.aboutCompanions')}
             </Button>
           </div>
         </div>
 
         {/* Danger Zone */}
         <div className="space-y-3">
-          <h2 className="font-medium text-destructive">Leave Room</h2>
+          <h2 className="font-medium text-destructive">{t('settings.leaveRoom')}</h2>
           
           <div className="bg-destructive/5 border border-destructive/20 rounded-lg p-4">
             <p className="text-sm text-muted-foreground mb-3">
-              Leaving will end your current session. You'll need to verify your 
-              location and go through setup again to rejoin.
+              {t('settings.leaveRoomDesc')}
             </p>
             
             <Button 
@@ -140,14 +141,14 @@ export function Settings({ onBack, onLeaveRoom }: SettingsProps) {
               className="w-full"
             >
               <LogOut size={16} />
-              Leave Chat Room
+              {t('settings.leaveChatRoom')}
             </Button>
           </div>
         </div>
 
         {/* Version info */}
         <div className="text-center text-xs text-muted-foreground pt-4 border-t">
-          Companions Anonymous v1.0.0
+          {t('settings.version')}
         </div>
       </div>
       
@@ -157,9 +158,9 @@ export function Settings({ onBack, onLeaveRoom }: SettingsProps) {
           {feedbackStage === 'form' ? (
             <>
               <DialogHeader>
-                <DialogTitle className="text-center">How was your chat experience?</DialogTitle>
+                <DialogTitle className="text-center">{t('settings.feedbackTitle')}</DialogTitle>
                 <DialogDescription className="text-center">
-                  Your feedback helps us make this space calmer and kinder.
+                  {t('settings.feedbackDesc')}
                 </DialogDescription>
               </DialogHeader>
               <div className="flex flex-col items-center gap-4">
@@ -180,7 +181,7 @@ export function Settings({ onBack, onLeaveRoom }: SettingsProps) {
                 <div className="w-full">
                   <textarea
                     className="w-full min-h-[80px] rounded-md border bg-background px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-primary/40"
-                    placeholder="Anything we could improve? (optional)"
+                    placeholder={t('settings.feedbackPlaceholder')}
                     value={feedbackText}
                     onChange={(e) => setFeedbackText(e.target.value)}
                   />
@@ -189,7 +190,7 @@ export function Settings({ onBack, onLeaveRoom }: SettingsProps) {
               <DialogFooter>
                 <div className="flex w-full gap-2">
                   <Button variant="outline" className="flex-1" onClick={() => setShowExitFeedback(false)}>
-                    Cancel
+                    {t('settings.cancel')}
                   </Button>
                   <Button
                     className="flex-1"
@@ -204,7 +205,7 @@ export function Settings({ onBack, onLeaveRoom }: SettingsProps) {
                       }, 1200);
                     }}
                   >
-                    Submit & Exit
+                    {t('settings.submitExit')}
                   </Button>
                 </div>
               </DialogFooter>
@@ -214,8 +215,8 @@ export function Settings({ onBack, onLeaveRoom }: SettingsProps) {
               <div className="flex items-center justify-center mb-3">
                 <CheckCircle2 className="text-success" size={28} />
               </div>
-              <div className="text-base font-medium mb-1">Thank you for your feedback!</div>
-              <div className="text-xs text-muted-foreground">Taking you back to the landing page…</div>
+              <div className="text-base font-medium mb-1">{t('settings.thankYou')}</div>
+              <div className="text-xs text-muted-foreground">{t('settings.redirecting')}</div>
             </div>
           )}
         </DialogContent>

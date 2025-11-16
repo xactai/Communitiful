@@ -1,9 +1,11 @@
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { PageContainer } from '@/components/AppLayout';
-import { Building2, HeartHandshake } from 'lucide-react';
+import { Building2, HeartHandshake, Languages } from 'lucide-react';
 import { Label } from '@/components/ui/label';
 import { motion } from 'framer-motion';
+import { useAppStore } from '@/stores/useAppStore';
+import { useTranslation } from '@/hooks/useTranslation';
 
 interface LandingProps {
   onStart: (mode: 'companion' | 'hospital') => void;
@@ -13,8 +15,34 @@ interface LandingProps {
 
 export function Landing({ onStart, onShowAbout, onShowPrivacy }: LandingProps) {
   const [hospitalMode, setHospitalMode] = useState(true);
+  const { t, language } = useTranslation();
+  const { updateSettings } = useAppStore();
+  
+  const toggleLanguage = () => {
+    updateSettings({ language: language === 'en' ? 'hi' : 'en' });
+  };
+  
   return (
     <PageContainer className="justify-center bg-landing-gradient">
+      {/* Language Toggle - Prominently placed at top */}
+      <motion.div
+        initial={{ opacity: 0, y: -10 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.3 }}
+        className="mb-4 flex justify-center"
+      >
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={toggleLanguage}
+          className="bg-white/90 backdrop-blur-sm border-primary/30 shadow-sm hover:bg-primary/5 hover:border-primary/50 transition-all"
+        >
+          <Languages size={16} className="mr-2" />
+          <span className="font-medium">{language === 'en' ? 'English' : 'हिंदी'}</span>
+          <span className="ml-2 text-xs opacity-70">⇄</span>
+        </Button>
+      </motion.div>
+      
       <motion.div 
         initial={{ opacity: 0, y: 16 }}
         animate={{ opacity: 1, y: 0 }}
@@ -52,10 +80,10 @@ export function Landing({ onStart, onShowAbout, onShowPrivacy }: LandingProps) {
             className="space-y-2"
           >
             <h1 className="text-3xl font-bold tracking-tight text-primary">
-              Companions Anonymous
+              {t('landing.title')}
             </h1>
             <p className="text-lg text-muted-foreground max-w-sm mx-auto">
-            For every companion who waits — you’re not alone.”
+              {t('landing.subtitle')}
             </p>
           </motion.div>
         </div>
@@ -76,8 +104,8 @@ export function Landing({ onStart, onShowAbout, onShowPrivacy }: LandingProps) {
               <span role="img" aria-label="shielded chat">🛡️</span>
             </motion.div>
             <div className="text-sm min-w-0">
-              <div className="font-medium">Anonymous and Private</div>
-              <div className="text-muted-foreground">No personal info required</div>
+              <div className="font-medium">{t('landing.feature1Title')}</div>
+              <div className="text-muted-foreground">{t('landing.feature1Desc')}</div>
             </div>
           </motion.div>
           
@@ -95,8 +123,8 @@ export function Landing({ onStart, onShowAbout, onShowPrivacy }: LandingProps) {
               <span role="img" aria-label="supportive circle">🤝</span>
             </motion.div>
             <div className="text-sm min-w-0">
-              <div className="font-medium">Connect with Others</div>
-              <div className="text-muted-foreground">Share experiences safely</div>
+              <div className="font-medium">{t('landing.feature2Title')}</div>
+              <div className="text-muted-foreground">{t('landing.feature2Desc')}</div>
             </div>
           </motion.div>
           
@@ -114,8 +142,8 @@ export function Landing({ onStart, onShowAbout, onShowPrivacy }: LandingProps) {
               <span className="text-lg">🧘</span>
             </motion.div>
             <div className="text-sm min-w-0">
-              <div className="font-medium">Calming Resources</div>
-              <div className="text-muted-foreground">Relaxation tools included</div>
+              <div className="font-medium">{t('landing.feature3Title')}</div>
+              <div className="text-muted-foreground">{t('landing.feature3Desc')}</div>
             </div>
           </motion.div>
         </div>
@@ -123,7 +151,7 @@ export function Landing({ onStart, onShowAbout, onShowPrivacy }: LandingProps) {
         {/* Mode toggle */}
         <div className="flex flex-col sm:flex-row items-center justify-center gap-2 sm:gap-3">
           <Label htmlFor="mode-toggle" className="text-sm flex items-center gap-1">
-            <HeartHandshake size={14} className="text-primary" /> Companion Mode
+            <HeartHandshake size={14} className="text-primary" /> {t('landing.companionMode')}
           </Label>
           
           <div 
@@ -149,7 +177,7 @@ export function Landing({ onStart, onShowAbout, onShowPrivacy }: LandingProps) {
           </div>
           
           <Label htmlFor="mode-toggle" className="text-sm flex items-center gap-1">
-            <Building2 size={14} /> Hospital Mode
+            <Building2 size={14} /> {t('landing.hospitalMode')}
           </Label>
         </div>
 
@@ -169,7 +197,7 @@ export function Landing({ onStart, onShowAbout, onShowPrivacy }: LandingProps) {
                   onClick={() => onStart(hospitalMode ? 'hospital' : 'companion')}
                   className="w-full max-w-xs bg-primary hover:bg-primary/90 shadow-md"
                 >
-                  Get Started
+                  {t('landing.getStarted')}
                 </Button>
               </motion.div>
             </div>
@@ -180,7 +208,7 @@ export function Landing({ onStart, onShowAbout, onShowPrivacy }: LandingProps) {
               className="text-primary hover:underline"
               onClick={onShowAbout}
             >
-              What is this?
+              {t('landing.whatIsThis')}
             </button>
             
             <div className="text-muted-foreground">·</div>
@@ -189,13 +217,13 @@ export function Landing({ onStart, onShowAbout, onShowPrivacy }: LandingProps) {
               className="text-primary hover:underline"
               onClick={onShowPrivacy}
             >
-              Privacy & Terms
+              {t('landing.privacyTerms')}
             </button>
           </div>
         </div>
       </motion.div>
       <div className="mt-6 text-center text-xs text-muted-foreground">
-        Designed for calm, connection, and compassionate waiting.
+        {t('landing.tagline')}
       </div>
     </PageContainer>
   );

@@ -3,12 +3,14 @@ import { PageContainer } from '@/components/AppLayout';
 import { motion } from 'framer-motion';
 import { Radar, CheckCircle2, MapPin } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { useTranslation } from '@/hooks/useTranslation';
 
 interface LocationScanProps {
   onComplete: () => void;
 }
 
 export function LocationScan({ onComplete }: LocationScanProps) {
+  const { t } = useTranslation();
   const [phase, setPhase] = useState<'scanning' | 'passed'>('scanning');
 
   useEffect(() => {
@@ -38,10 +40,10 @@ export function LocationScan({ onComplete }: LocationScanProps) {
 
       <div className="relative max-w-md mx-auto mt-20 px-6 text-center space-y-8">
         <div className="space-y-2">
-          <p className="text-xs uppercase tracking-[0.35em] text-primary">Access Check</p>
-          <h1 className="text-2xl font-semibold text-slate-900">Verifying On-site Presence</h1>
+          <p className="text-xs uppercase tracking-[0.35em] text-primary">{t('locationScan.accessCheck')}</p>
+          <h1 className="text-2xl font-semibold text-slate-900">{t('locationScan.verifying')}</h1>
           <p className="text-sm text-muted-foreground">
-            Access is limited to companions inside partner hospital premises.
+            {t('locationScan.limitedAccess')}
           </p>
         </div>
 
@@ -69,7 +71,7 @@ export function LocationScan({ onComplete }: LocationScanProps) {
                   ))}
                 </div>
               </div>
-              <p className="text-sm text-muted-foreground">Scanning location…</p>
+              <p className="text-sm text-muted-foreground">{t('locationScan.scanning')}</p>
             </div>
           ) : (
             <motion.div
@@ -80,22 +82,22 @@ export function LocationScan({ onComplete }: LocationScanProps) {
               <div className="mx-auto w-16 h-16 rounded-full bg-emerald-100 text-emerald-700 flex items-center justify-center">
                 <CheckCircle2 size={28} />
               </div>
-              <h2 className="text-lg font-semibold text-emerald-700">Location check passed</h2>
-              <p className="text-sm text-muted-foreground">You’re within hospital premises.</p>
+              <h2 className="text-lg font-semibold text-emerald-700">{t('locationScan.passed')}</h2>
+              <p className="text-sm text-muted-foreground">{t('locationScan.withinPremises')}</p>
               <Button variant="calm" size="touch" className="mt-2" onClick={onComplete}>
-                Continue
+                {t('locationScan.continue')}
               </Button>
             </motion.div>
           )}
         </div>
 
         <p className="text-xs text-muted-foreground">
-          We never store your precise location. This one-time check is used only for access.
+          {t('locationScan.privacyNote')}
         </p>
 
         {/* Maps credit */}
         <div className="flex items-center justify-center gap-2 pt-2">
-          <span className="text-[10px] uppercase tracking-[0.25em] text-muted-foreground">Powered by</span>
+          <span className="text-[10px] uppercase tracking-[0.25em] text-muted-foreground">{t('locationScan.poweredBy')}</span>
           <div className="inline-flex items-center gap-1.5 px-2 py-1 rounded-full border border-muted bg-white/70 backdrop-blur-sm">
             <MapPin size={12} className="text-[#34A853]" />
             <span className="text-xs font-medium text-slate-700">Google Maps</span>

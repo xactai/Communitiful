@@ -2,6 +2,7 @@ import { Button } from '@/components/ui/button';
 import { PageContainer } from '@/components/AppLayout';
 import { AVATARS } from '@/lib/types';
 import { Sparkles } from 'lucide-react';
+import { useTranslation } from '@/hooks/useTranslation';
 
 interface AvatarDisplayProps {
   avatarId: string;
@@ -10,6 +11,7 @@ interface AvatarDisplayProps {
 }
 
 export function AvatarDisplay({ avatarId, nickname, onContinue }: AvatarDisplayProps) {
+  const { t } = useTranslation();
   const avatar = AVATARS.find(a => a.id === avatarId);
 
   return (
@@ -17,11 +19,11 @@ export function AvatarDisplay({ avatarId, nickname, onContinue }: AvatarDisplayP
       <div className="flex flex-col items-center justify-center space-y-8 text-center py-8">
         {/* Header */}
         <div className="space-y-2">
-          <p className="text-xs uppercase tracking-[0.3em] text-primary">Step 3</p>
+          <p className="text-xs uppercase tracking-[0.3em] text-primary">{t('avatarDisplay.step')}</p>
           <Sparkles size={24} className="text-primary mx-auto mb-2" />
-          <h1 className="text-2xl font-semibold">Your Anonymous Identity</h1>
+          <h1 className="text-2xl font-semibold">{t('avatarDisplay.title')}</h1>
           <p className="text-muted-foreground text-sm">
-            This is how you'll appear to others in the chat
+            {t('avatarDisplay.subtitle')}
           </p>
         </div>
 
@@ -33,15 +35,14 @@ export function AvatarDisplay({ avatarId, nickname, onContinue }: AvatarDisplayP
           
           <div className="space-y-1">
             <h2 className="text-xl font-semibold">{nickname}</h2>
-            <p className="text-sm text-muted-foreground">{avatar?.name || 'Anonymous User'}</p>
+            <p className="text-sm text-muted-foreground">{avatar?.name || t('avatarDisplay.anonymousUser')}</p>
           </div>
         </div>
 
         {/* Information */}
         <div className="bg-muted/30 rounded-lg p-4 max-w-sm">
           <p className="text-sm text-muted-foreground leading-relaxed">
-            Your avatar and nickname have been randomly assigned to protect your privacy. 
-            These cannot be changed once you enter the chat.
+            {t('avatarDisplay.info')}
           </p>
         </div>
 
@@ -52,7 +53,7 @@ export function AvatarDisplay({ avatarId, nickname, onContinue }: AvatarDisplayP
           onClick={onContinue}
           className="w-full max-w-sm"
         >
-          Enter Chat Room
+          {t('avatarDisplay.enterChat')}
         </Button>
       </div>
     </PageContainer>

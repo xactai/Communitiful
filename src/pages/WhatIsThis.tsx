@@ -2,31 +2,33 @@ import { PageContainer } from '@/components/AppLayout';
 import { Button } from '@/components/ui/button';
 import { motion } from 'framer-motion';
 import { MessageCircleHeart, ShieldCheck, Sparkles } from 'lucide-react';
+import { useTranslation } from '@/hooks/useTranslation';
 
 interface WhatIsThisProps {
   onBack: () => void;
   onStart: () => void;
 }
 
-const featureCards = [
-  {
-    icon: ShieldCheck,
-    title: 'Anonymous Sanctuary',
-    description: 'Every nickname and avatar is randomized, keeping your identity private while you share feelings openly.'
-  },
-  {
-    icon: MessageCircleHeart,
-    title: 'Supportive Companions',
-    description: 'A moderated chat where every message is screened for warmth, empathy, and hospital-waiting relevance.'
-  },
-  {
-    icon: Sparkles,
-    title: 'Calming Rituals',
-    description: 'In-app breathing guides and grounding prompts help you stay steady while you wait.'
-  }
-];
-
 export function WhatIsThis({ onBack, onStart }: WhatIsThisProps) {
+  const { t } = useTranslation();
+  
+  const featureCards = [
+    {
+      icon: ShieldCheck,
+      title: t('whatIsThis.feature1Title'),
+      description: t('whatIsThis.feature1Desc')
+    },
+    {
+      icon: MessageCircleHeart,
+      title: t('whatIsThis.feature2Title'),
+      description: t('whatIsThis.feature2Desc')
+    },
+    {
+      icon: Sparkles,
+      title: t('whatIsThis.feature3Title'),
+      description: t('whatIsThis.feature3Desc')
+    }
+  ];
   return (
     <PageContainer className="bg-gradient-to-b from-[#eef2ff] via-white to-white relative overflow-hidden">
       <motion.div
@@ -59,12 +61,10 @@ export function WhatIsThis({ onBack, onStart }: WhatIsThisProps) {
             Companions Anonymous
           </p>
           <h1 className="text-3xl md:text-4xl font-bold text-slate-900 leading-snug">
-            A gentle, anonymous space for every caregiver waiting outside a ward.
+            {t('whatIsThis.title')}
           </h1>
           <p className="text-base md:text-lg text-muted-foreground max-w-3xl mx-auto">
-            When you tap “What is this?”, we want you to feel the calm you deserve.
-            Everything inside the app is designed to keep conversations private, compassionate,
-            and grounded in the reality of hospital waiting rooms.
+            {t('whatIsThis.description')}
           </p>
         </motion.div>
 
@@ -93,14 +93,14 @@ export function WhatIsThis({ onBack, onStart }: WhatIsThisProps) {
           className="space-y-3"
         >
           <p className="text-sm text-muted-foreground">
-            Moderated by real-time AI safety checks, geo-fenced to your hospital, and crafted with empathy-first design.
+            {t('whatIsThis.moderationNote')}
           </p>
           <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
             <Button variant="default" size="lg" className="w-full sm:w-auto" onClick={onStart}>
-              Enter Companion Space
+              {t('whatIsThis.enterSpace')}
             </Button>
             <Button variant="ghost" size="lg" className="w-full sm:w-auto" onClick={onBack}>
-              Back
+              {t('whatIsThis.back')}
             </Button>
           </div>
         </motion.div>

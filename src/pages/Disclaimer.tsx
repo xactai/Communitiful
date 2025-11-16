@@ -5,6 +5,7 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { PageContainer } from '@/components/AppLayout';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { ArrowLeft, AlertTriangle, Users, MessageCircle, Clock } from 'lucide-react';
+import { useTranslation } from '@/hooks/useTranslation';
 
 interface DisclaimerProps {
   onBack: () => void;
@@ -12,6 +13,7 @@ interface DisclaimerProps {
 }
 
 export function Disclaimer({ onBack, onAccept }: DisclaimerProps) {
+  const { t } = useTranslation();
   const [accepted, setAccepted] = useState(false);
 
   return (
@@ -41,7 +43,7 @@ export function Disclaimer({ onBack, onAccept }: DisclaimerProps) {
               animate={{ x: 0, opacity: 1 }}
               transition={{ delay: 0.05, duration: 0.3 }}
             >
-              Step 2
+              {t('disclaimer.step')}
             </motion.p>
             <motion.h1 
               className="text-xl font-semibold text-primary"
@@ -49,7 +51,7 @@ export function Disclaimer({ onBack, onAccept }: DisclaimerProps) {
               animate={{ x: 0, opacity: 1 }}
               transition={{ delay: 0.15, duration: 0.4 }}
             >
-              Important Information
+              {t('disclaimer.title')}
             </motion.h1>
           </div>
         </motion.div>
@@ -80,7 +82,7 @@ export function Disclaimer({ onBack, onAccept }: DisclaimerProps) {
               animate={{ y: 0, opacity: 1 }}
               transition={{ delay: 0.3, duration: 0.4 }}
             >
-              Welcome, Friend
+              {t('disclaimer.welcome')}
             </motion.h2>
             <motion.p 
               className="text-sm text-foreground leading-relaxed"
@@ -88,8 +90,12 @@ export function Disclaimer({ onBack, onAccept }: DisclaimerProps) {
               animate={{ y: 0, opacity: 1 }}
               transition={{ delay: 0.4, duration: 0.4 }}
             >
-              We're glad you're here. This space is created for companions like you.<br />
-              Share your journey and connect with others in similar situations.
+              {t('disclaimer.welcomeDesc').split('\n').map((line, i, arr) => (
+                <span key={i}>
+                  {line}
+                  {i < arr.length - 1 && <br />}
+                </span>
+              ))}
             </motion.p>
           </motion.div>
 
@@ -110,12 +116,12 @@ export function Disclaimer({ onBack, onAccept }: DisclaimerProps) {
                   <div className="w-12 h-12 mx-auto mb-2 sm:mb-3 rounded-full bg-white/70 text-xl flex items-center justify-center shadow">
                     <span role="img" aria-label="shielded chat">🛡️</span>
                   </div>
-                  <h3 className="font-medium text-xs sm:text-sm">Anonymous & Safe</h3>
+                  <h3 className="font-medium text-xs sm:text-sm">{t('disclaimer.anonymousSafe')}</h3>
                 </motion.div>
               </TooltipTrigger>
               <TooltipContent>
                 <p className="text-xs max-w-48">
-                  No personal information is shared. All messages are moderated for safety.
+                  {t('disclaimer.anonymousSafeDesc')}
                 </p>
               </TooltipContent>
             </Tooltip>
@@ -130,12 +136,12 @@ export function Disclaimer({ onBack, onAccept }: DisclaimerProps) {
                   <div className="w-12 h-12 mx-auto mb-2 sm:mb-3 rounded-full bg-white/70 text-xl flex items-center justify-center shadow">
                     <span role="img" aria-label="supportive hands">🤝</span>
                   </div>
-                  <h3 className="font-medium text-xs sm:text-sm">Supportive Space</h3>
+                  <h3 className="font-medium text-xs sm:text-sm">{t('disclaimer.supportiveSpace')}</h3>
                 </motion.div>
               </TooltipTrigger>
               <TooltipContent>
                 <p className="text-xs max-w-48">
-                  Share your waiting experience and offer emotional support to others.
+                  {t('disclaimer.supportiveSpaceDesc')}
                 </p>
               </TooltipContent>
             </Tooltip>
@@ -147,15 +153,15 @@ export function Disclaimer({ onBack, onAccept }: DisclaimerProps) {
                   whileHover={{ scale: 1.02, y: -3 }}
                   whileTap={{ scale: 0.98 }}
                 >
-                    <div className="w-12 h-12 mx-auto mb-2 sm:mb-3 rounded-full bg-white/70 text-xl flex items-center justify-center shadow">
+                  <div className="w-12 h-12 mx-auto mb-2 sm:mb-3 rounded-full bg-white/70 text-xl flex items-center justify-center shadow">
                     <span role="img" aria-label="chat bubble">💬</span>
                   </div>
-                  <h3 className="font-medium text-xs sm:text-sm">Experience Only</h3>
+                  <h3 className="font-medium text-xs sm:text-sm">{t('disclaimer.experienceOnly')}</h3>
                 </motion.div>
               </TooltipTrigger>
               <TooltipContent>
                 <p className="text-xs max-w-48">
-                  Focus on sharing experiences, not medical advice or personal details.
+                  {t('disclaimer.experienceOnlyDesc')}
                 </p>
               </TooltipContent>
             </Tooltip>
@@ -175,11 +181,11 @@ export function Disclaimer({ onBack, onAccept }: DisclaimerProps) {
                   whileHover={{ scale: 1.02 }}
                 >
                   <Users size={12} className="text-primary" />
-                  <span>Be Respectful</span>
+                  <span>{t('disclaimer.beRespectful')}</span>
                 </motion.div>
               </TooltipTrigger>
               <TooltipContent>
-                <p className="text-xs">Keep conversations supportive and kind</p>
+                <p className="text-xs">{t('disclaimer.beRespectfulDesc')}</p>
               </TooltipContent>
             </Tooltip>
 
@@ -190,11 +196,11 @@ export function Disclaimer({ onBack, onAccept }: DisclaimerProps) {
                   whileHover={{ scale: 1.02 }}
                 >
                   <Clock size={12} className="text-primary" />
-                  <span>Share Waiting</span>
+                  <span>{t('disclaimer.shareWaiting')}</span>
                 </motion.div>
               </TooltipTrigger>
               <TooltipContent>
-                <p className="text-xs">Talk about your waiting experience</p>
+                <p className="text-xs">{t('disclaimer.shareWaitingDesc')}</p>
               </TooltipContent>
             </Tooltip>
 
@@ -205,11 +211,11 @@ export function Disclaimer({ onBack, onAccept }: DisclaimerProps) {
                   whileHover={{ scale: 1.02 }}
                 >
                   <AlertTriangle size={12} className="text-primary" />
-                  <span>No Medical Advice</span>
+                  <span>{t('disclaimer.noMedicalAdvice')}</span>
                 </motion.div>
               </TooltipTrigger>
               <TooltipContent>
-                <p className="text-xs">Don't give or ask for medical advice</p>
+                <p className="text-xs">{t('disclaimer.noMedicalAdviceDesc')}</p>
               </TooltipContent>
             </Tooltip>
           </motion.div>
@@ -235,7 +241,7 @@ export function Disclaimer({ onBack, onAccept }: DisclaimerProps) {
                 htmlFor="accept"
                 className="text-sm leading-relaxed cursor-pointer max-w-sm text-left"
               >
-                I understand this is for sharing experiences only, not medical advice.
+                {t('disclaimer.acceptText')}
               </label>
             </motion.div>
 
@@ -250,7 +256,7 @@ export function Disclaimer({ onBack, onAccept }: DisclaimerProps) {
                 disabled={!accepted}
                 className="w-full max-w-sm rounded-2xl text-base font-semibold shadow-[0_15px_35px_rgba(79,70,229,0.25)] hover:shadow-lg focus:ring-2 focus:ring-primary/20"
               >
-                Continue
+                {t('disclaimer.continue')}
               </Button>
             </motion.div>
           </motion.div>

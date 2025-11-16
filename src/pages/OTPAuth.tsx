@@ -5,6 +5,7 @@ import { PageContainer } from '@/components/AppLayout';
 import { ArrowLeft, Smartphone } from 'lucide-react';
 import { OTP_TEST_CODE } from '@/lib/types';
 import { useAppStore } from '@/stores/useAppStore';
+import { useTranslation } from '@/hooks/useTranslation';
 
 interface OTPAuthProps {
   onBack: () => void;
@@ -12,6 +13,7 @@ interface OTPAuthProps {
 }
 
 export function OTPAuth({ onBack, onSuccess }: OTPAuthProps) {
+  const { t } = useTranslation();
   const { otpPhone, setOtpPhone } = useAppStore();
   const [step, setStep] = useState<'phone' | 'otp'>('phone');
   const [otpCode, setOtpCode] = useState('');
@@ -37,7 +39,7 @@ export function OTPAuth({ onBack, onSuccess }: OTPAuthProps) {
     const cleaned = otpPhone.replace(/\D/g, '');
     
     if (cleaned.length !== 10) {
-      setError('Please enter a valid 10-digit phone number');
+      setError(t('otpAuth.errorPhone'));
       return;
     }
     
@@ -91,7 +93,7 @@ export function OTPAuth({ onBack, onSuccess }: OTPAuthProps) {
       if (code === OTP_TEST_CODE) {
         onSuccess();
       } else {
-        setError('Invalid code. Please try again.');
+        setError(t('otpAuth.invalidCode'));
         setOtpCode('');
         otpInputRefs.current[0]?.focus();
       }
@@ -145,7 +147,7 @@ export function OTPAuth({ onBack, onSuccess }: OTPAuthProps) {
         <Button variant="ghost" size="icon" onClick={onBack}>
           <ArrowLeft size={20} />
         </Button>
-        <h1 className="text-xl font-semibold">Verification</h1>
+        <h1 className="text-xl font-semibold">{t('otpAuth.title')}</h1>
       </div>
 
       <div className="space-y-6">
@@ -160,9 +162,9 @@ export function OTPAuth({ onBack, onSuccess }: OTPAuthProps) {
           /* Phone input step */
           <div className="space-y-6">
             <div className="text-center space-y-2">
-              <h2 className="text-lg font-medium">Enter Your Phone Number</h2>
+              <h2 className="text-lg font-medium">{t('otpAuth.enterPhone')}</h2>
               <p className="text-sm text-muted-foreground max-w-sm mx-auto">
-                We verify to prevent outsiders. No account is created.
+                {t('otpAuth.verifyNote')}
               </p>
             </div>
 
@@ -193,7 +195,7 @@ export function OTPAuth({ onBack, onSuccess }: OTPAuthProps) {
                 disabled={loading || otpPhone.replace(/\D/g, '').length !== 10}
                 className="w-full"
               >
-                {loading ? 'Sending...' : 'Send Code'}
+                {loading ? t('otpAuth.sending') : t('otpAuth.sendCode')}
               </Button>
             </div>
           </div>
@@ -201,12 +203,12 @@ export function OTPAuth({ onBack, onSuccess }: OTPAuthProps) {
           /* OTP input step */
           <div className="space-y-6">
             <div className="text-center space-y-2">
-              <h2 className="text-lg font-medium">Enter Verification Code</h2>
+              <h2 className="text-lg font-medium">{t('otpAuth.enterCode')}</h2>
               <p className="text-sm text-muted-foreground">
-                Code sent to {otpPhone}
+                {t('otpAuth.codeSent')} {otpPhone}
               </p>
               <p className="text-xs text-muted-foreground">
-                For testing, use: {OTP_TEST_CODE}
+                {t('otpAuth.forTesting')} {OTP_TEST_CODE}
               </p>
             </div>
 
@@ -243,11 +245,11 @@ export function OTPAuth({ onBack, onSuccess }: OTPAuthProps) {
                     onClick={handleResend}
                     disabled={loading}
                   >
-                    Resend Code
+                    {t('otpAuth.resendCode')}
                   </Button>
                 ) : (
                   <p className="text-sm text-muted-foreground">
-                    Resend in {resendTimer}s
+                    {t('otpAuth.resendIn')} {resendTimer}s
                   </p>
                 )}
               </div>
@@ -259,7 +261,7 @@ export function OTPAuth({ onBack, onSuccess }: OTPAuthProps) {
                 onClick={() => setStep('phone')}
                 className="w-full"
               >
-                Change Phone Number
+                {t('otpAuth.changePhone')}
               </Button>
             </div>
           </div>

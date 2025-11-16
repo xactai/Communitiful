@@ -27,6 +27,7 @@ import {
   DialogDescription, 
   DialogFooter 
 } from '@/components/ui/dialog';
+import { useTranslation } from '@/hooks/useTranslation';
 
 interface ChatProps {
   onOpenSettings: () => void;
@@ -34,6 +35,7 @@ interface ChatProps {
 }
 
 export function Chat({ onOpenSettings, onOpenRelaxation }: ChatProps) {
+  const { t } = useTranslation();
   const { session, addMessage, updateMessage, incrementUserMessageCount, setCurrentStep, clearMessages } = useAppStore();
   const [sharedMessages, setSharedMessages] = useState<Message[]>([]);
   const [onlineUsers, setOnlineUsers] = useState<UserPresence[]>([]);
@@ -118,11 +120,13 @@ export function Chat({ onOpenSettings, onOpenRelaxation }: ChatProps) {
       
       // Show notification when user count changes
       if (previousCount > 0 && newCount > previousCount) {
-        setUserJoinMessage(`${newCount - previousCount} companion${newCount - previousCount > 1 ? 's' : ''} joined the chat`);
+        const count = newCount - previousCount;
+        setUserJoinMessage(`${count} ${count > 1 ? t('chat.companions') : t('chat.companion')} ${t('chat.userJoined')}`);
         setShowUserJoinNotification(true);
         setTimeout(() => setShowUserJoinNotification(false), 3000);
       } else if (previousCount > 0 && newCount < previousCount) {
-        setUserJoinMessage(`${previousCount - newCount} companion${previousCount - newCount > 1 ? 's' : ''} left the chat`);
+        const count = previousCount - newCount;
+        setUserJoinMessage(`${count} ${count > 1 ? t('chat.companions') : t('chat.companion')} ${t('chat.userLeft')}`);
         setShowUserJoinNotification(true);
         setTimeout(() => setShowUserJoinNotification(false), 3000);
       }
@@ -544,7 +548,7 @@ export function Chat({ onOpenSettings, onOpenRelaxation }: ChatProps) {
             >
               {formatTimeAgo(message.createdAt)}
             </span>
-            {isPending && <span className="italic">Checking...</span>}
+            {isPending && <span className="italic">{t('chat.checking')}</span>}
           </div>
         </div>
       </div>
@@ -577,7 +581,7 @@ export function Chat({ onOpenSettings, onOpenRelaxation }: ChatProps) {
       )}
       
       {/* Header */}
-      <div className="bg-surface border-b px-4 py-3 flex items-center justify-between">
+      <div className="bg-primary-soft/60 border-b px-4 py-3 flex items-center justify-between backdrop-blur-sm">
         <div className="flex items-center gap-2 sm:gap-3 min-w-0 flex-1">
           <div className="w-8 h-8 bg-primary-soft rounded-full flex items-center justify-center flex-shrink-0">
             {getAvatarEmoji(session.avatarId)}
@@ -594,7 +598,7 @@ export function Chat({ onOpenSettings, onOpenRelaxation }: ChatProps) {
         {/* Online Users Count */}
         <div className="flex items-center gap-2 text-xs font-semibold text-primary bg-primary/10 border border-primary/20 px-2 py-1 rounded-full shadow-sm">
           <Users size={12} className="text-primary" />
-          <span>{onlineUsers.length} online</span>
+          <span>{onlineUsers.length} {t('chat.online')}</span>
         </div>
         
         <div className="flex items-center gap-1 sm:gap-2 flex-shrink-0">
@@ -637,8 +641,7 @@ export function Chat({ onOpenSettings, onOpenRelaxation }: ChatProps) {
       <div className="bg-warning/10 border-b border-warning/20 px-4 py-2">
         <p className="text-xs text-center">
           <AlertTriangle size={12} className="inline mr-1" />
-          This chat is for emotional sharing and companionship, not medical advice.
-          In emergencies, please contact hospital staff.
+          {t('chat.disclaimer')}
         </p>
       </div>
 
@@ -646,8 +649,8 @@ export function Chat({ onOpenSettings, onOpenRelaxation }: ChatProps) {
       <div className="flex-1 overflow-y-auto px-4 py-4">
         {sharedMessages.length === 0 && (
           <div className="text-center text-muted-foreground mt-8">
-            <p className="mb-2 text-sm sm:text-base">Welcome to the waiting room chat!</p>
-            <p className="text-xs sm:text-sm">Share your thoughts and connect with others.</p>
+            <p className="mb-2 text-sm sm:text-base">{t('chat.welcomeMessage')}</p>
+            <p className="text-xs sm:text-sm">{t('chat.welcomeSubtext')}</p>
           </div>
         )}
         
@@ -661,8 +664,8 @@ export function Chat({ onOpenSettings, onOpenRelaxation }: ChatProps) {
                 <div className="w-4 h-4 text-sm">💭</div>
                 <span className="text-xs font-medium text-muted-foreground">
                   {typingUsers.length === 1 
-                    ? `${typingUsers[0].nick} is typing...`
-                    : `${typingUsers.length} companions are typing...`
+                    ? `${typingUsers[0].nick} ${t('chat.typing')}`
+                    : `${typingUsers.length} ${t('chat.typingMultiple')}`
                   }
                 </span>
               </div>
@@ -686,7 +689,7 @@ export function Chat({ onOpenSettings, onOpenRelaxation }: ChatProps) {
               value={inputText}
               onChange={handleInputChange}
               onKeyPress={handleKeyPress}
-              placeholder="Share with fellow companions..."
+              placeholder={t('chat.placeholder')}
               disabled={sending}
               maxLength={500}
               className="text-sm sm:text-base"
@@ -743,9 +746,9 @@ export function Chat({ onOpenSettings, onOpenRelaxation }: ChatProps) {
           {feedbackStage === 'form' ? (
             <>
               <DialogHeader>
-                <DialogTitle className="text-center">How was your chat experience?</DialogTitle>
+                <DialogTitle className="text-center">{t('settings.feedbackTitle')}</DialogTitle>
                 <DialogDescription className="text-center">
-                  Your feedback helps us make this space calmer and kinder.
+                  {t('settings.feedbackDesc')}
                 </DialogDescription>
               </DialogHeader>
               <div className="flex flex-col items-center gap-4">
@@ -766,7 +769,7 @@ export function Chat({ onOpenSettings, onOpenRelaxation }: ChatProps) {
                 <div className="w-full">
                   <textarea
                     className="w-full min-h-[80px] rounded-md border bg-background px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-primary/40"
-                    placeholder="Anything we could improve? (optional)"
+                    placeholder={t('settings.feedbackPlaceholder')}
                     value={feedbackText}
                     onChange={(e) => setFeedbackText(e.target.value)}
                   />
@@ -775,7 +778,7 @@ export function Chat({ onOpenSettings, onOpenRelaxation }: ChatProps) {
               <DialogFooter>
                 <div className="flex w-full gap-2">
                   <Button variant="outline" className="flex-1" onClick={() => setShowExitFeedback(false)}>
-                    Cancel
+                    {t('settings.cancel')}
                   </Button>
                   <Button
                     className="flex-1"
@@ -790,7 +793,7 @@ export function Chat({ onOpenSettings, onOpenRelaxation }: ChatProps) {
                       }, 1200);
                     }}
                   >
-                    Submit & Exit
+                    {t('settings.submitExit')}
                   </Button>
                 </div>
               </DialogFooter>
@@ -800,8 +803,8 @@ export function Chat({ onOpenSettings, onOpenRelaxation }: ChatProps) {
               <div className="flex items-center justify-center mb-3">
                 <CheckCircle2 className="text-success" size={28} />
               </div>
-              <div className="text-base font-medium mb-1">Thank you for your feedback!</div>
-              <div className="text-xs text-muted-foreground">Taking you back to the landing page…</div>
+              <div className="text-base font-medium mb-1">{t('settings.thankYou')}</div>
+              <div className="text-xs text-muted-foreground">{t('settings.redirecting')}</div>
             </div>
           )}
         </DialogContent>
