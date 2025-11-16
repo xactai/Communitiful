@@ -398,15 +398,17 @@ export function Chat({ onOpenSettings, onOpenRelaxation }: ChatProps) {
 
     return (
       <div key={message.id} className={`flex mb-4 ${isOwn ? 'justify-end' : 'justify-start'}`}>
-        <div className={`max-w-[85%] sm:max-w-xs ${
-          isOwn 
-            ? 'bg-primary text-primary-foreground' 
-            : isAgent
-            ? 'bg-accent border border-accent-foreground/10'
-            : isSystem || isCompanion
-            ? 'bg-info/10 border border-info/20'
-            : 'bg-surface border'
-        } rounded-lg p-3 ${isPending ? 'opacity-50' : ''} ${isTyping ? 'animate-pulse' : ''}`}>
+        <div
+          className={`max-w-[85%] sm:max-w-xs transition-transform ${
+            isOwn
+              ? 'bg-gradient-to-br from-primary to-primary/90 text-primary-foreground shadow-lg rounded-2xl'
+              : isAgent
+              ? 'bg-accent/80 border border-accent-foreground/10 rounded-2xl shadow'
+              : isSystem || isCompanion
+              ? 'bg-info/10 border border-info/20 rounded-2xl shadow'
+              : 'bg-white/90 border border-slate-200 rounded-2xl shadow-sm'
+          } p-3 ${isPending ? 'opacity-50' : ''} ${isTyping ? 'animate-pulse' : ''} hover:-translate-y-[1px]`}
+        >
           {/* Avatar and name for all messages */}
           <div className="flex items-center gap-2 mb-2">
             <div className="w-6 h-6 text-sm flex-shrink-0">
@@ -439,11 +441,19 @@ export function Chat({ onOpenSettings, onOpenRelaxation }: ChatProps) {
             </span>
           </div>
           
-          <p className="text-sm sm:text-sm leading-relaxed break-words">{message.text}</p>
+          <p className="text-sm sm:text-sm leading-relaxed break-words">
+            {message.text}
+          </p>
           
-          <div className="flex items-center justify-between mt-2 text-xs opacity-70">
-            <span>{formatTimeAgo(message.createdAt)}</span>
-            {isPending && <span>Checking...</span>}
+          <div className="flex items-center justify-between mt-2 text-[11px] opacity-80">
+            <span
+              className={`px-2 py-0.5 rounded-full ${
+                isOwn ? 'bg-white/20 text-primary-foreground' : 'bg-muted/60 text-muted-foreground'
+              }`}
+            >
+              {formatTimeAgo(message.createdAt)}
+            </span>
+            {isPending && <span className="italic">Checking...</span>}
           </div>
         </div>
       </div>

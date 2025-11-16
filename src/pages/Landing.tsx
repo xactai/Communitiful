@@ -31,6 +31,16 @@ export function Landing({ onStart, onShowAbout, onShowPrivacy }: LandingProps) {
             alt="Brand Logo" 
             className="rounded-lg shadow-md mx-auto w-36 h-auto"
           />
+          {/* Animated divider */}
+          <div className="relative mx-auto mt-4 h-1.5 max-w-xs rounded-full overflow-hidden bg-primary/10 border border-primary/20">
+            <motion.div
+              className="absolute inset-y-0 w-1/3 bg-primary/30"
+              initial={{ x: '-30%' }}
+              animate={{ x: ['-30%', '110%'] }}
+              transition={{ repeat: Infinity, duration: 3, ease: 'easeInOut' }}
+              style={{ filter: 'blur(1px)' }}
+            />
+          </div>
         </div>
 
         {/* Title */}
@@ -58,9 +68,13 @@ export function Landing({ onStart, onShowAbout, onShowPrivacy }: LandingProps) {
             transition={{ delay: 0.3, duration: 0.5 }}
             className="flex items-center gap-3 text-left"
           >
-            <div className="w-10 h-10 bg-primary-soft rounded-full flex items-center justify-center flex-shrink-0 text-lg">
+            <motion.div 
+              className="w-10 h-10 bg-primary-soft rounded-full flex items-center justify-center flex-shrink-0 text-lg"
+              whileHover={{ scale: 1.05 }}
+              transition={{ type: 'spring', stiffness: 240, damping: 16 }}
+            >
               <span role="img" aria-label="shielded chat">🛡️</span>
-            </div>
+            </motion.div>
             <div className="text-sm min-w-0">
               <div className="font-medium">Anonymous and Private</div>
               <div className="text-muted-foreground">No personal info required</div>
@@ -73,9 +87,13 @@ export function Landing({ onStart, onShowAbout, onShowPrivacy }: LandingProps) {
             transition={{ delay: 0.4, duration: 0.5 }}
             className="flex items-center gap-3 text-left"
           >
-            <div className="w-10 h-10 bg-primary-soft rounded-full flex items-center justify-center flex-shrink-0 text-lg">
+            <motion.div 
+              className="w-10 h-10 bg-primary-soft rounded-full flex items-center justify-center flex-shrink-0 text-lg"
+              whileHover={{ scale: 1.05 }}
+              transition={{ type: 'spring', stiffness: 240, damping: 16 }}
+            >
               <span role="img" aria-label="supportive circle">🤝</span>
-            </div>
+            </motion.div>
             <div className="text-sm min-w-0">
               <div className="font-medium">Connect with Others</div>
               <div className="text-muted-foreground">Share experiences safely</div>
@@ -88,9 +106,13 @@ export function Landing({ onStart, onShowAbout, onShowPrivacy }: LandingProps) {
             transition={{ delay: 0.5, duration: 0.5 }}
             className="flex items-center gap-3 text-left"
           >
-            <div className="w-10 h-10 bg-primary-soft rounded-full flex items-center justify-center flex-shrink-0">
+            <motion.div 
+              className="w-10 h-10 bg-primary-soft rounded-full flex items-center justify-center flex-shrink-0"
+              whileHover={{ scale: 1.05 }}
+              transition={{ type: 'spring', stiffness: 240, damping: 16 }}
+            >
               <span className="text-lg">🧘</span>
-            </div>
+            </motion.div>
             <div className="text-sm min-w-0">
               <div className="font-medium">Calming Resources</div>
               <div className="text-muted-foreground">Relaxation tools included</div>
@@ -166,6 +188,9 @@ export function Landing({ onStart, onShowAbout, onShowPrivacy }: LandingProps) {
           </div>
         </div>
       </motion.div>
+      <div className="mt-6 text-center text-xs text-muted-foreground">
+        Designed for calm, connection, and compassionate waiting.
+      </div>
     </PageContainer>
   );
 }

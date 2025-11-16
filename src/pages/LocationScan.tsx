@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { PageContainer } from '@/components/AppLayout';
 import { motion } from 'framer-motion';
-import { Radar, CheckCircle2 } from 'lucide-react';
+import { Radar, CheckCircle2, MapPin } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
 interface LocationScanProps {
@@ -92,6 +92,15 @@ export function LocationScan({ onComplete }: LocationScanProps) {
         <p className="text-xs text-muted-foreground">
           We never store your precise location. This one-time check is used only for access.
         </p>
+
+        {/* Maps credit */}
+        <div className="flex items-center justify-center gap-2 pt-2">
+          <span className="text-[10px] uppercase tracking-[0.25em] text-muted-foreground">Powered by</span>
+          <div className="inline-flex items-center gap-1.5 px-2 py-1 rounded-full border border-muted bg-white/70 backdrop-blur-sm">
+            <MapPin size={12} className="text-[#34A853]" />
+            <span className="text-xs font-medium text-slate-700">Google Maps</span>
+          </div>
+        </div>
       </div>
     </PageContainer>
   );
