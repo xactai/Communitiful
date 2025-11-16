@@ -36,6 +36,7 @@ export function Chat({ onOpenSettings, onOpenRelaxation }: ChatProps) {
   const [moderationMessage, setModerationMessage] = useState("Moderation Notice");
   const [moderationType, setModerationType] = useState<'block' | 'warn' | 'safety'>('warn');
   const [moderationSuggestions, setModerationSuggestions] = useState<string[]>([]);
+  const [showStickers, setShowStickers] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const [defaultMessagesLoaded, setDefaultMessagesLoaded] = useState(false);
   const lastUserMessageTimeRef = useRef<number>(Date.now());
@@ -215,6 +216,74 @@ export function Chat({ onOpenSettings, onOpenRelaxation }: ChatProps) {
   };
 
   // Auto-response functionality has been removed
+  // Sticker set (predefined, vision-aligned)
+  const stickers: { id: string; label: string; glyph: string }[] = [
+    { id: 'heart-support', label: 'Heart Support', glyph: '💙' },
+    { id: 'calm-breath', label: 'Calm Breath', glyph: '🌿' },
+    { id: 'hope-star', label: 'Hope Star', glyph: '⭐' },
+    { id: 'gentle-hug', label: 'Gentle Hug', glyph: '🤗' },
+    { id: 'peace-dove', label: 'Peace', glyph: '🕊️' },
+    { id: 'kind-hands', label: 'Kind Hands', glyph: '🫶' },
+    { id: 'soft-cloud', label: 'Soft Cloud', glyph: '☁️' },
+    { id: 'light-moon', label: 'Light Moon', glyph: '🌙' },
+    // Additional calming/supportive stickers
+    { id: 'warm-sunrise', label: 'Warm Sunrise', glyph: '🌅' },
+    { id: 'soothing-rainbow', label: 'Soothing Rainbow', glyph: '🌈' },
+    { id: 'comfort-tea', label: 'Comfort Tea', glyph: '🍵' },
+    { id: 'hydrate', label: 'Hydrate', glyph: '💧' },
+    { id: 'calm-candle', label: 'Calm Candle', glyph: '🕯️' },
+    { id: 'lotus', label: 'Lotus', glyph: '🪷' },
+    { id: 'sparkles', label: 'Little Wins', glyph: '✨' },
+    { id: 'blossom', label: 'Gentle Blossom', glyph: '🌸' },
+    { id: 'earbuds', label: 'Soft Music', glyph: '🎧' },
+    { id: 'book', label: 'Quiet Read', glyph: '📖' },
+    { id: 'folded-hands', label: 'Gratitude', glyph: '🙏' },
+    { id: 'smile', label: 'Soft Smile', glyph: '😊' },
+    { id: 'white-heart', label: 'Care', glyph: '🤍' },
+    { id: 'orange-heart', label: 'Warmth', glyph: '🧡' },
+    { id: 'sparkles-orbit', label: 'Hopeful Light', glyph: '💫' },
+    { id: 'hugging-hands', label: 'Support', glyph: '🫂' },
+    { id: 'meditation-man', label: 'Breathe (He)', glyph: '🧘‍♂️' },
+    { id: 'meditation-woman', label: 'Breathe (She)', glyph: '🧘‍♀️' },
+    { id: 'green-leaf', label: 'Fresh Air', glyph: '🍃' },
+    { id: 'thought', label: 'Thinking of You', glyph: '💭' },
+  ];
+
+  const STICKER_PREFIX = ':sticker:';
+  const buildStickerToken = (id: string) => `${STICKER_PREFIX}${id}:`;
+  const parseSticker = (text: string | undefined) => {
+    if (!text) return null;
+    if (!text.startsWith(STICKER_PREFIX)) return null;
+    const id = text.slice(STICKER_PREFIX.length, -1);
+    return stickers.find(s => s.id === id) || null;
+  };
+
+  const handleSendSticker = async (stickerId: string) => {
+    if (!session || sending) return;
+    setShowStickers(false);
+    const token = buildStickerToken(stickerId);
+    const messageId = crypto.randomUUID();
+    const pendingMessage: Message = {
+      id: messageId,
+      clinicId: session.clinicId,
+      sessionId: session.id,
+      authorType: 'user',
+      text: token,
+      createdAt: new Date(),
+      moderation: { status: 'allowed' }
+    };
+    try {
+      addMessage(pendingMessage);
+      try {
+        await realtimeChat.addMessage(pendingMessage);
+      } catch (e) {
+        sharedChat.addMessage(pendingMessage);
+      }
+      incrementUserMessageCount();
+    } catch (e) {
+      console.error('Sticker send error:', e);
+    }
+  };
 
   // Handle message send
   const handleSend = async () => {
@@ -396,6 +465,8 @@ export function Chat({ onOpenSettings, onOpenRelaxation }: ChatProps) {
       );
     }
 
+    // Sticker rendering
+    const sticker = parseSticker(message.text);
     return (
       <div key={message.id} className={`flex mb-4 ${isOwn ? 'justify-end' : 'justify-start'}`}>
         <div
@@ -440,10 +511,17 @@ export function Chat({ onOpenSettings, onOpenRelaxation }: ChatProps) {
               }
             </span>
           </div>
-          
-          <p className="text-sm sm:text-sm leading-relaxed break-words">
-            {message.text}
-          </p>
+          {sticker ? (
+            <div className="flex items-center justify-center py-2">
+              <div className="text-3xl sm:text-4xl" title={sticker.label} aria-label={sticker.label}>
+                {sticker.glyph}
+              </div>
+            </div>
+          ) : (
+            <p className="text-sm sm:text-sm leading-relaxed break-words">
+              {message.text}
+            </p>
+          )}
           
           <div className="flex items-center justify-between mt-2 text-[11px] opacity-80">
             <span
@@ -595,6 +673,35 @@ export function Chat({ onOpenSettings, onOpenRelaxation }: ChatProps) {
             </p>
           </div>
           
+          {/* Sticker picker */}
+          <div className="relative">
+            <Button
+              variant="ghost"
+              size="icon"
+              className="h-10 w-10 sm:h-11 sm:w-11"
+              onClick={() => setShowStickers(v => !v)}
+              title="Send a sticker"
+              aria-label="Send a sticker"
+            >
+              😊
+            </Button>
+            {showStickers && (
+              <div className="absolute bottom-12 right-0 z-20 w-56 rounded-xl border bg-white shadow-xl p-2 grid grid-cols-4 gap-1">
+                {stickers.map(s => (
+                  <button
+                    key={s.id}
+                    className="h-12 w-12 flex items-center justify-center rounded-lg hover:bg-muted text-2xl"
+                    title={s.label}
+                    aria-label={s.label}
+                    onClick={() => handleSendSticker(s.id)}
+                  >
+                    {s.glyph}
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
+
           <Button
             variant="default"
             size="icon"
