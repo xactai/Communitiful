@@ -5,7 +5,7 @@ import { realtimeChat } from '@/lib/realtimeChat';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { PageContainer } from '@/components/AppLayout';
-import { Settings, Send, AlertTriangle, MessageCircle, Users } from 'lucide-react';
+import { Settings, Send, AlertTriangle, MessageCircle, Users, LogOut, CheckCircle2 } from 'lucide-react';
 import { Message, AVATARS, TEST_CLINIC } from '@/lib/types';
 import { UserPresence } from '@/lib/userPresence';
 import { 
@@ -19,6 +19,14 @@ import {
 } from '@/lib/deepseek';
 import { ModerationBanner } from '@/components/ModerationBanner';
 import { moderateWithGemini } from '@/lib/geminiModeration';
+import { 
+  Dialog, 
+  DialogContent, 
+  DialogHeader, 
+  DialogTitle, 
+  DialogDescription, 
+  DialogFooter 
+} from '@/components/ui/dialog';
 
 interface ChatProps {
   onOpenSettings: () => void;
@@ -26,7 +34,7 @@ interface ChatProps {
 }
 
 export function Chat({ onOpenSettings, onOpenRelaxation }: ChatProps) {
-  const { session, addMessage, updateMessage, incrementUserMessageCount } = useAppStore();
+  const { session, addMessage, updateMessage, incrementUserMessageCount, setCurrentStep, clearMessages } = useAppStore();
   const [sharedMessages, setSharedMessages] = useState<Message[]>([]);
   const [onlineUsers, setOnlineUsers] = useState<UserPresence[]>([]);
   const [inputText, setInputText] = useState('');
@@ -44,6 +52,11 @@ export function Chat({ onOpenSettings, onOpenRelaxation }: ChatProps) {
   const [userJoinMessage, setUserJoinMessage] = useState('');
   const [typingUsers, setTypingUsers] = useState<UserPresence[]>([]);
   const typingTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const [showExitFeedback, setShowExitFeedback] = useState(false);
+  const [feedbackStage, setFeedbackStage] = useState<'form' | 'thanks'>('form');
+  const [rating, setRating] = useState<number | null>(null);
+  const [feedbackText, setFeedbackText] = useState('');
+  const ratingEmojis = ['😞','😕','😐','🙂','😊'];
   
   // Predefined messages to simulate an active chat environment
   const defaultMessages = [
@@ -591,6 +604,16 @@ export function Chat({ onOpenSettings, onOpenRelaxation }: ChatProps) {
           <Button variant="ghost" size="icon" className="h-8 w-8 sm:h-10 sm:w-10" onClick={onOpenSettings}>
             <Settings size={16} />
           </Button>
+          <Button 
+            variant="ghost" 
+            size="icon" 
+            className="h-8 w-8 sm:h-10 sm:w-10" 
+            onClick={() => { setFeedbackStage('form'); setShowExitFeedback(true); }}
+            aria-label="Leave chat"
+            title="Leave chat"
+          >
+            <LogOut size={16} />
+          </Button>
         </div>
       </div>
 
@@ -713,6 +736,76 @@ export function Chat({ onOpenSettings, onOpenRelaxation }: ChatProps) {
           </Button>
         </div>
       </div>
+      
+      {/* Exit Feedback Modal */}
+      <Dialog open={showExitFeedback} onOpenChange={(open) => { if (!open) setShowExitFeedback(false); }}>
+        <DialogContent className="sm:max-w-md">
+          {feedbackStage === 'form' ? (
+            <>
+              <DialogHeader>
+                <DialogTitle className="text-center">How was your chat experience?</DialogTitle>
+                <DialogDescription className="text-center">
+                  Your feedback helps us make this space calmer and kinder.
+                </DialogDescription>
+              </DialogHeader>
+              <div className="flex flex-col items-center gap-4">
+                <div className="flex items-center justify-center gap-2">
+                  {ratingEmojis.map((emo, idx) => (
+                    <button
+                      key={idx}
+                      className={`text-2xl p-2 rounded-md border transition ${
+                        rating === idx + 1 ? 'bg-primary/10 border-primary/30' : 'hover:bg-muted/50'
+                      }`}
+                      onClick={() => setRating(idx + 1)}
+                      aria-label={`Rate ${idx + 1}`}
+                    >
+                      {emo}
+                    </button>
+                  ))}
+                </div>
+                <div className="w-full">
+                  <textarea
+                    className="w-full min-h-[80px] rounded-md border bg-background px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-primary/40"
+                    placeholder="Anything we could improve? (optional)"
+                    value={feedbackText}
+                    onChange={(e) => setFeedbackText(e.target.value)}
+                  />
+                </div>
+              </div>
+              <DialogFooter>
+                <div className="flex w-full gap-2">
+                  <Button variant="outline" className="flex-1" onClick={() => setShowExitFeedback(false)}>
+                    Cancel
+                  </Button>
+                  <Button
+                    className="flex-1"
+                    disabled={rating === null}
+                    onClick={() => {
+                      // TODO: send feedback to backend if available
+                      setFeedbackStage('thanks');
+                      setTimeout(() => {
+                        setShowExitFeedback(false);
+                        clearMessages();
+                        setCurrentStep('landing');
+                      }, 1200);
+                    }}
+                  >
+                    Submit & Exit
+                  </Button>
+                </div>
+              </DialogFooter>
+            </>
+          ) : (
+            <div className="py-8 text-center">
+              <div className="flex items-center justify-center mb-3">
+                <CheckCircle2 className="text-success" size={28} />
+              </div>
+              <div className="text-base font-medium mb-1">Thank you for your feedback!</div>
+              <div className="text-xs text-muted-foreground">Taking you back to the landing page…</div>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

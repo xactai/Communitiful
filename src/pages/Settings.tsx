@@ -1,8 +1,17 @@
 import { Button } from '@/components/ui/button';
 import { Switch } from '@/components/ui/switch';
 import { PageContainer } from '@/components/AppLayout';
-import { ArrowLeft, LogOut, Shield, Heart, HelpCircle } from 'lucide-react';
+import { ArrowLeft, LogOut, Shield, Heart, HelpCircle, CheckCircle2 } from 'lucide-react';
 import { useAppStore } from '@/stores/useAppStore';
+import { useState } from 'react';
+import { 
+  Dialog, 
+  DialogContent, 
+  DialogHeader, 
+  DialogTitle, 
+  DialogDescription, 
+  DialogFooter 
+} from '@/components/ui/dialog';
 
 interface SettingsProps {
   onBack: () => void;
@@ -10,16 +19,20 @@ interface SettingsProps {
 }
 
 export function Settings({ onBack, onLeaveRoom }: SettingsProps) {
-  const { settings, updateSettings, setCurrentStep } = useAppStore();
+  const { settings, updateSettings, setCurrentStep, clearMessages } = useAppStore();
+  const [showExitFeedback, setShowExitFeedback] = useState(false);
+  const [feedbackStage, setFeedbackStage] = useState<'form' | 'thanks'>('form');
+  const [rating, setRating] = useState<number | null>(null);
+  const [feedbackText, setFeedbackText] = useState('');
+  const ratingEmojis = ['😞','😕','😐','🙂','😊'];
 
   const handleSettingChange = (key: keyof typeof settings, value: any) => {
     updateSettings({ [key]: value });
   };
 
   const handleLeaveRoom = () => {
-    if (confirm('Are you sure you want to leave the chat room? You will need to go through verification again to rejoin.')) {
-      onLeaveRoom();
-    }
+    setFeedbackStage('form');
+    setShowExitFeedback(true);
   };
 
   return (
@@ -137,6 +150,76 @@ export function Settings({ onBack, onLeaveRoom }: SettingsProps) {
           Companions Anonymous v1.0.0
         </div>
       </div>
+      
+      {/* Exit Feedback Modal */}
+      <Dialog open={showExitFeedback} onOpenChange={(open) => { if (!open) setShowExitFeedback(false); }}>
+        <DialogContent className="sm:max-w-md">
+          {feedbackStage === 'form' ? (
+            <>
+              <DialogHeader>
+                <DialogTitle className="text-center">How was your chat experience?</DialogTitle>
+                <DialogDescription className="text-center">
+                  Your feedback helps us make this space calmer and kinder.
+                </DialogDescription>
+              </DialogHeader>
+              <div className="flex flex-col items-center gap-4">
+                <div className="flex items-center justify-center gap-2">
+                  {ratingEmojis.map((emo, idx) => (
+                    <button
+                      key={idx}
+                      className={`text-2xl p-2 rounded-md border transition ${
+                        rating === idx + 1 ? 'bg-primary/10 border-primary/30' : 'hover:bg-muted/50'
+                      }`}
+                      onClick={() => setRating(idx + 1)}
+                      aria-label={`Rate ${idx + 1}`}
+                    >
+                      {emo}
+                    </button>
+                  ))}
+                </div>
+                <div className="w-full">
+                  <textarea
+                    className="w-full min-h-[80px] rounded-md border bg-background px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-primary/40"
+                    placeholder="Anything we could improve? (optional)"
+                    value={feedbackText}
+                    onChange={(e) => setFeedbackText(e.target.value)}
+                  />
+                </div>
+              </div>
+              <DialogFooter>
+                <div className="flex w-full gap-2">
+                  <Button variant="outline" className="flex-1" onClick={() => setShowExitFeedback(false)}>
+                    Cancel
+                  </Button>
+                  <Button
+                    className="flex-1"
+                    disabled={rating === null}
+                    onClick={() => {
+                      setFeedbackStage('thanks');
+                      setTimeout(() => {
+                        setShowExitFeedback(false);
+                        clearMessages();
+                        onLeaveRoom?.();
+                        setCurrentStep('landing');
+                      }, 1200);
+                    }}
+                  >
+                    Submit & Exit
+                  </Button>
+                </div>
+              </DialogFooter>
+            </>
+          ) : (
+            <div className="py-8 text-center">
+              <div className="flex items-center justify-center mb-3">
+                <CheckCircle2 className="text-success" size={28} />
+              </div>
+              <div className="text-base font-medium mb-1">Thank you for your feedback!</div>
+              <div className="text-xs text-muted-foreground">Taking you back to the landing page…</div>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
     </PageContainer>
   );
 }
