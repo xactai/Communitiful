@@ -90,7 +90,7 @@ export function PrivacyTerms({ onBack }: PrivacyTermsProps) {
           <p>{t('privacyTerms.note3')}</p>
         </motion.div>
 
-        <Button variant="ghost" className="mx-auto" onClick={onBack}>
+        <Button variant="outline" className="mx-auto border-2 border-primary/30 hover:border-primary/50 hover:bg-primary/5" onClick={onBack}>
           {t('privacyTerms.back')}
         </Button>
       </motion.div>

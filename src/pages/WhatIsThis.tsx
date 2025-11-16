@@ -99,7 +99,7 @@ export function WhatIsThis({ onBack, onStart }: WhatIsThisProps) {
             <Button variant="default" size="lg" className="w-full sm:w-auto" onClick={onStart}>
               {t('whatIsThis.enterSpace')}
             </Button>
-            <Button variant="ghost" size="lg" className="w-full sm:w-auto" onClick={onBack}>
+            <Button variant="outline" size="lg" className="w-full sm:w-auto border-2 border-primary/30 hover:border-primary/50 hover:bg-primary/5" onClick={onBack}>
               {t('whatIsThis.back')}
             </Button>
           </div>
