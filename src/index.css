@@ -108,6 +108,46 @@ All colors MUST be HSL.
   }
 }
 
+@layer utilities {
+  /* Landing gradient slow shift */
+  @keyframes landing-gradient-shift {
+    0% {
+      background-position: 0% 0%;
+    }
+    100% {
+      background-position: 100% 100%;
+    }
+  }
+  .bg-landing-gradient {
+    background-image: radial-gradient(1200px 600px at 0% 0%, hsl(var(--primary-soft)) 0%, transparent 60%),
+      radial-gradient(1000px 500px at 100% 100%, hsl(var(--accent) / 0.35) 0%, transparent 60%),
+      linear-gradient(to bottom, hsl(var(--primary-soft)), hsl(var(--surface)));
+    background-size: 200% 200%, 200% 200%, 100% 100%;
+    background-repeat: no-repeat;
+    animation: landing-gradient-shift 5s ease-in-out infinite alternate;
+  }
+
+  /* Logo gentle pulse */
+  @keyframes logo-pulse-scale {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.06); }
+    100% { transform: scale(1); }
+  }
+  .logo-pulse {
+    animation: logo-pulse-scale 2.5s ease-in-out infinite;
+    will-change: transform;
+  }
+
+  /* CTA soft bounce-in with fade */
+  @keyframes soft-bounce-in {
+    0% { opacity: 0; transform: translateY(8px) scale(0.98); }
+    60% { opacity: 1; transform: translateY(0) scale(1.02); }
+    100% { opacity: 1; transform: translateY(0) scale(1); }
+  }
+  .animate-soft-bounce-in {
+    animation: soft-bounce-in 0.4s cubic-bezier(0.22, 1, 0.36, 1) both;
+  }
+}
 @layer base {
   * {
     @apply border-border;

@@ -14,22 +14,22 @@ interface LandingProps {
 export function Landing({ onStart, onShowAbout, onShowPrivacy }: LandingProps) {
   const [hospitalMode, setHospitalMode] = useState(true);
   return (
-    <PageContainer className="justify-center bg-gradient-to-b from-primary-soft to-white">
+    <PageContainer className="justify-center bg-landing-gradient">
       <motion.div 
-        initial={{ opacity: 0, y: 20 }}
+        initial={{ opacity: 0, y: 16 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5 }}
+        transition={{ duration: 0.3 }}
         className="text-center space-y-8 p-8 rounded-lg bg-white/90 backdrop-blur-sm shadow-md border border-primary-light/30">
         
         {/* Brand Logo */}
         <div className="mb-6">
           <motion.img 
-            initial={{ scale: 0.9 }}
-            animate={{ scale: 1 }}
-            transition={{ duration: 0.5 }}
+            initial={{ opacity: 0, scale: 0.98 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ duration: 0.3 }}
             src="/images/Brand Logo.png" 
             alt="Brand Logo" 
-            className="rounded-lg shadow-md mx-auto w-36 h-auto"
+            className="rounded-lg shadow-md mx-auto w-36 h-auto logo-pulse"
           />
           {/* Animated divider */}
           <div className="relative mx-auto mt-4 h-1.5 max-w-xs rounded-full overflow-hidden bg-primary/10 border border-primary/20">
@@ -156,17 +156,23 @@ export function Landing({ onStart, onShowAbout, onShowPrivacy }: LandingProps) {
         {/* Call to action */}
         <div className="space-y-4">
           <motion.div
-            whileHover={{ scale: 1.03 }}
-            whileTap={{ scale: 0.98 }}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 0.15, duration: 0.25 }}
+            className="inline-block"
           >
-            <Button 
-              variant="default" 
-              size="touch" 
-              onClick={() => onStart(hospitalMode ? 'hospital' : 'companion')}
-              className="w-full max-w-xs bg-primary hover:bg-primary/90 shadow-md"
-            >
-              Get Started
-            </Button>
+            <div className="inline-block animate-soft-bounce-in">
+              <motion.div whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.98 }}>
+                <Button 
+                  variant="default" 
+                  size="touch" 
+                  onClick={() => onStart(hospitalMode ? 'hospital' : 'companion')}
+                  className="w-full max-w-xs bg-primary hover:bg-primary/90 shadow-md"
+                >
+                  Get Started
+                </Button>
+              </motion.div>
+            </div>
           </motion.div>
           
           <div className="space-y-2 text-sm">
