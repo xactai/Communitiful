@@ -579,8 +579,8 @@ export function Chat({ onOpenSettings, onOpenRelaxation }: ChatProps) {
         </div>
         
         {/* Online Users Count */}
-        <div className="flex items-center gap-2 text-xs text-muted-foreground bg-muted/50 px-2 py-1 rounded-full">
-          <Users size={12} />
+        <div className="flex items-center gap-2 text-xs font-semibold text-primary bg-primary/10 border border-primary/20 px-2 py-1 rounded-full shadow-sm">
+          <Users size={12} className="text-primary" />
           <span>{onlineUsers.length} online</span>
         </div>
         

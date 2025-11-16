@@ -1,13 +1,39 @@
 import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { PageContainer } from '@/components/AppLayout';
-import { ArrowLeft, Play, Pause, RotateCcw, Heart } from 'lucide-react';
+import { 
+  ArrowLeft, 
+  Play, 
+  Pause, 
+  RotateCcw, 
+  Heart,
+  Brain,
+  Gamepad2,
+  Sparkles,
+  Palette
+} from 'lucide-react';
 
 interface RelaxationProps {
   onBack: () => void;
 }
 
 export function Relaxation({ onBack }: RelaxationProps) {
+  // Game selection
+  const [selectedGame, setSelectedGame] = useState<
+    'breathing' | 'grounding' | 'memory' | 'gratitude' | 'color'
+  >('breathing');
+
+  const gamesMeta: Record<
+    'breathing' | 'grounding' | 'memory' | 'gratitude' | 'color',
+    { title: string }
+  > = {
+    breathing: { title: 'Breathing' },
+    grounding: { title: 'Grounding' },
+    memory: { title: 'Memory' },
+    gratitude: { title: 'Gratitude' },
+    color: { title: 'Color Focus' },
+  };
+
   const [breathingActive, setBreathingActive] = useState(false);
   const [breathingPhase, setBreathingPhase] = useState<'inhale' | 'hold' | 'exhale'>('inhale');
   const [breathingTimer, setBreathingTimer] = useState(0);
@@ -114,6 +140,87 @@ export function Relaxation({ onBack }: RelaxationProps) {
     "Each moment brings you closer to answers",
   ];
 
+  // Grounding (5-4-3-2-1) interactive
+  const [groundingStep, setGroundingStep] = useState(5);
+  const [groundingCount, setGroundingCount] = useState(0);
+  const advanceGrounding = () => {
+    if (groundingCount + 1 >= groundingStep) {
+      const next = groundingStep - 1;
+      setGroundingStep(next > 0 ? next : 5);
+      setGroundingCount(0);
+    } else {
+      setGroundingCount((c) => c + 1);
+    }
+  };
+
+  // Memory Match (simple 3 pairs)
+  type Card = { id: number; emoji: string; flipped: boolean; matched: boolean };
+  const initialDeck: Card[] = (() => {
+    const emojis = ['💐', '🌈', '🕊️'];
+    const cards = emojis
+      .flatMap((e, i) => [
+        { id: i * 2, emoji: e, flipped: false, matched: false },
+        { id: i * 2 + 1, emoji: e, flipped: false, matched: false },
+      ])
+      .sort(() => Math.random() - 0.5);
+    return cards;
+  })();
+  const [deck, setDeck] = useState<Card[]>(initialDeck);
+  const [flippedIndices, setFlippedIndices] = useState<number[]>([]);
+  const [matches, setMatches] = useState(0);
+
+  const resetMemory = () => {
+    const shuffled = [...initialDeck].sort(() => Math.random() - 0.5).map(c => ({ ...c, flipped: false, matched: false }));
+    setDeck(shuffled);
+    setFlippedIndices([]);
+    setMatches(0);
+  };
+
+  const flipCard = (idx: number) => {
+    if (deck[idx].flipped || deck[idx].matched || flippedIndices.length === 2) return;
+    const newDeck = deck.map((c, i) => (i === idx ? { ...c, flipped: true } : c));
+    const newFlipped = [...flippedIndices, idx];
+    setDeck(newDeck);
+    setFlippedIndices(newFlipped);
+    if (newFlipped.length === 2) {
+      const [a, b] = newFlipped;
+      const isMatch = newDeck[a].emoji === newDeck[b].emoji;
+      setTimeout(() => {
+        if (isMatch) {
+          setDeck(d =>
+            d.map((c, i) =>
+              i === a || i === b ? { ...c, matched: true } : c
+            )
+          );
+          setMatches(m => m + 1);
+        } else {
+          setDeck(d =>
+            d.map((c, i) =>
+              i === a || i === b ? { ...c, flipped: false } : c
+            )
+          );
+        }
+        setFlippedIndices([]);
+      }, 600);
+    }
+  };
+
+  // Gratitude prompts
+  const gratitudePrompts = [
+    "Name one person you're grateful for today.",
+    "Recall a small kindness you noticed recently.",
+    "What's one thing in this room that brings comfort?",
+    "Think of a strength you've shown this week.",
+  ];
+  const [gratitudeIndex, setGratitudeIndex] = useState(0);
+  const nextGratitude = () =>
+    setGratitudeIndex(i => (i + 1) % gratitudePrompts.length);
+
+  // Color focus
+  const soothingColors = ['#E0F2FE', '#DCFCE7', '#FCE7F3', '#F3E8FF', '#FEF9C3'];
+  const [colorIndex, setColorIndex] = useState(0);
+  const cycleColor = () => setColorIndex(i => (i + 1) % soothingColors.length);
+
   return (
     <PageContainer>
       {/* Header */}
@@ -125,7 +232,79 @@ export function Relaxation({ onBack }: RelaxationProps) {
       </div>
 
       <div className="space-y-6">
+        {/* Game selector grid (minimal) */}
+        <div>
+          <h2 className="text-base font-medium mb-3">Choose an activity</h2>
+          <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+            <button
+              className={`bg-surface border rounded-lg p-3 text-left hover:bg-primary-soft/30 transition ${
+                selectedGame === 'breathing' ? 'ring-2 ring-primary' : ''
+              }`}
+              onClick={() => setSelectedGame('breathing')}
+              aria-label="Choose Breathing"
+            >
+              <div className="flex items-center gap-2 mb-1">
+                <Brain size={16} className="text-primary" />
+                <span className="font-medium text-sm">{gamesMeta.breathing.title}</span>
+              </div>
+            </button>
+
+            <button
+              className={`bg-surface border rounded-lg p-3 text-left hover:bg-primary-soft/30 transition ${
+                selectedGame === 'grounding' ? 'ring-2 ring-primary' : ''
+              }`}
+              onClick={() => setSelectedGame('grounding')}
+              aria-label="Choose Grounding 5-4-3-2-1"
+            >
+              <div className="flex items-center gap-2 mb-1">
+                <Sparkles size={16} className="text-primary" />
+                <span className="font-medium text-sm">{gamesMeta.grounding.title}</span>
+              </div>
+            </button>
+
+            <button
+              className={`bg-surface border rounded-lg p-3 text-left hover:bg-primary-soft/30 transition ${
+                selectedGame === 'memory' ? 'ring-2 ring-primary' : ''
+              }`}
+              onClick={() => setSelectedGame('memory')}
+              aria-label="Choose Memory Match"
+            >
+              <div className="flex items-center gap-2 mb-1">
+                <Gamepad2 size={16} className="text-primary" />
+                <span className="font-medium text-sm">{gamesMeta.memory.title}</span>
+              </div>
+            </button>
+
+            <button
+              className={`bg-surface border rounded-lg p-3 text-left hover:bg-primary-soft/30 transition ${
+                selectedGame === 'gratitude' ? 'ring-2 ring-primary' : ''
+              }`}
+              onClick={() => setSelectedGame('gratitude')}
+              aria-label="Choose Gratitude Prompt"
+            >
+              <div className="flex items-center gap-2 mb-1">
+                <Heart size={16} className="text-primary" />
+                <span className="font-medium text-sm">{gamesMeta.gratitude.title}</span>
+              </div>
+            </button>
+
+            <button
+              className={`bg-surface border rounded-lg p-3 text-left hover:bg-primary-soft/30 transition ${
+                selectedGame === 'color' ? 'ring-2 ring-primary' : ''
+              }`}
+              onClick={() => setSelectedGame('color')}
+              aria-label="Choose Color Focus"
+            >
+              <div className="flex items-center gap-2 mb-1">
+                <Palette size={16} className="text-primary" />
+                <span className="font-medium text-sm">{gamesMeta.color.title}</span>
+              </div>
+            </button>
+          </div>
+        </div>
+
         {/* Breathing Exercise */}
+        {selectedGame === 'breathing' && (
         <div className="bg-primary-soft/30 rounded-lg p-6 text-center">
           <h2 className="text-lg font-medium mb-4">Breathing Exercise</h2>
           
@@ -195,31 +374,93 @@ export function Relaxation({ onBack }: RelaxationProps) {
             </div>
           )}
         </div>
+        )}
 
-        {/* Grounding Tips */}
-        <div className="space-y-3">
-          <h3 className="font-medium">Grounding Techniques</h3>
-          <div className="grid gap-2">
-            {groundingTips.map((tip, index) => (
-              <div key={index} className="bg-surface border rounded-lg p-3 text-sm">
-                {tip}
+        {/* Grounding (interactive counter) */}
+        {selectedGame === 'grounding' && (
+          <div className="bg-surface border rounded-lg p-6 text-center">
+            <h2 className="text-lg font-medium mb-1">Grounding 5-4-3-2-1</h2>
+            <p className="text-sm text-muted-foreground mb-4">
+              Tap to count. Progress resets after 1.
+            </p>
+            <div className="flex items-center justify-center gap-6 mb-4">
+              <div className="text-center">
+                <div className="text-xs text-muted-foreground mb-1">Current target</div>
+                <div className="text-2xl font-semibold">{groundingStep}</div>
               </div>
-            ))}
+              <div className="text-center">
+                <div className="text-xs text-muted-foreground mb-1">Count</div>
+                <div className="text-2xl font-semibold">{groundingCount}</div>
+              </div>
+            </div>
+            <Button variant="default" onClick={advanceGrounding}>
+              Tap
+            </Button>
           </div>
-        </div>
+        )}
 
-        {/* Calming Prompts */}
-        <div className="space-y-3">
-          <h3 className="font-medium">Gentle Reminders</h3>
-          <div className="grid gap-2">
-            {calmingPrompts.map((prompt, index) => (
-              <div key={index} className="bg-primary-soft/20 border border-primary/10 rounded-lg p-3 text-sm text-center">
-                <Heart size={14} className="inline mr-2 text-primary" />
-                {prompt}
+        {/* Memory Match */}
+        {selectedGame === 'memory' && (
+          <div className="bg-surface border rounded-lg p-6">
+            <div className="flex items-center justify-between mb-3">
+              <h2 className="text-lg font-medium">Memory Match</h2>
+              <Button variant="ghost" size="sm" onClick={resetMemory}>Reset</Button>
+            </div>
+            <p className="text-sm text-muted-foreground mb-4">
+              Find all pairs. Matched: {matches}/3
+            </p>
+            <div className="grid grid-cols-3 gap-3">
+              {deck.map((card, idx) => (
+                <button
+                  key={card.id}
+                  className={`aspect-square rounded-lg border flex items-center justify-center text-2xl transition ${
+                    card.matched ? 'bg-success/10 border-success/30' : 'bg-white hover:bg-primary-soft/20'
+                  }`}
+                  onClick={() => flipCard(idx)}
+                >
+                  {card.flipped || card.matched ? card.emoji : '❒'}
+                </button>
+              ))}
+            </div>
+            {matches === 3 && (
+              <div className="mt-4 p-3 bg-success/10 border border-success/20 rounded-lg text-center">
+                🎉 Nicely done! All pairs found.
               </div>
-            ))}
+            )}
           </div>
-        </div>
+        )}
+
+        {/* Gratitude Prompt */}
+        {selectedGame === 'gratitude' && (
+          <div className="bg-primary-soft/20 border border-primary/10 rounded-lg p-6 text-center">
+            <h2 className="text-lg font-medium mb-2">Gratitude Moment</h2>
+            <p className="text-sm mb-4">{gratitudePrompts[gratitudeIndex]}</p>
+            <Button variant="default" onClick={nextGratitude}>
+              New Prompt
+            </Button>
+          </div>
+        )}
+
+        {/* Color Focus */}
+        {selectedGame === 'color' && (
+          <div className="bg-surface border rounded-lg p-6 text-center">
+            <h2 className="text-lg font-medium mb-3">Color Focus</h2>
+            <p className="text-sm text-muted-foreground mb-4">
+              Gaze softly at the color. Tap to shift hues.
+            </p>
+            <button
+              onClick={cycleColor}
+              className="w-full rounded-lg h-28 transition"
+              style={{ backgroundColor: soothingColors[colorIndex] }}
+              aria-label="Change calming color"
+            />
+            <div className="text-xs text-muted-foreground mt-2">
+              {soothingColors[colorIndex]}
+            </div>
+          </div>
+        )}
+
+        {/* Minimal page: tips and extra lists removed */}
 
         {/* Back to chat */}
         <Button variant="outline" size="touch" onClick={onBack} className="w-full">
