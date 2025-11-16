@@ -16,6 +16,7 @@ import { toast } from "@/components/ui/use-toast";
 import { WhatIsThis } from '@/pages/WhatIsThis';
 import { PrivacyTerms } from '@/pages/PrivacyTerms';
 import { AboutCompanions } from '@/pages/AboutCompanions';
+import { LocationScan } from '@/pages/LocationScan';
 
 const Index = () => {
   const { 
@@ -51,7 +52,7 @@ const Index = () => {
   const handleStart = (mode: 'companion' | 'hospital') => {
     setAppMode(mode);
     if (mode === 'companion') {
-      setCurrentStep('companion-auth');
+      setCurrentStep('location-scan');
     } else {
       setCurrentStep('hospital-form');
     }
@@ -125,6 +126,11 @@ const Index = () => {
         <LocationGuard onLocationVerified={handleLocationVerified}>
           <div>Location verified!</div>
         </LocationGuard>
+      );
+    
+    case 'location-scan':
+      return (
+        <LocationScan onComplete={() => setCurrentStep('companion-auth')} />
       );
       
     case 'companion-auth':
