@@ -23,7 +23,128 @@ export function Landing({ onStart, onShowAbout, onShowPrivacy }: LandingProps) {
   };
   
   return (
-    <PageContainer className="justify-center bg-landing-gradient">
+    <PageContainer className="justify-center bg-landing-gradient relative overflow-hidden">
+      {/* Decorative Graffiti Elements - Healthcare/Companionship Theme */}
+      <div className="absolute inset-0 pointer-events-none overflow-hidden">
+        {/* Floating medical/companionship symbols */}
+        <motion.div
+          className="absolute top-20 left-10 text-6xl opacity-5"
+          animate={{ 
+            y: [0, -20, 0],
+            rotate: [0, 5, 0]
+          }}
+          transition={{ 
+            duration: 6,
+            repeat: Infinity,
+            ease: "easeInOut"
+          }}
+        >
+          ❤️
+        </motion.div>
+        <motion.div
+          className="absolute top-40 right-16 text-5xl opacity-[0.04]"
+          animate={{ 
+            y: [0, 15, 0],
+            rotate: [0, -5, 0]
+          }}
+          transition={{ 
+            duration: 7,
+            repeat: Infinity,
+            ease: "easeInOut",
+            delay: 0.5
+          }}
+        >
+          🤝
+        </motion.div>
+        <motion.div
+          className="absolute bottom-32 left-20 text-4xl opacity-5"
+          animate={{ 
+            y: [0, -15, 0],
+            rotate: [0, 3, 0]
+          }}
+          transition={{ 
+            duration: 8,
+            repeat: Infinity,
+            ease: "easeInOut",
+            delay: 1
+          }}
+        >
+          🕊️
+        </motion.div>
+        <motion.div
+          className="absolute bottom-20 right-24 text-5xl opacity-[0.04]"
+          animate={{ 
+            y: [0, 20, 0],
+            rotate: [0, -3, 0]
+          }}
+          transition={{ 
+            duration: 6.5,
+            repeat: Infinity,
+            ease: "easeInOut",
+            delay: 0.8
+          }}
+        >
+          💚
+        </motion.div>
+        <motion.div
+          className="absolute top-1/2 left-8 text-3xl opacity-[0.03]"
+          animate={{ 
+            y: [0, -10, 0],
+            rotate: [0, 4, 0]
+          }}
+          transition={{ 
+            duration: 9,
+            repeat: Infinity,
+            ease: "easeInOut",
+            delay: 1.2
+          }}
+        >
+          🧘
+        </motion.div>
+        <motion.div
+          className="absolute top-1/3 right-12 text-4xl opacity-[0.04]"
+          animate={{ 
+            y: [0, 12, 0],
+            rotate: [0, -4, 0]
+          }}
+          transition={{ 
+            duration: 7.5,
+            repeat: Infinity,
+            ease: "easeInOut",
+            delay: 0.3
+          }}
+        >
+          🌿
+        </motion.div>
+        
+        {/* Abstract shapes - medical cross inspired */}
+        <motion.div
+          className="absolute top-16 right-1/4 w-32 h-32 border-2 border-primary/5 rounded-full"
+          animate={{ 
+            scale: [1, 1.1, 1],
+            opacity: [0.05, 0.08, 0.05]
+          }}
+          transition={{ 
+            duration: 10,
+            repeat: Infinity,
+            ease: "easeInOut"
+          }}
+        />
+        <motion.div
+          className="absolute bottom-16 left-1/4 w-24 h-24 border-2 border-accent/5 rounded-full"
+          animate={{ 
+            scale: [1, 1.15, 1],
+            opacity: [0.05, 0.07, 0.05]
+          }}
+          transition={{ 
+            duration: 12,
+            repeat: Infinity,
+            ease: "easeInOut",
+            delay: 2
+          }}
+        />
+      </div>
+      
       {/* Language Toggle - Prominently placed at top */}
       <motion.div
         initial={{ opacity: 0, y: -10 }}
@@ -57,7 +178,7 @@ export function Landing({ onStart, onShowAbout, onShowPrivacy }: LandingProps) {
             transition={{ duration: 0.3 }}
             src="/images/Brand Logo.png" 
             alt="Brand Logo" 
-            className="rounded-lg shadow-md mx-auto w-36 h-auto logo-pulse"
+            className="rounded-lg shadow-[0_4px_20px_rgba(0,0,0,0.15),0_8px_30px_rgba(79,70,229,0.2)] mx-auto w-36 h-auto logo-pulse"
           />
           {/* Animated divider */}
           <div className="relative mx-auto mt-4 h-1.5 max-w-xs rounded-full overflow-hidden bg-primary/10 border border-primary/20">
