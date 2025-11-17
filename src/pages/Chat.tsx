@@ -583,7 +583,7 @@ export function Chat({ onOpenSettings, onOpenRelaxation }: ChatProps) {
       {/* Header */}
       <div className="bg-primary-soft/60 border-b px-4 py-3 flex items-center justify-between backdrop-blur-sm">
         <div className="flex items-center gap-2 sm:gap-3 min-w-0 flex-1">
-          <div className="w-8 h-8 bg-primary-soft rounded-full flex items-center justify-center flex-shrink-0">
+          <div className="w-8 h-8 bg-primary-soft rounded-full flex items-center justify-center flex-shrink-0 border-2 border-primary/30">
             {getAvatarEmoji(session.avatarId)}
           </div>
           <div className="min-w-0 flex-1">
