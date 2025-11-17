@@ -227,7 +227,7 @@ export function Relaxation({ onBack }: RelaxationProps) {
     <PageContainer>
       {/* Header */}
       <div className="flex items-center gap-4 mb-6">
-        <Button variant="ghost" size="icon" onClick={onBack}>
+        <Button variant="outline" size="icon" className="border-2 border-primary/30 hover:border-primary/50 hover:bg-primary/5" onClick={onBack}>
           <ArrowLeft size={20} />
         </Button>
         <h1 className="text-xl font-semibold">{t('relaxation.title')}</h1>
