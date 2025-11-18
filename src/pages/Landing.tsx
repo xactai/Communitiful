@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { PageContainer } from '@/components/AppLayout';
-import { Building2, HeartHandshake, Languages } from 'lucide-react';
+import { Building2, HeartHandshake, Languages, ExternalLink } from 'lucide-react';
 import { Label } from '@/components/ui/label';
 import { motion } from 'framer-motion';
 import { useAppStore } from '@/stores/useAppStore';
@@ -341,6 +341,29 @@ export function Landing({ onStart, onShowAbout, onShowPrivacy }: LandingProps) {
               {t('landing.privacyTerms')}
             </button>
           </div>
+          
+          {/* Website Link Section */}
+          <motion.div
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.6, duration: 0.4 }}
+            className="mt-4 pt-4 border-t border-primary/10"
+          >
+            <a
+              href="https://xactai.github.io/Communitiful/"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="group inline-flex flex-col items-center gap-2 px-4 py-3 rounded-lg bg-primary/5 hover:bg-primary/10 border border-primary/20 hover:border-primary/30 transition-all duration-300 w-full"
+            >
+              <div className="flex items-center gap-2 text-sm font-medium text-primary group-hover:text-primary/90 transition-colors">
+                <ExternalLink size={16} className="group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" />
+                <span>{t('landing.visitWebsite')}</span>
+              </div>
+              <p className="text-xs text-muted-foreground text-center">
+                {t('landing.visitWebsiteDesc')}
+              </p>
+            </a>
+          </motion.div>
         </div>
       </motion.div>
       <div className="mt-6 text-center text-xs text-muted-foreground">

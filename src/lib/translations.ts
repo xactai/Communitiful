@@ -18,6 +18,8 @@ export const translations = {
       whatIsThis: "What is this?",
       privacyTerms: "Privacy & Terms",
       tagline: "Designed for calm, connection, and compassionate waiting.",
+      visitWebsite: "Visit our website",
+      visitWebsiteDesc: "Learn more about our mission and impact",
     },
     
     // Chat Page
@@ -254,6 +256,8 @@ export const translations = {
       whatIsThis: "यह क्या है?",
       privacyTerms: "गोपनीयता और नियम",
       tagline: "शांति, जुड़ाव और दयालु प्रतीक्षा के लिए डिज़ाइन किया गया।",
+      visitWebsite: "हमारी वेबसाइट देखें",
+      visitWebsiteDesc: "हमारे मिशन और प्रभाव के बारे में अधिक जानें",
     },
     
     // Chat Page
