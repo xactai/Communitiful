@@ -324,22 +324,24 @@ export function Landing({ onStart, onShowAbout, onShowPrivacy }: LandingProps) {
             </div>
           </motion.div>
           
-          <div className="space-y-2 text-sm">
-            <button 
-              className="text-primary hover:underline"
+          <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
+            <Button
+              variant="outline"
+              size="sm"
               onClick={onShowAbout}
+              className="w-full sm:w-auto bg-emerald-50/80 hover:bg-emerald-100/90 border-emerald-200 hover:border-emerald-300 text-emerald-700 hover:text-emerald-800 shadow-sm"
             >
               {t('landing.whatIsThis')}
-            </button>
+            </Button>
             
-            <div className="text-muted-foreground">·</div>
-            
-            <button 
-              className="text-primary hover:underline"
+            <Button
+              variant="outline"
+              size="sm"
               onClick={onShowPrivacy}
+              className="w-full sm:w-auto bg-indigo-50/80 hover:bg-indigo-100/90 border-indigo-200 hover:border-indigo-300 text-indigo-700 hover:text-indigo-800 shadow-sm"
             >
               {t('landing.privacyTerms')}
-            </button>
+            </Button>
           </div>
           
           {/* Website Link Section */}
