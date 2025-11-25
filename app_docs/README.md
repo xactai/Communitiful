@@ -17,7 +17,7 @@ Used by hospital staff to register the visiting patient and their companions.
 - 📋 Patient + Companion registration with validations
 - 🌍 International mobile number input:
   - Country code selector with flag (default: 🇮🇳 +91)
-  - Numbers stored as `{countryCode}{localNumber}` for consistency
+  - Numbers stored as `{countryCode}{localNumber}` for consistency in the number format
 - 🔐 Data stored securely in Supabase
 - 📱 Mobile and tablet friendly UI
 - 🧩 Clean data controls: duplicates and basic field checks
