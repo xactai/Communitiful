@@ -232,10 +232,14 @@ export function HospitalForm({ onBack, onSuccess }: HospitalFormProps) {
     if (cleanedContact.length !== 10) return setError('Valid 10-digit patient contact required');
 
     // Validate companions
-    for (const c of companions) {
+    for (let idx = 0; idx < companions.length; idx++) {
+      const c = companions[idx];
       if (!c.name.trim()) return setError('All companion names are required');
-  const cleaned = c.number.replace(/\D/g, '');
+      const cleaned = c.number.replace(/\D/g, '');
       if (cleaned.length !== 10) return setError('All companions must have valid 10-digit mobile numbers');
+      if (!locationFetchedStates[idx]) {
+        return setError(`Location must be fetched for Companion ${idx + 1}. Please click "Fetch Location" for all companions.`);
+      }
     }
 
     setLoading(true);
