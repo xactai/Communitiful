@@ -296,7 +296,7 @@ export function HospitalForm({ onBack, onSuccess }: HospitalFormProps) {
               height={60} 
               className="object-contain rounded-lg shadow-md"
             />
-            <h1 className="text-2xl font-bold text-primary">Apollo HOSPITALS</h1>
+            <h1 className="text-2xl font-bold text-primary"></h1>
           </div>
           <div className="w-10" /> {/* Spacer for centering */}
         </div>
