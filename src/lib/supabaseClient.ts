@@ -55,4 +55,84 @@ export async function insertCompanions(companions: InsertCompanionInput[]) {
   return supabase.from('companions').insert(companions);
 }
 
+// Active session management functions
+export interface ActiveSession {
+  id: string;
+  mobile_number: string;
+  session_id: string;
+  is_active: boolean;
+  created_at: string;
+  last_seen_at: string;
+}
+
+/**
+ * Check if there's an active session for a given mobile number
+ */
+export async function checkActiveSession(mobileNumber: string) {
+  const { data, error } = await supabase
+    .from('active_sessions')
+    .select('*')
+    .eq('mobile_number', mobileNumber)
+    .eq('is_active', true)
+    .maybeSingle();
+  
+  return { data, error };
+}
+
+/**
+ * Create a new active session for a mobile number
+ */
+export async function createActiveSession(mobileNumber: string, sessionId: string) {
+  // First, deactivate any existing sessions for this mobile number
+  await supabase
+    .from('active_sessions')
+    .update({ is_active: false })
+    .eq('mobile_number', mobileNumber)
+    .eq('is_active', true);
+
+  // Create new active session
+  const { data, error } = await supabase
+    .from('active_sessions')
+    .insert({
+      mobile_number: mobileNumber,
+      session_id: sessionId,
+      is_active: true,
+      last_seen_at: new Date().toISOString(),
+    })
+    .select()
+    .single();
+  
+  return { data, error };
+}
+
+/**
+ * Deactivate a session by session ID
+ */
+export async function deactivateSession(sessionId: string) {
+  const { data, error } = await supabase
+    .from('active_sessions')
+    .update({ is_active: false })
+    .eq('session_id', sessionId)
+    .eq('is_active', true)
+    .select()
+    .single();
+  
+  return { data, error };
+}
+
+/**
+ * Update last_seen_at for an active session
+ */
+export async function updateSessionLastSeen(sessionId: string) {
+  const { data, error } = await supabase
+    .from('active_sessions')
+    .update({ last_seen_at: new Date().toISOString() })
+    .eq('session_id', sessionId)
+    .eq('is_active', true)
+    .select()
+    .single();
+  
+  return { data, error };
+}
+
 

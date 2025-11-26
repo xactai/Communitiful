@@ -4,8 +4,9 @@ import { Input } from '@/components/ui/input';
 import { PageContainer } from '@/components/AppLayout';
 import { ArrowLeft, Smartphone, ShieldCheck } from 'lucide-react';
 import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { findCompanionByMobile } from '@/lib/supabaseClient';
+import { findCompanionByMobile, checkActiveSession } from '@/lib/supabaseClient';
 import { useTranslation } from '@/hooks/useTranslation';
+import { useAppStore } from '@/stores/useAppStore';
 
 const COUNTRY_CODES = [
   { code: '+91', country: 'India', flag: '🇮🇳' },
@@ -23,6 +24,7 @@ interface CompanionAuthProps {
 
 export function CompanionAuth({ onBack, onSuccess }: CompanionAuthProps) {
   const { t } = useTranslation();
+  const { setAuthenticatedMobile } = useAppStore();
   const [countryCode, setCountryCode] = useState('+91');
   const [mobile, setMobile] = useState('');
   const [error, setError] = useState('');
@@ -43,6 +45,23 @@ export function CompanionAuth({ onBack, onSuccess }: CompanionAuthProps) {
 
     setLoading(true);
     const formattedNumber = `${countryCode}${cleaned}`;
+    
+    // First, check if there's an active session for this mobile number
+    const { data: activeSession, error: sessionError } = await checkActiveSession(formattedNumber);
+    
+    if (sessionError) {
+      setLoading(false);
+      setError(t('companionAuth.errorServer'));
+      return;
+    }
+
+    if (activeSession) {
+      setLoading(false);
+      setError(t('companionAuth.errorActiveSession'));
+      return;
+    }
+
+    // Verify companion exists in database
     const { data, error } = await findCompanionByMobile(formattedNumber, cleaned);
     setLoading(false);
 
@@ -56,6 +75,8 @@ export function CompanionAuth({ onBack, onSuccess }: CompanionAuthProps) {
       return;
     }
 
+    // Store authenticated mobile number for later use
+    setAuthenticatedMobile(formattedNumber);
     onSuccess();
   };
 

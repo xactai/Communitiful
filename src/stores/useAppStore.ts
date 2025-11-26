@@ -40,6 +40,10 @@ interface AppState {
   otpPhone: string;
   setOtpPhone: (phone: string) => void;
   
+  // Authenticated mobile number (for session tracking)
+  authenticatedMobile: string | null;
+  setAuthenticatedMobile: (mobile: string | null) => void;
+  
   // Reset all state
   reset: () => void;
 }
@@ -113,6 +117,10 @@ export const useAppStore = create<AppState>()(
       otpPhone: '',
       setOtpPhone: (phone) => set({ otpPhone: phone }),
       
+      // Authenticated mobile
+      authenticatedMobile: null,
+      setAuthenticatedMobile: (mobile) => set({ authenticatedMobile: mobile }),
+      
       // Reset
       reset: () => set({
         appMode: 'companion',
@@ -121,6 +129,7 @@ export const useAppStore = create<AppState>()(
         messages: [],
         currentStep: 'landing',
         otpPhone: '',
+        authenticatedMobile: null,
         isLoading: false,
         userMessageCount: 0,
       }),

@@ -17,6 +17,7 @@ import { WhatIsThis } from '@/pages/WhatIsThis';
 import { PrivacyTerms } from '@/pages/PrivacyTerms';
 import { AboutCompanions } from '@/pages/AboutCompanions';
 import { LocationScan } from '@/pages/LocationScan';
+import { createActiveSession } from '@/lib/supabaseClient';
 
 const Index = () => {
   const { 
@@ -25,17 +26,19 @@ const Index = () => {
     currentStep, 
     setCurrentStep, 
     session, 
-    setSession, 
+    setSession,
+    authenticatedMobile,
     reset 
   } = useAppStore();
 
   // Initialize or create session with auto-assigned avatar and nickname
-  const createSession = () => {
+  const createSession = async () => {
     const randomAvatar = Math.floor(Math.random() * 8) + 1; // Random avatar 1-8
     const randomNickname = generateNickname();
     
+    const sessionId = crypto.randomUUID();
     const newSession: Session = {
-      id: crypto.randomUUID(),
+      id: sessionId,
       clinicId: TEST_CLINIC.id,
       nick: randomNickname,
       avatarId: randomAvatar.toString(),
@@ -43,6 +46,16 @@ const Index = () => {
       lastSeenAt: new Date(),
       onSite: true,
     };
+    
+    // Create active session in database if mobile number is available
+    if (authenticatedMobile) {
+      try {
+        await createActiveSession(authenticatedMobile, sessionId);
+      } catch (error) {
+        console.error('Failed to create active session:', error);
+        // Continue anyway - session is created locally
+      }
+    }
     
     setSession(newSession);
     setCurrentStep('chat');
@@ -58,8 +71,8 @@ const Index = () => {
     }
   };
   const handleCompanionAuthSuccess = () => setCurrentStep('disclaimer');
-  const handleDisclaimerAccept = () => {
-    createSession(); // Auto-create session with random avatar and nickname
+  const handleDisclaimerAccept = async () => {
+    await createSession(); // Auto-create session with random avatar and nickname
     setCurrentStep('avatar-display'); // Show avatar display before chat
   };
 
@@ -177,7 +190,8 @@ const Index = () => {
       return (
         <Settings 
           onBack={() => setCurrentStep('chat')}
-          onLeaveRoom={() => {
+          onLeaveRoom={async () => {
+            // Session deactivation is handled in Settings component
             reset();
             setCurrentStep('landing');
           }}

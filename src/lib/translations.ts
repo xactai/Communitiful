@@ -161,6 +161,7 @@ export const translations = {
       errorInvalid: "Please enter a valid 10-digit phone number",
       errorServer: "Error contacting server. Please try again.",
       errorNotFound: "No registration found for this number. Please contact hospital staff to register.",
+      errorActiveSession: "This mobile number is already logged in on another device. Please log out from the other device first or wait for the session to expire.",
     },
     
     // OTP Auth
@@ -399,6 +400,7 @@ export const translations = {
       errorInvalid: "कृपया एक वैध 10-अंकीय फोन नंबर दर्ज करें",
       errorServer: "सर्वर से संपर्क करने में त्रुटि। कृपया पुनः प्रयास करें।",
       errorNotFound: "इस नंबर के लिए कोई पंजीकरण नहीं मिला। कृपया पंजीकरण के लिए अस्पताल के कर्मचारियों से संपर्क करें।",
+      errorActiveSession: "यह मोबाइल नंबर पहले से ही किसी अन्य डिवाइस पर लॉग इन है। कृपया पहले दूसरे डिवाइस से लॉग आउट करें या सत्र समाप्त होने की प्रतीक्षा करें।",
     },
     
     // OTP Auth
