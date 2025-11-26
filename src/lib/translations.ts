@@ -5,7 +5,7 @@ export const translations = {
     // Landing Page
     landing: {
       title: "Companions Anonymous",
-      subtitle: "For every companion who waits — you're not alone.",
+      subtitle: "For every companion who waits — you're not alone",
       feature1Title: "Anonymous and Private",
       feature1Desc: "No personal info required",
       feature2Title: "Connect with Others",
