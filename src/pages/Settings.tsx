@@ -13,7 +13,6 @@ import {
   DialogFooter 
 } from '@/components/ui/dialog';
 import { useTranslation } from '@/hooks/useTranslation';
-import { deactivateSession } from '@/lib/supabaseClient';
 
 interface SettingsProps {
   onBack: () => void;
@@ -22,7 +21,7 @@ interface SettingsProps {
 
 export function Settings({ onBack, onLeaveRoom }: SettingsProps) {
   const { t } = useTranslation();
-  const { settings, updateSettings, setCurrentStep, clearMessages, session } = useAppStore();
+  const { settings, updateSettings, setCurrentStep, clearMessages } = useAppStore();
   const [showExitFeedback, setShowExitFeedback] = useState(false);
   const [feedbackStage, setFeedbackStage] = useState<'form' | 'thanks'>('form');
   const [rating, setRating] = useState<number | null>(null);
@@ -196,17 +195,7 @@ export function Settings({ onBack, onLeaveRoom }: SettingsProps) {
                   <Button
                     className="flex-1"
                     disabled={rating === null}
-                    onClick={async () => {
-                      // Deactivate session in database if session exists
-                      if (session?.id) {
-                        try {
-                          await deactivateSession(session.id);
-                        } catch (error) {
-                          console.error('Failed to deactivate session:', error);
-                          // Continue anyway
-                        }
-                      }
-                      
+                    onClick={() => {
                       setFeedbackStage('thanks');
                       setTimeout(() => {
                         setShowExitFeedback(false);
