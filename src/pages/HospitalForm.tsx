@@ -382,7 +382,7 @@ export function HospitalForm({ onBack, onSuccess }: HospitalFormProps) {
 
             <div className="space-y-3">
               <Label htmlFor="purpose" className="text-base font-medium">
-                Purpose of Visit
+                Purpose of Visit *
               </Label>
               <Select value={purposeOfVisit} onValueChange={setPurposeOfVisit}>
                 <SelectTrigger className="focus:ring-2 focus:ring-primary/20 py-6 text-base shadow-sm border-primary/20">
@@ -460,7 +460,7 @@ export function HospitalForm({ onBack, onSuccess }: HospitalFormProps) {
 
                   <div className="space-y-3">
                     <Label htmlFor={`companion-relationship-${idx}`} className="text-base font-medium">
-                      Relationship
+                      Relationship *
                     </Label>
                     <Select value={c.relationship} onValueChange={(value) => updateCompanion(idx, 'relationship', value)}>
                       <SelectTrigger className="focus:ring-2 focus:ring-primary/20 py-6 text-base shadow-sm border-primary/20 hover:border-primary/50 transition-colors">
@@ -480,7 +480,7 @@ export function HospitalForm({ onBack, onSuccess }: HospitalFormProps) {
                   </div>
 
                   <div className="space-y-2">
-                    <Label htmlFor={`companion-number-${idx}`}>
+                    <Label htmlFor={`companion-number-${idx}`} className="text-base font-medium">
                       Mobile Number *
                     </Label>
                     <div className="flex flex-col sm:flex-row gap-2 sm:items-center">
@@ -532,8 +532,8 @@ export function HospitalForm({ onBack, onSuccess }: HospitalFormProps) {
                   </div>
 
                   <div className="space-y-2">
-                    <Label htmlFor={`companion-location-${idx}`}>
-                      Location
+                    <Label htmlFor={`companion-location-${idx}`} className="text-base font-medium">
+                      Location *
                     </Label>
                     <div className="space-y-3">
                       <Button
