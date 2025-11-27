@@ -62,6 +62,7 @@ Block ANY message that includes:
 - spam, scams, promotions, requests for money, external links, ads, or chain messages
 - irrelevant/off-topic chatter (politics, religious preaching, non-care gossip, offensive humor) that distracts from supportive waiting-room conversation
 - extremely negative, disturbing, or fear-inducing content likely to increase stress for waiting families
+- phone numbers, mobile numbers, or contact information (including with country codes like +91, +1, etc.) - STRICTLY BLOCK any sharing of contact details for privacy protection
 
 Allow empathetic sharing that stays supportive and relevant.
 

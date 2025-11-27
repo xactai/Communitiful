@@ -101,14 +101,29 @@ export function preFilterMessage(text: string): {
 } {
   const lowerText = text.toLowerCase();
   
-  // Block obvious patterns
-  const phonePattern = /\b\d{3}[-.]?\d{3}[-.]?\d{4}\b/;
+  // Enhanced phone number patterns to catch all formats including country codes
+  // Pattern 1: International format with country code (+91, +1, +44, etc.)
+  const internationalPhonePattern = /\+?\d{1,4}[\s\-]?\d{1,4}[\s\-]?\d{4,14}/;
+  
+  // Pattern 2: US/Canada format (XXX-XXX-XXXX, (XXX) XXX-XXXX, etc.)
+  const usPhonePattern = /\b\d{3}[-.\s]?\d{3}[-.\s]?\d{4}\b/;
+  
+  // Pattern 3: Indian format (10 digits, with or without spaces/dashes)
+  const indianPhonePattern = /\b\d{5}[\s\-]?\d{5}\b|\b\d{10}\b/;
+  
+  // Pattern 4: Phone numbers with keywords like "call", "phone", "mobile", "number"
+  const phoneWithKeywords = /(call|phone|mobile|number|contact|reach|text|sms|whatsapp)[\s:]*[\+\d\s\-\(\)]{7,}/i;
+  
+  // Check for phone numbers
+  if (internationalPhonePattern.test(text) || 
+      usPhonePattern.test(text) || 
+      indianPhonePattern.test(text) || 
+      phoneWithKeywords.test(text)) {
+    return { allowed: false, reason: 'Mobile numbers are not allowed for privacy. Please do not share contact information.' };
+  }
+  
   const emailPattern = /\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b/;
   const urlPattern = /https?:\/\/[^\s]+/;
-  
-  if (phonePattern.test(text)) {
-    return { allowed: false, reason: 'Phone numbers are not allowed for privacy' };
-  }
   
   if (emailPattern.test(text)) {
     return { allowed: false, reason: 'Email addresses are not allowed for privacy' };

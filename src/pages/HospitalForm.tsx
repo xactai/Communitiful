@@ -601,7 +601,6 @@ export function HospitalForm({ onBack, onSuccess }: HospitalFormProps) {
                 whileTap={{ scale: 0.98 }}
                 className="flex items-center justify-center gap-2"
               >
-                <Users size={16} className="text-primary" />
                 Add Another Companion
               </motion.div>
             </Button>
