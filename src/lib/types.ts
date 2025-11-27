@@ -37,6 +37,12 @@ export interface Message {
     senderName: string;
     senderAvatar?: string;
   };
+  reactions?: {
+    [emoji: string]: {
+      count: number;
+      users: string[]; // sessionIds of users who reacted
+    };
+  };
 }
 
 export interface Announcement {

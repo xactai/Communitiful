@@ -67,6 +67,14 @@ export function Chat({ onOpenSettings, onOpenRelaxation }: ChatProps) {
   const touchStartXRef = useRef<number | null>(null);
   const touchStartYRef = useRef<number | null>(null);
   
+  // Reaction functionality
+  const [reactionPickerMessage, setReactionPickerMessage] = useState<Message | null>(null);
+  const [reactionPickerPosition, setReactionPickerPosition] = useState<{ x: number; y: number } | null>(null);
+  const reactionPickerRef = useRef<HTMLDivElement>(null);
+  
+  // Common reaction emojis
+  const REACTION_EMOJIS = ['👍', '❤️', '🙂', '😂', '😮', '😢', '🙏'];
+  
   // Predefined messages to simulate an active chat environment
   const defaultMessages = [
     { sender: "🧑‍⚕️ Dr. Mira", message: "Good morning everyone 🌞 Hope you're all feeling stronger today!" },
@@ -79,6 +87,22 @@ export function Chat({ onOpenSettings, onOpenRelaxation }: ChatProps) {
     { sender: "🤖 CompanionBot", message: "If you're new here, say hi 👋 and let's chat about your day!" },
   ];
   
+  // Close reaction picker on outside click
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (reactionPickerRef.current && !reactionPickerRef.current.contains(event.target as Node)) {
+        closeReactionPicker();
+      }
+    };
+
+    if (reactionPickerMessage) {
+      document.addEventListener('mousedown', handleClickOutside);
+      return () => {
+        document.removeEventListener('mousedown', handleClickOutside);
+      };
+    }
+  }, [reactionPickerMessage]);
+
   // Initialize real-time chat and subscribe to messages
   useEffect(() => {
     let unsubscribe: (() => void) | null = null;
@@ -102,12 +126,19 @@ export function Chat({ onOpenSettings, onOpenRelaxation }: ChatProps) {
             const messageMap = new Map<string, Message>();
             // First add all existing messages (preserve local state)
             prev.forEach(msg => messageMap.set(msg.id, msg));
-            // Then update/add messages from subscription, but preserve reply data if it exists locally
+            // Then update/add messages from subscription, but preserve local data if it exists
             messages.forEach(msg => {
               const existing = messageMap.get(msg.id);
-              if (existing && existing.replyTo && !msg.replyTo) {
+              if (existing) {
                 // Preserve local reply data if database message doesn't have it
-                messageMap.set(msg.id, { ...msg, replyTo: existing.replyTo });
+                const preservedReplyTo = existing.replyTo && !msg.replyTo ? existing.replyTo : msg.replyTo;
+                // Preserve local reactions if they exist (merge with database reactions)
+                const preservedReactions = existing.reactions || msg.reactions;
+                messageMap.set(msg.id, { 
+                  ...msg, 
+                  replyTo: preservedReplyTo,
+                  reactions: preservedReactions || msg.reactions
+                });
               } else {
                 messageMap.set(msg.id, msg);
               }
@@ -127,7 +158,19 @@ export function Chat({ onOpenSettings, onOpenRelaxation }: ChatProps) {
           setSharedMessages(prev => {
             const messageMap = new Map<string, Message>();
             prev.forEach(msg => messageMap.set(msg.id, msg));
-            messages.forEach(msg => messageMap.set(msg.id, msg));
+            messages.forEach(msg => {
+              const existing = messageMap.get(msg.id);
+              if (existing) {
+                // Preserve local reactions if they exist
+                const preservedReactions = existing.reactions || msg.reactions;
+                messageMap.set(msg.id, { 
+                  ...msg, 
+                  reactions: preservedReactions || msg.reactions
+                });
+              } else {
+                messageMap.set(msg.id, msg);
+              }
+            });
             return Array.from(messageMap.values()).sort(
               (a, b) => a.createdAt.getTime() - b.createdAt.getTime()
             );
@@ -288,10 +331,22 @@ export function Chat({ onOpenSettings, onOpenRelaxation }: ChatProps) {
     }
   };
 
-  // Long-press handler
-  const handleLongPressStart = (message: Message) => {
+  // Long-press handler - show reaction picker
+  const handleLongPressStart = (message: Message, event?: React.MouseEvent | React.TouchEvent) => {
     longPressTimerRef.current = setTimeout(() => {
-      handleReply(message);
+      // Show reaction picker
+      if (event) {
+        const clientX = 'touches' in event ? event.touches[0].clientX : (event as React.MouseEvent).clientX;
+        const clientY = 'touches' in event ? event.touches[0].clientY : (event as React.MouseEvent).clientY;
+        // Position picker above the message, centered horizontally
+        setReactionPickerPosition({ 
+          x: clientX, 
+          y: Math.max(10, clientY - 60) 
+        });
+      } else {
+        setReactionPickerPosition({ x: window.innerWidth / 2, y: window.innerHeight / 2 });
+      }
+      setReactionPickerMessage(message);
     }, 500); // 500ms for long press
   };
 
@@ -310,7 +365,7 @@ export function Chat({ onOpenSettings, onOpenRelaxation }: ChatProps) {
     touchStartXRef.current = e.touches[0].clientX;
     touchStartYRef.current = e.touches[0].clientY;
     currentMessageRef.current = message;
-    handleLongPressStart(message);
+    handleLongPressStart(message, e);
   };
 
   const handleTouchMove = (e: React.TouchEvent) => {
@@ -334,6 +389,76 @@ export function Chat({ onOpenSettings, onOpenRelaxation }: ChatProps) {
     touchStartXRef.current = null;
     touchStartYRef.current = null;
     currentMessageRef.current = null;
+  };
+
+  // Reaction handlers
+  const handleAddReaction = async (message: Message, emoji: string) => {
+    if (!session) return;
+    
+    const currentReactions = message.reactions || {};
+    const reaction = currentReactions[emoji] || { count: 0, users: [] };
+    
+    // Check if user already reacted with this emoji
+    const userIndex = reaction.users.indexOf(session.id);
+    let updatedReactions: typeof currentReactions;
+    
+    if (userIndex >= 0) {
+      // Remove reaction
+      if (reaction.count === 1) {
+        // Remove emoji entirely if count would be 0
+        updatedReactions = { ...currentReactions };
+        delete updatedReactions[emoji];
+      } else {
+        // Decrement count and remove user
+        updatedReactions = {
+          ...currentReactions,
+          [emoji]: {
+            count: reaction.count - 1,
+            users: reaction.users.filter(id => id !== session.id)
+          }
+        };
+      }
+    } else {
+      // Add reaction
+      updatedReactions = {
+        ...currentReactions,
+        [emoji]: {
+          count: reaction.count + 1,
+          users: [...reaction.users, session.id]
+        }
+      };
+    }
+    
+    // Close picker
+    setReactionPickerMessage(null);
+    setReactionPickerPosition(null);
+    
+    // Update message locally in sharedMessages state immediately
+    setSharedMessages(prev => prev.map(msg => {
+      if (msg.id === message.id) {
+        const updated = { ...msg, reactions: updatedReactions };
+        // Debug log
+        console.log('Updating message reactions:', { messageId: msg.id, reactions: updatedReactions, updated });
+        return updated;
+      }
+      return msg;
+    }));
+    
+    // Update in Zustand store
+    updateMessage(message.id, { reactions: updatedReactions });
+    
+    // Update in realtime chat
+    try {
+      await realtimeChat.updateMessage(message.id, { reactions: updatedReactions });
+    } catch (error) {
+      console.error('Failed to update reaction in real-time chat:', error);
+      sharedChat.updateMessage(message.id, { reactions: updatedReactions });
+    }
+  };
+
+  const closeReactionPicker = () => {
+    setReactionPickerMessage(null);
+    setReactionPickerPosition(null);
   };
 
   // Auto-response functionality has been removed
@@ -619,7 +744,7 @@ export function Chat({ onOpenSettings, onOpenRelaxation }: ChatProps) {
         onTouchStart={(e) => handleTouchStart(e, message)}
         onTouchMove={handleTouchMove}
         onTouchEnd={handleTouchEnd}
-        onMouseDown={() => handleLongPressStart(message)}
+        onMouseDown={(e) => handleLongPressStart(message, e)}
         onMouseUp={handleLongPressEnd}
         onMouseLeave={handleLongPressEnd}
       >
@@ -702,6 +827,38 @@ export function Chat({ onOpenSettings, onOpenRelaxation }: ChatProps) {
             <p className="text-sm sm:text-sm leading-relaxed break-words">
               {message.text}
             </p>
+          )}
+          
+          {/* Reactions */}
+          {message.reactions && 
+           typeof message.reactions === 'object' && 
+           Object.keys(message.reactions).length > 0 && (
+            <div className="flex flex-wrap gap-1 mt-2">
+              {Object.entries(message.reactions).map(([emoji, reaction]) => {
+                if (!reaction || typeof reaction !== 'object' || !reaction.count || !reaction.users) {
+                  return null;
+                }
+                const hasUserReacted = session && reaction.users.includes(session.id);
+                return (
+                  <button
+                    key={emoji}
+                    onClick={() => handleAddReaction(message, emoji)}
+                    className={`flex items-center gap-1 px-2 py-1 rounded-full text-xs transition-colors ${
+                      hasUserReacted
+                        ? isOwn
+                          ? 'bg-white/30 text-primary-foreground'
+                          : 'bg-primary/20 text-primary border border-primary/30'
+                        : isOwn
+                        ? 'bg-white/10 text-primary-foreground/70 hover:bg-white/20'
+                        : 'bg-muted/40 text-muted-foreground hover:bg-muted/60'
+                    }`}
+                  >
+                    <span>{emoji}</span>
+                    <span>{reaction.count}</span>
+                  </button>
+                );
+              })}
+            </div>
           )}
           
           <div className="flex items-center justify-between mt-2 text-[11px] opacity-80">
@@ -872,6 +1029,43 @@ export function Chat({ onOpenSettings, onOpenRelaxation }: ChatProps) {
             <X size={14} />
           </Button>
         </div>
+      )}
+
+      {/* Reaction Picker */}
+      {reactionPickerMessage && reactionPickerPosition && (
+        <>
+          {/* Backdrop */}
+          <div
+            className="fixed inset-0 z-40"
+            onClick={closeReactionPicker}
+          />
+          {/* Picker */}
+          <div
+            ref={reactionPickerRef}
+            className="fixed z-50 bg-white border border-slate-200 rounded-full shadow-lg px-2 py-1 flex items-center gap-1 animate-in fade-in zoom-in-95 duration-200"
+            style={{
+              left: `${Math.max(10, Math.min(reactionPickerPosition.x - 100, window.innerWidth - 220))}px`,
+              top: `${Math.max(10, reactionPickerPosition.y - 60)}px`,
+            }}
+            onClick={(e) => e.stopPropagation()}
+          >
+            {REACTION_EMOJIS.map((emoji) => {
+              const hasReacted = session && reactionPickerMessage.reactions?.[emoji]?.users.includes(session.id);
+              return (
+                <button
+                  key={emoji}
+                  onClick={() => handleAddReaction(reactionPickerMessage, emoji)}
+                  className={`text-2xl p-2 rounded-full transition-all hover:scale-125 ${
+                    hasReacted ? 'bg-primary/20 scale-110' : 'hover:bg-muted/50'
+                  }`}
+                  aria-label={`React with ${emoji}`}
+                >
+                  {emoji}
+                </button>
+              );
+            })}
+          </div>
+        </>
       )}
 
       {/* Input */}
