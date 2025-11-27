@@ -31,6 +31,12 @@ export interface Message {
     name: string;
     emoji: string;
   };
+  replyTo?: {
+    messageId: string;
+    text: string;
+    senderName: string;
+    senderAvatar?: string;
+  };
 }
 
 export interface Announcement {

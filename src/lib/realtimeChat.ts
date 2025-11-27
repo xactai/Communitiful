@@ -80,7 +80,10 @@ export class RealtimeChatManager {
         status: dbMessage.moderation_status,
         reason: dbMessage.moderation_reason
       },
-      companionIdentity: dbMessage.companion_identity ? JSON.parse(dbMessage.companion_identity) : undefined
+      companionIdentity: dbMessage.companion_identity ? JSON.parse(dbMessage.companion_identity) : undefined,
+      replyTo: dbMessage.reply_to 
+        ? (typeof dbMessage.reply_to === 'string' ? JSON.parse(dbMessage.reply_to) : dbMessage.reply_to)
+        : undefined
     };
   }
 
@@ -133,7 +136,8 @@ export class RealtimeChatManager {
           created_at: message.createdAt.toISOString(),
           moderation_status: message.moderation.status,
           moderation_reason: message.moderation.reason,
-          companion_identity: message.companionIdentity ? JSON.stringify(message.companionIdentity) : null
+          companion_identity: message.companionIdentity ? JSON.stringify(message.companionIdentity) : null,
+          reply_to: message.replyTo ? JSON.stringify(message.replyTo) : null
         });
 
       if (error) {

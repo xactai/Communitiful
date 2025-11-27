@@ -5,7 +5,7 @@ import { realtimeChat } from '@/lib/realtimeChat';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { PageContainer } from '@/components/AppLayout';
-import { Settings, Send, AlertTriangle, MessageCircle, Users, LogOut, CheckCircle2 } from 'lucide-react';
+import { Settings, Send, AlertTriangle, MessageCircle, Users, LogOut, CheckCircle2, X, Reply } from 'lucide-react';
 import { Message, AVATARS, TEST_CLINIC } from '@/lib/types';
 import { UserPresence } from '@/lib/userPresence';
 import { 
@@ -60,6 +60,13 @@ export function Chat({ onOpenSettings, onOpenRelaxation }: ChatProps) {
   const [feedbackText, setFeedbackText] = useState('');
   const ratingEmojis = ['😞','😕','😐','🙂','😊'];
   
+  // Reply functionality
+  const [replyingTo, setReplyingTo] = useState<Message | null>(null);
+  const messageRefs = useRef<Map<string, HTMLDivElement>>(new Map());
+  const longPressTimerRef = useRef<NodeJS.Timeout | null>(null);
+  const touchStartXRef = useRef<number | null>(null);
+  const touchStartYRef = useRef<number | null>(null);
+  
   // Predefined messages to simulate an active chat environment
   const defaultMessages = [
     { sender: "🧑‍⚕️ Dr. Mira", message: "Good morning everyone 🌞 Hope you're all feeling stronger today!" },
@@ -90,7 +97,25 @@ export function Chat({ onOpenSettings, onOpenRelaxation }: ChatProps) {
         
         await realtimeChat.initialize();
         unsubscribe = realtimeChat.subscribe((messages) => {
-          setSharedMessages(messages);
+          // Merge with existing messages to preserve any local messages that haven't been synced yet
+          setSharedMessages(prev => {
+            const messageMap = new Map<string, Message>();
+            // First add all existing messages (preserve local state)
+            prev.forEach(msg => messageMap.set(msg.id, msg));
+            // Then update/add messages from subscription, but preserve reply data if it exists locally
+            messages.forEach(msg => {
+              const existing = messageMap.get(msg.id);
+              if (existing && existing.replyTo && !msg.replyTo) {
+                // Preserve local reply data if database message doesn't have it
+                messageMap.set(msg.id, { ...msg, replyTo: existing.replyTo });
+              } else {
+                messageMap.set(msg.id, msg);
+              }
+            });
+            return Array.from(messageMap.values()).sort(
+              (a, b) => a.createdAt.getTime() - b.createdAt.getTime()
+            );
+          });
         });
         console.log('✅ Real-time chat initialized successfully');
       } catch (error) {
@@ -98,7 +123,15 @@ export function Chat({ onOpenSettings, onOpenRelaxation }: ChatProps) {
         console.log('🔄 Falling back to local chat');
         // Fallback to local chat
         unsubscribe = sharedChat.subscribe((messages) => {
-          setSharedMessages(messages);
+          // Merge with existing messages to preserve any local messages
+          setSharedMessages(prev => {
+            const messageMap = new Map<string, Message>();
+            prev.forEach(msg => messageMap.set(msg.id, msg));
+            messages.forEach(msg => messageMap.set(msg.id, msg));
+            return Array.from(messageMap.values()).sort(
+              (a, b) => a.createdAt.getTime() - b.createdAt.getTime()
+            );
+          });
         });
       }
     };
@@ -232,6 +265,77 @@ export function Chat({ onOpenSettings, onOpenRelaxation }: ChatProps) {
     return `${adjectives[adjIndex]} ${nouns[nounIndex]}`;
   };
 
+  // Reply functionality handlers
+  const handleReply = (message: Message) => {
+    setReplyingTo(message);
+  };
+
+  const cancelReply = () => {
+    setReplyingTo(null);
+  };
+
+  // Scroll to and highlight a message
+  const scrollToMessage = (messageId: string) => {
+    const messageElement = messageRefs.current.get(messageId);
+    if (messageElement) {
+      messageElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      
+      // Add highlight effect
+      messageElement.classList.add('highlight-message');
+      setTimeout(() => {
+        messageElement.classList.remove('highlight-message');
+      }, 2000);
+    }
+  };
+
+  // Long-press handler
+  const handleLongPressStart = (message: Message) => {
+    longPressTimerRef.current = setTimeout(() => {
+      handleReply(message);
+    }, 500); // 500ms for long press
+  };
+
+  const handleLongPressEnd = () => {
+    if (longPressTimerRef.current) {
+      clearTimeout(longPressTimerRef.current);
+      longPressTimerRef.current = null;
+    }
+  };
+
+  // Store the message being interacted with
+  const currentMessageRef = useRef<Message | null>(null);
+
+  // Touch handlers for swipe and long-press
+  const handleTouchStart = (e: React.TouchEvent, message: Message) => {
+    touchStartXRef.current = e.touches[0].clientX;
+    touchStartYRef.current = e.touches[0].clientY;
+    currentMessageRef.current = message;
+    handleLongPressStart(message);
+  };
+
+  const handleTouchMove = (e: React.TouchEvent) => {
+    if (touchStartXRef.current === null || touchStartYRef.current === null || !currentMessageRef.current) return;
+    
+    const deltaX = e.touches[0].clientX - touchStartXRef.current;
+    const deltaY = Math.abs(e.touches[0].clientY - touchStartYRef.current);
+    
+    // If swiping right (and not too much vertical movement), trigger reply
+    if (deltaX > 50 && deltaY < 30) {
+      handleLongPressEnd(); // Cancel long press
+      handleReply(currentMessageRef.current);
+      touchStartXRef.current = null;
+      touchStartYRef.current = null;
+      currentMessageRef.current = null;
+    }
+  };
+
+  const handleTouchEnd = () => {
+    handleLongPressEnd();
+    touchStartXRef.current = null;
+    touchStartYRef.current = null;
+    currentMessageRef.current = null;
+  };
+
   // Auto-response functionality has been removed
   // Sticker set (predefined, vision-aligned)
   const stickers: { id: string; label: string; glyph: string }[] = [
@@ -350,6 +454,17 @@ export function Chat({ onOpenSettings, onOpenRelaxation }: ChatProps) {
 
     // Create pending message
     const messageId = crypto.randomUUID();
+    const replyData = replyingTo ? {
+      messageId: replyingTo.id,
+      text: replyingTo.text,
+      senderName: replyingTo.sessionId === session.id 
+        ? session.nick || 'You'
+        : getNicknameForSession(replyingTo.sessionId),
+      senderAvatar: replyingTo.sessionId === session.id
+        ? getAvatarEmoji(session.avatarId)
+        : getAvatarForSession(replyingTo.sessionId)
+    } : undefined;
+    
     const pendingMessage: Message = {
       id: messageId,
       clinicId: session.clinicId,
@@ -357,14 +472,26 @@ export function Chat({ onOpenSettings, onOpenRelaxation }: ChatProps) {
       authorType: 'user',
       text: messageText,
       createdAt: new Date(),
-      moderation: { status: 'allowed' }
+      moderation: { status: 'allowed' },
+      replyTo: replyData
     };
+    
+    // Debug log
+    if (replyData) {
+      console.log('Sending message with reply:', { replyData, pendingMessage });
+    }
+    
+    // Clear reply state
+    setReplyingTo(null);
 
     // Update last user message time
     lastUserMessageTimeRef.current = Date.now();
     
     // Add message to both local and real-time state
     addMessage(pendingMessage);
+    
+    // Immediately add to sharedMessages so it appears right away with reply data
+    setSharedMessages(prev => [...prev, pendingMessage]);
     
     try {
       await realtimeChat.addMessage(pendingMessage);
@@ -485,8 +612,25 @@ export function Chat({ onOpenSettings, onOpenRelaxation }: ChatProps) {
     // Sticker rendering
     const sticker = parseSticker(message.text);
     return (
-      <div key={message.id} className={`flex mb-4 ${isOwn ? 'justify-end' : 'justify-start'}`}>
+      <div 
+        key={message.id} 
+        className={`flex mb-4 ${isOwn ? 'justify-end' : 'justify-start'}`}
+        data-message-id={message.id}
+        onTouchStart={(e) => handleTouchStart(e, message)}
+        onTouchMove={handleTouchMove}
+        onTouchEnd={handleTouchEnd}
+        onMouseDown={() => handleLongPressStart(message)}
+        onMouseUp={handleLongPressEnd}
+        onMouseLeave={handleLongPressEnd}
+      >
         <div
+          ref={(el) => {
+            if (el) {
+              messageRefs.current.set(message.id, el);
+            } else {
+              messageRefs.current.delete(message.id);
+            }
+          }}
           className={`max-w-[85%] sm:max-w-xs transition-transform ${
             isOwn
               ? 'bg-gradient-to-br from-primary to-primary/90 text-primary-foreground shadow-lg rounded-2xl'
@@ -497,6 +641,26 @@ export function Chat({ onOpenSettings, onOpenRelaxation }: ChatProps) {
               : 'bg-white/90 border border-slate-200 rounded-2xl shadow-sm'
           } p-3 ${isPending ? 'opacity-50' : ''} ${isTyping ? 'animate-pulse' : ''} hover:-translate-y-[1px]`}
         >
+          {/* Reply Header */}
+          {message.replyTo && message.replyTo.messageId && message.replyTo.text && (
+            <div 
+              className="mb-2 pb-2 border-l-4 border-primary/50 pl-2 cursor-pointer hover:bg-black/5 dark:hover:bg-white/5 rounded-r transition-colors"
+              onClick={() => scrollToMessage(message.replyTo!.messageId)}
+            >
+              <div className="flex items-center gap-1 mb-1">
+                <Reply size={12} className={isOwn ? 'text-primary-foreground/70' : 'text-muted-foreground'} />
+                <span className={`text-xs font-medium ${isOwn ? 'text-primary-foreground/70' : 'text-muted-foreground'}`}>
+                  {message.replyTo.senderName || 'Unknown'}
+                </span>
+              </div>
+              <p className={`text-xs truncate ${isOwn ? 'text-primary-foreground/60' : 'text-muted-foreground/80'}`}>
+                {message.replyTo.text && message.replyTo.text.length > 50 
+                  ? message.replyTo.text.substring(0, 50) + '...' 
+                  : message.replyTo.text || ''}
+              </p>
+            </div>
+          )}
+          
           {/* Avatar and name for all messages */}
           <div className="flex items-center gap-2 mb-2">
             <div className="w-6 h-6 text-sm flex-shrink-0">
@@ -680,6 +844,35 @@ export function Chat({ onOpenSettings, onOpenRelaxation }: ChatProps) {
         
         <div ref={messagesEndRef} />
       </div>
+
+      {/* Reply Preview Bar */}
+      {replyingTo && (
+        <div className="bg-primary-soft/40 border-t border-primary/20 px-4 py-2 flex items-center gap-3">
+          <div className="flex-1 min-w-0">
+            <div className="flex items-center gap-2 mb-1">
+              <Reply size={14} className="text-primary flex-shrink-0" />
+              <span className="text-xs font-medium text-primary truncate">
+                {replyingTo.sessionId === session?.id 
+                  ? session.nick || 'You'
+                  : getNicknameForSession(replyingTo.sessionId)}
+              </span>
+            </div>
+            <p className="text-xs text-muted-foreground truncate">
+              {replyingTo.text.length > 60 
+                ? replyingTo.text.substring(0, 60) + '...' 
+                : replyingTo.text}
+            </p>
+          </div>
+          <Button
+            variant="ghost"
+            size="icon"
+            className="h-6 w-6 flex-shrink-0"
+            onClick={cancelReply}
+          >
+            <X size={14} />
+          </Button>
+        </div>
+      )}
 
       {/* Input */}
       <div className="bg-surface border-t px-4 py-3">
