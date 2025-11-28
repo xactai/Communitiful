@@ -1,9 +1,9 @@
 import { createClient } from '@supabase/supabase-js';
 
 // Supabase configuration (prefer env, fallback to hardcoded)
-const rawUrl = (import.meta as any)?.env?.VITE_SUPABASE_URL || 'https://uvnivlzzcfqotlnijrvv.supabase.co';
+const rawUrl = (import.meta as any)?.env?.VITE_SUPABASE_URL || 'https://brhwxzffmbonjfzfvjte.supabase.co';
 const supabaseUrl = String(rawUrl).trim().replace(/^@+/, '');
-const supabaseKey = (import.meta as any)?.env?.VITE_SUPABASE_ANON_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InV2bml2bHp6Y2Zxb3RsbmlqcnZ2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTk3NDQ3NzksImV4cCI6MjA3NTMyMDc3OX0.7dCcYWwySkqaSgJjsNLrsGD5ZD6l5hzW1CN4nlAMIJY';
+const supabaseKey = (import.meta as any)?.env?.VITE_SUPABASE_ANON_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJyaHd4emZmbWJvbmpmemZ2anRlIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjQzMjExNjAsImV4cCI6MjA3OTg5NzE2MH0.pIAzv2eiJRMsP8_H6gk6QHp8u1ui1G9-YzBB951MLUw';
 
 export const supabase = createClient(supabaseUrl, supabaseKey);
 
