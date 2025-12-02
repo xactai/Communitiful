@@ -43,6 +43,13 @@ jobs:
           cd wait-well-connect-main
           npm run build
           
+      - name: Remove CNAME file if exists
+        run: |
+          if [ -f wait-well-connect-main/dist/CNAME ]; then
+            rm wait-well-connect-main/dist/CNAME
+            echo "CNAME file removed"
+          fi
+          
       - name: Setup Pages
         uses: actions/configure-pages@v4
         
