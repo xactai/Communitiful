@@ -5,6 +5,7 @@ import { componentTagger } from "lovable-tagger";
 
 // https://vitejs.dev/config/
 export default defineConfig(({ mode }) => ({
+  // Base path for GitHub Pages deployment at xactai.github.io/Communitiful
   base: process.env.NODE_ENV === 'production' ? "/Communitiful/" : "/",
   server: {
     host: "::",
