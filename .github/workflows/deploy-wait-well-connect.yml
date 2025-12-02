@@ -45,9 +45,22 @@ jobs:
           
       - name: Remove CNAME file if exists
         run: |
+          # Remove CNAME from dist folder (copied from public during build)
+          find wait-well-connect-main/dist -name "CNAME" -type f -delete || true
+          # Also check public folder to prevent it from being copied
+          if [ -f wait-well-connect-main/public/CNAME ]; then
+            rm wait-well-connect-main/public/CNAME
+            echo "CNAME file removed from public folder"
+          fi
+          echo "CNAME removal check complete"
+          
+      - name: Verify no CNAME in build output
+        run: |
           if [ -f wait-well-connect-main/dist/CNAME ]; then
-            rm wait-well-connect-main/dist/CNAME
-            echo "CNAME file removed"
+            echo "ERROR: CNAME file still exists in dist folder!"
+            exit 1
+          else
+            echo "✓ Confirmed: No CNAME file in build output"
           fi
           
       - name: Setup Pages
