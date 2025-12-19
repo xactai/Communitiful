@@ -232,10 +232,14 @@ export function HospitalForm({ onBack, onSuccess }: HospitalFormProps) {
     if (cleanedContact.length !== 10) return setError('Valid 10-digit patient contact required');
 
     // Validate companions
-    for (const c of companions) {
+    for (let idx = 0; idx < companions.length; idx++) {
+      const c = companions[idx];
       if (!c.name.trim()) return setError('All companion names are required');
-  const cleaned = c.number.replace(/\D/g, '');
+      const cleaned = c.number.replace(/\D/g, '');
       if (cleaned.length !== 10) return setError('All companions must have valid 10-digit mobile numbers');
+      if (!locationFetchedStates[idx]) {
+        return setError(`Location must be fetched for Companion ${idx + 1}. Please click "Fetch Location" for all companions.`);
+      }
     }
 
     setLoading(true);
@@ -296,7 +300,7 @@ export function HospitalForm({ onBack, onSuccess }: HospitalFormProps) {
               height={60} 
               className="object-contain rounded-lg shadow-md"
             />
-            <h1 className="text-2xl font-bold text-primary">Apollo HOSPITALS</h1>
+            <h1 className="text-2xl font-bold text-primary"></h1>
           </div>
           <div className="w-10" /> {/* Spacer for centering */}
         </div>
@@ -382,7 +386,7 @@ export function HospitalForm({ onBack, onSuccess }: HospitalFormProps) {
 
             <div className="space-y-3">
               <Label htmlFor="purpose" className="text-base font-medium">
-                Purpose of Visit
+                Purpose of Visit *
               </Label>
               <Select value={purposeOfVisit} onValueChange={setPurposeOfVisit}>
                 <SelectTrigger className="focus:ring-2 focus:ring-primary/20 py-6 text-base shadow-sm border-primary/20">
@@ -460,7 +464,7 @@ export function HospitalForm({ onBack, onSuccess }: HospitalFormProps) {
 
                   <div className="space-y-3">
                     <Label htmlFor={`companion-relationship-${idx}`} className="text-base font-medium">
-                      Relationship
+                      Relationship *
                     </Label>
                     <Select value={c.relationship} onValueChange={(value) => updateCompanion(idx, 'relationship', value)}>
                       <SelectTrigger className="focus:ring-2 focus:ring-primary/20 py-6 text-base shadow-sm border-primary/20 hover:border-primary/50 transition-colors">
@@ -480,7 +484,7 @@ export function HospitalForm({ onBack, onSuccess }: HospitalFormProps) {
                   </div>
 
                   <div className="space-y-2">
-                    <Label htmlFor={`companion-number-${idx}`}>
+                    <Label htmlFor={`companion-number-${idx}`} className="text-base font-medium">
                       Mobile Number *
                     </Label>
                     <div className="flex flex-col sm:flex-row gap-2 sm:items-center">
@@ -532,8 +536,8 @@ export function HospitalForm({ onBack, onSuccess }: HospitalFormProps) {
                   </div>
 
                   <div className="space-y-2">
-                    <Label htmlFor={`companion-location-${idx}`}>
-                      Location
+                    <Label htmlFor={`companion-location-${idx}`} className="text-base font-medium">
+                      Location *
                     </Label>
                     <div className="space-y-3">
                       <Button
@@ -597,7 +601,6 @@ export function HospitalForm({ onBack, onSuccess }: HospitalFormProps) {
                 whileTap={{ scale: 0.98 }}
                 className="flex items-center justify-center gap-2"
               >
-                <Users size={16} className="text-primary" />
                 Add Another Companion
               </motion.div>
             </Button>

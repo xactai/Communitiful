@@ -1,132 +1,146 @@
-# GitHub Pages Setup Guide - Fix 404 Error
+# GitHub Pages Setup Guide
 
-## 🚨 **Current Issue**
-Your GitHub Pages is showing a 404 error because of configuration mismatches between the repository structure and GitHub Pages settings.
+## ✅ **Setup Complete!**
 
-## 🔧 **Solutions Implemented**
+Your project is now configured for GitHub Pages deployment with GitHub Actions.
 
-### **1. Created GitHub Actions Deployment Workflow**
-- ✅ Added `.github/workflows/deploy-website.yml`
-- ✅ Automatically builds and deploys website_code to GitHub Pages
-- ✅ Triggers on changes to website_code directory
+## 🚀 **Quick Start**
 
-### **2. Fixed Vite Configuration**
-- ✅ Updated `website_code/vite.config.ts` to handle production builds correctly
-- ✅ Uses proper base path for GitHub Pages
+### **Step 1: Enable GitHub Pages in Repository Settings**
 
-### **3. Improved 404 Handling**
-- ✅ Enhanced `website_code/404.html` with better redirect logic
-- ✅ Added fallback text for users
-
-## 🚀 **Setup Steps**
-
-### **Step 1: Enable GitHub Pages**
-1. Go to your repository on GitHub
+1. Go to your repository on GitHub: `https://github.com/xactai/Communitiful`
 2. Click **Settings** → **Pages**
 3. Under **Source**, select **GitHub Actions**
 4. Save the settings
 
-### **Step 2: Verify Repository Name**
-Your repository should be named `Communitiful` for the current configuration to work. If it's different, update the base path in:
-- `website_code/vite.config.ts` (line 8)
-- `website_code/404.html` (line 10)
+### **Step 2: Push to Deploy**
 
-### **Step 3: Deploy the Website**
-1. **Commit and push** the changes:
-   ```bash
-   git add .
-   git commit -m "Fix GitHub Pages deployment"
-   git push origin main
-   ```
+Simply push your code to the `main` branch:
 
-2. **Check GitHub Actions**:
-   - Go to **Actions** tab in your repository
-   - You should see "Deploy Website to GitHub Pages" workflow running
-   - Wait for it to complete successfully
-
-### **Step 4: Access Your Website**
-Your website should be available at:
-```
-https://[your-username].github.io/Communitiful/
+```bash
+git add .
+git commit -m "Setup GitHub Pages deployment"
+git push origin main
 ```
 
-## 🔍 **Troubleshooting**
+The GitHub Actions workflow will automatically:
+- Build your React/Vite application
+- Deploy it to GitHub Pages
+- Copy the CNAME file for your custom domain
 
-### **If you still get 404:**
+### **Step 3: Access Your Website**
 
-1. **Check Repository Name**:
-   - If your repo is not named "Communitiful", update the base path:
-   ```typescript
-   // In website_code/vite.config.ts
-   base: process.env.NODE_ENV === 'production' ? "/[your-repo-name]/" : "/",
-   ```
+Your website will be available at:
+- **Custom Domain**: `https://www.communitiful.com` (if DNS is configured)
+- **GitHub Pages URL**: `https://xactai.github.io/Communitiful/` (if not using custom domain)
 
-2. **Check GitHub Pages Settings**:
-   - Repository Settings → Pages → Source should be "GitHub Actions"
-   - Not "Deploy from a branch"
+## 📋 **What Was Configured**
 
-3. **Check Actions Tab**:
-   - Look for failed deployments
-   - Check build logs for errors
+### **1. GitHub Actions Workflow**
+- ✅ Created `.github/workflows/deploy.yml`
+- ✅ Automatically builds and deploys on push to `main`
+- ✅ Copies CNAME file to dist folder
+- ✅ Copies 404.html for SPA routing support
 
-4. **Verify File Structure**:
-   - Make sure `website_code/dist/` contains built files
-   - Check that `index.html` exists in the dist folder
+### **2. Vite Configuration**
+- ✅ Updated `vite.config.ts` with base path configuration
+- ✅ Configured for custom domain (base: "/")
+- ✅ Production builds will work correctly
 
-### **Alternative: Manual Deployment**
+### **3. SPA Routing Support**
+- ✅ Created `404.html` for handling client-side routing
+- ✅ Redirects all routes to index.html for React Router support
 
-If GitHub Actions doesn't work, you can deploy manually:
+## 🔧 **Configuration Details**
 
-1. **Build the website**:
-   ```bash
-   cd website_code
-   npm install
-   npm run build
-   ```
+### **Custom Domain Setup**
 
-2. **Deploy to gh-pages branch**:
-   ```bash
-   npm install -g gh-pages
-   gh-pages -d dist
-   ```
+Your `CNAME` file contains: `www.communitiful.com`
 
-3. **Update GitHub Pages settings**:
-   - Source: Deploy from a branch
-   - Branch: gh-pages
-   - Folder: / (root)
+To use the custom domain:
+1. Configure your DNS records:
+   - Type: `CNAME`
+   - Name: `www`
+   - Value: `xactai.github.io`
+2. Wait for DNS propagation (can take up to 24 hours)
+3. GitHub Pages will automatically detect and use the custom domain
 
-## 📋 **File Structure After Fix**
+### **Base Path Configuration**
+
+If you need to change the base path (for example, if not using a custom domain), update `vite.config.ts`:
+
+```typescript
+// For custom domain (current)
+base: process.env.NODE_ENV === 'production' ? "/" : "/"
+
+// For GitHub Pages subpath
+base: process.env.NODE_ENV === 'production' ? "/Communitiful/" : "/"
+```
+
+## 🔍 **Monitoring Deployment**
+
+### **Check Deployment Status**
+
+1. Go to the **Actions** tab in your repository
+2. Look for "Deploy to GitHub Pages" workflow
+3. Click on a run to see detailed logs
+
+### **Troubleshooting**
+
+**If deployment fails:**
+- Check the Actions tab for error messages
+- Verify Node.js version (should be 18)
+- Check that `package.json` has a build script
+- Ensure all dependencies are listed in `package.json`
+
+**If website shows 404:**
+- Verify GitHub Pages source is set to "GitHub Actions"
+- Check that the workflow completed successfully
+- Wait a few minutes for GitHub Pages to update
+- Clear your browser cache
+
+**If assets don't load:**
+- Verify the base path in `vite.config.ts` matches your deployment URL
+- Check browser console for 404 errors
+- Ensure `CNAME` file is copied to dist folder (handled automatically)
+
+## 📁 **File Structure**
 
 ```
 .github/
   workflows/
-    deploy-website.yml          # New deployment workflow
-    sync.yml                    # Existing sync workflow
+    deploy.yml              # GitHub Actions deployment workflow
 
-website_code/
-  dist/                         # Built files (auto-generated)
-  src/                          # Source code
-  vite.config.ts               # Fixed base path
-  404.html                     # Improved 404 handling
-  index.html                   # Main HTML file
-  package.json                 # Dependencies
+vite.config.ts              # Vite config with base path
+404.html                    # SPA routing support
+CNAME                       # Custom domain configuration
+package.json                # Build scripts and dependencies
 ```
 
 ## ✅ **Success Indicators**
 
 When everything works correctly, you should see:
 - ✅ GitHub Actions workflow completes successfully
-- ✅ Website loads at `https://[username].github.io/Communitiful/`
+- ✅ Website loads at your custom domain or GitHub Pages URL
 - ✅ No 404 errors
 - ✅ All assets (CSS, JS, images) load correctly
+- ✅ React Router navigation works (if you add routing later)
 
-## 🆘 **Still Having Issues?**
+## 🔄 **Automatic Deployments**
 
-If you're still getting 404 errors:
+Every time you push to the `main` branch, the website will automatically rebuild and deploy. No manual steps required!
 
-1. **Check the exact repository name** and update base paths accordingly
-2. **Verify GitHub Pages is enabled** in repository settings
-3. **Check the Actions tab** for deployment errors
-4. **Try accessing the website** after a few minutes (GitHub Pages can take time to update)
+## 📝 **Notes**
 
-The most common issue is a mismatch between the repository name and the base path configuration. Make sure both match exactly!
+- The workflow uses Node.js 18
+- Build artifacts are cached for faster deployments
+- The deployment uses the latest GitHub Pages Actions (v4)
+- Custom domain (www.communitiful.com) is automatically handled via CNAME file
+
+## 🆘 **Need Help?**
+
+If you encounter any issues:
+1. Check the GitHub Actions logs
+2. Verify repository settings
+3. Ensure DNS is configured correctly (for custom domain)
+4. Review the troubleshooting section above

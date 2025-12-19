@@ -5,7 +5,7 @@ import { realtimeChat } from '@/lib/realtimeChat';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { PageContainer } from '@/components/AppLayout';
-import { Settings, Send, AlertTriangle, MessageCircle, Users, LogOut, CheckCircle2 } from 'lucide-react';
+import { Settings, Send, AlertTriangle, MessageCircle, Users, LogOut, CheckCircle2, X, Reply } from 'lucide-react';
 import { Message, AVATARS, TEST_CLINIC } from '@/lib/types';
 import { UserPresence } from '@/lib/userPresence';
 import { 
@@ -60,6 +60,21 @@ export function Chat({ onOpenSettings, onOpenRelaxation }: ChatProps) {
   const [feedbackText, setFeedbackText] = useState('');
   const ratingEmojis = ['😞','😕','😐','🙂','😊'];
   
+  // Reply functionality
+  const [replyingTo, setReplyingTo] = useState<Message | null>(null);
+  const messageRefs = useRef<Map<string, HTMLDivElement>>(new Map());
+  const longPressTimerRef = useRef<NodeJS.Timeout | null>(null);
+  const touchStartXRef = useRef<number | null>(null);
+  const touchStartYRef = useRef<number | null>(null);
+  
+  // Reaction functionality
+  const [reactionPickerMessage, setReactionPickerMessage] = useState<Message | null>(null);
+  const [reactionPickerPosition, setReactionPickerPosition] = useState<{ x: number; y: number } | null>(null);
+  const reactionPickerRef = useRef<HTMLDivElement>(null);
+  
+  // Common reaction emojis
+  const REACTION_EMOJIS = ['👍', '❤️', '🙂', '😂', '😮', '😢', '🙏'];
+  
   // Predefined messages to simulate an active chat environment
   const defaultMessages = [
     { sender: "🧑‍⚕️ Dr. Mira", message: "Good morning everyone 🌞 Hope you're all feeling stronger today!" },
@@ -72,6 +87,22 @@ export function Chat({ onOpenSettings, onOpenRelaxation }: ChatProps) {
     { sender: "🤖 CompanionBot", message: "If you're new here, say hi 👋 and let's chat about your day!" },
   ];
   
+  // Close reaction picker on outside click
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (reactionPickerRef.current && !reactionPickerRef.current.contains(event.target as Node)) {
+        closeReactionPicker();
+      }
+    };
+
+    if (reactionPickerMessage) {
+      document.addEventListener('mousedown', handleClickOutside);
+      return () => {
+        document.removeEventListener('mousedown', handleClickOutside);
+      };
+    }
+  }, [reactionPickerMessage]);
+
   // Initialize real-time chat and subscribe to messages
   useEffect(() => {
     let unsubscribe: (() => void) | null = null;
@@ -90,7 +121,32 @@ export function Chat({ onOpenSettings, onOpenRelaxation }: ChatProps) {
         
         await realtimeChat.initialize();
         unsubscribe = realtimeChat.subscribe((messages) => {
-          setSharedMessages(messages);
+          // Merge with existing messages to preserve any local messages that haven't been synced yet
+          setSharedMessages(prev => {
+            const messageMap = new Map<string, Message>();
+            // First add all existing messages (preserve local state)
+            prev.forEach(msg => messageMap.set(msg.id, msg));
+            // Then update/add messages from subscription, but preserve local data if it exists
+            messages.forEach(msg => {
+              const existing = messageMap.get(msg.id);
+              if (existing) {
+                // Preserve local reply data if database message doesn't have it
+                const preservedReplyTo = existing.replyTo && !msg.replyTo ? existing.replyTo : msg.replyTo;
+                // Preserve local reactions if they exist (merge with database reactions)
+                const preservedReactions = existing.reactions || msg.reactions;
+                messageMap.set(msg.id, { 
+                  ...msg, 
+                  replyTo: preservedReplyTo,
+                  reactions: preservedReactions || msg.reactions
+                });
+              } else {
+                messageMap.set(msg.id, msg);
+              }
+            });
+            return Array.from(messageMap.values()).sort(
+              (a, b) => a.createdAt.getTime() - b.createdAt.getTime()
+            );
+          });
         });
         console.log('✅ Real-time chat initialized successfully');
       } catch (error) {
@@ -98,7 +154,27 @@ export function Chat({ onOpenSettings, onOpenRelaxation }: ChatProps) {
         console.log('🔄 Falling back to local chat');
         // Fallback to local chat
         unsubscribe = sharedChat.subscribe((messages) => {
-          setSharedMessages(messages);
+          // Merge with existing messages to preserve any local messages
+          setSharedMessages(prev => {
+            const messageMap = new Map<string, Message>();
+            prev.forEach(msg => messageMap.set(msg.id, msg));
+            messages.forEach(msg => {
+              const existing = messageMap.get(msg.id);
+              if (existing) {
+                // Preserve local reactions if they exist
+                const preservedReactions = existing.reactions || msg.reactions;
+                messageMap.set(msg.id, { 
+                  ...msg, 
+                  reactions: preservedReactions || msg.reactions
+                });
+              } else {
+                messageMap.set(msg.id, msg);
+              }
+            });
+            return Array.from(messageMap.values()).sort(
+              (a, b) => a.createdAt.getTime() - b.createdAt.getTime()
+            );
+          });
         });
       }
     };
@@ -232,6 +308,159 @@ export function Chat({ onOpenSettings, onOpenRelaxation }: ChatProps) {
     return `${adjectives[adjIndex]} ${nouns[nounIndex]}`;
   };
 
+  // Reply functionality handlers
+  const handleReply = (message: Message) => {
+    setReplyingTo(message);
+  };
+
+  const cancelReply = () => {
+    setReplyingTo(null);
+  };
+
+  // Scroll to and highlight a message
+  const scrollToMessage = (messageId: string) => {
+    const messageElement = messageRefs.current.get(messageId);
+    if (messageElement) {
+      messageElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      
+      // Add highlight effect
+      messageElement.classList.add('highlight-message');
+      setTimeout(() => {
+        messageElement.classList.remove('highlight-message');
+      }, 2000);
+    }
+  };
+
+  // Long-press handler - show reaction picker
+  const handleLongPressStart = (message: Message, event?: React.MouseEvent | React.TouchEvent) => {
+    longPressTimerRef.current = setTimeout(() => {
+      // Show reaction picker
+      if (event) {
+        const clientX = 'touches' in event ? event.touches[0].clientX : (event as React.MouseEvent).clientX;
+        const clientY = 'touches' in event ? event.touches[0].clientY : (event as React.MouseEvent).clientY;
+        // Position picker above the message, centered horizontally
+        setReactionPickerPosition({ 
+          x: clientX, 
+          y: Math.max(10, clientY - 60) 
+        });
+      } else {
+        setReactionPickerPosition({ x: window.innerWidth / 2, y: window.innerHeight / 2 });
+      }
+      setReactionPickerMessage(message);
+    }, 500); // 500ms for long press
+  };
+
+  const handleLongPressEnd = () => {
+    if (longPressTimerRef.current) {
+      clearTimeout(longPressTimerRef.current);
+      longPressTimerRef.current = null;
+    }
+  };
+
+  // Store the message being interacted with
+  const currentMessageRef = useRef<Message | null>(null);
+
+  // Touch handlers for swipe and long-press
+  const handleTouchStart = (e: React.TouchEvent, message: Message) => {
+    touchStartXRef.current = e.touches[0].clientX;
+    touchStartYRef.current = e.touches[0].clientY;
+    currentMessageRef.current = message;
+    handleLongPressStart(message, e);
+  };
+
+  const handleTouchMove = (e: React.TouchEvent) => {
+    if (touchStartXRef.current === null || touchStartYRef.current === null || !currentMessageRef.current) return;
+    
+    const deltaX = e.touches[0].clientX - touchStartXRef.current;
+    const deltaY = Math.abs(e.touches[0].clientY - touchStartYRef.current);
+    
+    // If swiping right (and not too much vertical movement), trigger reply
+    if (deltaX > 50 && deltaY < 30) {
+      handleLongPressEnd(); // Cancel long press
+      handleReply(currentMessageRef.current);
+      touchStartXRef.current = null;
+      touchStartYRef.current = null;
+      currentMessageRef.current = null;
+    }
+  };
+
+  const handleTouchEnd = () => {
+    handleLongPressEnd();
+    touchStartXRef.current = null;
+    touchStartYRef.current = null;
+    currentMessageRef.current = null;
+  };
+
+  // Reaction handlers
+  const handleAddReaction = async (message: Message, emoji: string) => {
+    if (!session) return;
+    
+    const currentReactions = message.reactions || {};
+    const reaction = currentReactions[emoji] || { count: 0, users: [] };
+    
+    // Check if user already reacted with this emoji
+    const userIndex = reaction.users.indexOf(session.id);
+    let updatedReactions: typeof currentReactions;
+    
+    if (userIndex >= 0) {
+      // Remove reaction
+      if (reaction.count === 1) {
+        // Remove emoji entirely if count would be 0
+        updatedReactions = { ...currentReactions };
+        delete updatedReactions[emoji];
+      } else {
+        // Decrement count and remove user
+        updatedReactions = {
+          ...currentReactions,
+          [emoji]: {
+            count: reaction.count - 1,
+            users: reaction.users.filter(id => id !== session.id)
+          }
+        };
+      }
+    } else {
+      // Add reaction
+      updatedReactions = {
+        ...currentReactions,
+        [emoji]: {
+          count: reaction.count + 1,
+          users: [...reaction.users, session.id]
+        }
+      };
+    }
+    
+    // Close picker
+    setReactionPickerMessage(null);
+    setReactionPickerPosition(null);
+    
+    // Update message locally in sharedMessages state immediately
+    setSharedMessages(prev => prev.map(msg => {
+      if (msg.id === message.id) {
+        const updated = { ...msg, reactions: updatedReactions };
+        // Debug log
+        console.log('Updating message reactions:', { messageId: msg.id, reactions: updatedReactions, updated });
+        return updated;
+      }
+      return msg;
+    }));
+    
+    // Update in Zustand store
+    updateMessage(message.id, { reactions: updatedReactions });
+    
+    // Update in realtime chat
+    try {
+      await realtimeChat.updateMessage(message.id, { reactions: updatedReactions });
+    } catch (error) {
+      console.error('Failed to update reaction in real-time chat:', error);
+      sharedChat.updateMessage(message.id, { reactions: updatedReactions });
+    }
+  };
+
+  const closeReactionPicker = () => {
+    setReactionPickerMessage(null);
+    setReactionPickerPosition(null);
+  };
+
   // Auto-response functionality has been removed
   // Sticker set (predefined, vision-aligned)
   const stickers: { id: string; label: string; glyph: string }[] = [
@@ -350,6 +579,17 @@ export function Chat({ onOpenSettings, onOpenRelaxation }: ChatProps) {
 
     // Create pending message
     const messageId = crypto.randomUUID();
+    const replyData = replyingTo ? {
+      messageId: replyingTo.id,
+      text: replyingTo.text,
+      senderName: replyingTo.sessionId === session.id 
+        ? session.nick || 'You'
+        : getNicknameForSession(replyingTo.sessionId),
+      senderAvatar: replyingTo.sessionId === session.id
+        ? getAvatarEmoji(session.avatarId)
+        : getAvatarForSession(replyingTo.sessionId)
+    } : undefined;
+    
     const pendingMessage: Message = {
       id: messageId,
       clinicId: session.clinicId,
@@ -357,14 +597,26 @@ export function Chat({ onOpenSettings, onOpenRelaxation }: ChatProps) {
       authorType: 'user',
       text: messageText,
       createdAt: new Date(),
-      moderation: { status: 'allowed' }
+      moderation: { status: 'allowed' },
+      replyTo: replyData
     };
+    
+    // Debug log
+    if (replyData) {
+      console.log('Sending message with reply:', { replyData, pendingMessage });
+    }
+    
+    // Clear reply state
+    setReplyingTo(null);
 
     // Update last user message time
     lastUserMessageTimeRef.current = Date.now();
     
     // Add message to both local and real-time state
     addMessage(pendingMessage);
+    
+    // Immediately add to sharedMessages so it appears right away with reply data
+    setSharedMessages(prev => [...prev, pendingMessage]);
     
     try {
       await realtimeChat.addMessage(pendingMessage);
@@ -485,8 +737,25 @@ export function Chat({ onOpenSettings, onOpenRelaxation }: ChatProps) {
     // Sticker rendering
     const sticker = parseSticker(message.text);
     return (
-      <div key={message.id} className={`flex mb-4 ${isOwn ? 'justify-end' : 'justify-start'}`}>
+      <div 
+        key={message.id} 
+        className={`flex mb-4 ${isOwn ? 'justify-end' : 'justify-start'}`}
+        data-message-id={message.id}
+        onTouchStart={(e) => handleTouchStart(e, message)}
+        onTouchMove={handleTouchMove}
+        onTouchEnd={handleTouchEnd}
+        onMouseDown={(e) => handleLongPressStart(message, e)}
+        onMouseUp={handleLongPressEnd}
+        onMouseLeave={handleLongPressEnd}
+      >
         <div
+          ref={(el) => {
+            if (el) {
+              messageRefs.current.set(message.id, el);
+            } else {
+              messageRefs.current.delete(message.id);
+            }
+          }}
           className={`max-w-[85%] sm:max-w-xs transition-transform ${
             isOwn
               ? 'bg-gradient-to-br from-primary to-primary/90 text-primary-foreground shadow-lg rounded-2xl'
@@ -497,6 +766,26 @@ export function Chat({ onOpenSettings, onOpenRelaxation }: ChatProps) {
               : 'bg-white/90 border border-slate-200 rounded-2xl shadow-sm'
           } p-3 ${isPending ? 'opacity-50' : ''} ${isTyping ? 'animate-pulse' : ''} hover:-translate-y-[1px]`}
         >
+          {/* Reply Header */}
+          {message.replyTo && message.replyTo.messageId && message.replyTo.text && (
+            <div 
+              className="mb-2 pb-2 border-l-4 border-primary/50 pl-2 cursor-pointer hover:bg-black/5 dark:hover:bg-white/5 rounded-r transition-colors"
+              onClick={() => scrollToMessage(message.replyTo!.messageId)}
+            >
+              <div className="flex items-center gap-1 mb-1">
+                <Reply size={12} className={isOwn ? 'text-primary-foreground/70' : 'text-muted-foreground'} />
+                <span className={`text-xs font-medium ${isOwn ? 'text-primary-foreground/70' : 'text-muted-foreground'}`}>
+                  {message.replyTo.senderName || 'Unknown'}
+                </span>
+              </div>
+              <p className={`text-xs truncate ${isOwn ? 'text-primary-foreground/60' : 'text-muted-foreground/80'}`}>
+                {message.replyTo.text && message.replyTo.text.length > 50 
+                  ? message.replyTo.text.substring(0, 50) + '...' 
+                  : message.replyTo.text || ''}
+              </p>
+            </div>
+          )}
+          
           {/* Avatar and name for all messages */}
           <div className="flex items-center gap-2 mb-2">
             <div className="w-6 h-6 text-sm flex-shrink-0">
@@ -538,6 +827,38 @@ export function Chat({ onOpenSettings, onOpenRelaxation }: ChatProps) {
             <p className="text-sm sm:text-sm leading-relaxed break-words">
               {message.text}
             </p>
+          )}
+          
+          {/* Reactions */}
+          {message.reactions && 
+           typeof message.reactions === 'object' && 
+           Object.keys(message.reactions).length > 0 && (
+            <div className="flex flex-wrap gap-1 mt-2">
+              {Object.entries(message.reactions).map(([emoji, reaction]) => {
+                if (!reaction || typeof reaction !== 'object' || !reaction.count || !reaction.users) {
+                  return null;
+                }
+                const hasUserReacted = session && reaction.users.includes(session.id);
+                return (
+                  <button
+                    key={emoji}
+                    onClick={() => handleAddReaction(message, emoji)}
+                    className={`flex items-center gap-1 px-2 py-1 rounded-full text-xs transition-colors ${
+                      hasUserReacted
+                        ? isOwn
+                          ? 'bg-white/30 text-primary-foreground'
+                          : 'bg-primary/20 text-primary border border-primary/30'
+                        : isOwn
+                        ? 'bg-white/10 text-primary-foreground/70 hover:bg-white/20'
+                        : 'bg-muted/40 text-muted-foreground hover:bg-muted/60'
+                    }`}
+                  >
+                    <span>{emoji}</span>
+                    <span>{reaction.count}</span>
+                  </button>
+                );
+              })}
+            </div>
           )}
           
           <div className="flex items-center justify-between mt-2 text-[11px] opacity-80">
@@ -680,6 +1001,72 @@ export function Chat({ onOpenSettings, onOpenRelaxation }: ChatProps) {
         
         <div ref={messagesEndRef} />
       </div>
+
+      {/* Reply Preview Bar */}
+      {replyingTo && (
+        <div className="bg-primary-soft/40 border-t border-primary/20 px-4 py-2 flex items-center gap-3">
+          <div className="flex-1 min-w-0">
+            <div className="flex items-center gap-2 mb-1">
+              <Reply size={14} className="text-primary flex-shrink-0" />
+              <span className="text-xs font-medium text-primary truncate">
+                {replyingTo.sessionId === session?.id 
+                  ? session.nick || 'You'
+                  : getNicknameForSession(replyingTo.sessionId)}
+              </span>
+            </div>
+            <p className="text-xs text-muted-foreground truncate">
+              {replyingTo.text.length > 60 
+                ? replyingTo.text.substring(0, 60) + '...' 
+                : replyingTo.text}
+            </p>
+          </div>
+          <Button
+            variant="ghost"
+            size="icon"
+            className="h-6 w-6 flex-shrink-0"
+            onClick={cancelReply}
+          >
+            <X size={14} />
+          </Button>
+        </div>
+      )}
+
+      {/* Reaction Picker */}
+      {reactionPickerMessage && reactionPickerPosition && (
+        <>
+          {/* Backdrop */}
+          <div
+            className="fixed inset-0 z-40"
+            onClick={closeReactionPicker}
+          />
+          {/* Picker */}
+          <div
+            ref={reactionPickerRef}
+            className="fixed z-50 bg-white border border-slate-200 rounded-full shadow-lg px-2 py-1 flex items-center gap-1 animate-in fade-in zoom-in-95 duration-200"
+            style={{
+              left: `${Math.max(10, Math.min(reactionPickerPosition.x - 100, window.innerWidth - 220))}px`,
+              top: `${Math.max(10, reactionPickerPosition.y - 60)}px`,
+            }}
+            onClick={(e) => e.stopPropagation()}
+          >
+            {REACTION_EMOJIS.map((emoji) => {
+              const hasReacted = session && reactionPickerMessage.reactions?.[emoji]?.users.includes(session.id);
+              return (
+                <button
+                  key={emoji}
+                  onClick={() => handleAddReaction(reactionPickerMessage, emoji)}
+                  className={`text-2xl p-2 rounded-full transition-all hover:scale-125 ${
+                    hasReacted ? 'bg-primary/20 scale-110' : 'hover:bg-muted/50'
+                  }`}
+                  aria-label={`React with ${emoji}`}
+                >
+                  {emoji}
+                </button>
+              );
+            })}
+          </div>
+        </>
+      )}
 
       {/* Input */}
       <div className="bg-surface border-t px-4 py-3">

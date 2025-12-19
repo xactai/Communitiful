@@ -1,7 +1,7 @@
-# 🏥 Companions Anonymous — Implementation Document
+# 🏥 Communitiful — Implementation Document
 
 ## 📘 Overview
-**Companions Anonymous** is an end-to-end application built to support companions of hospital patients through a **safe, anonymous, and moderated digital environment**.  
+**Communitiful** (formerly Companions Anonymous) is an end-to-end application built to support companions of hospital patients through a **safe, anonymous, and moderated digital environment**.  
 The application has two core modules — **Hospital Mode** and **Companion Mode** — that work together to enable **secure registration, authentication, and peer-to-peer engagement** within a hospital’s premises.
 
 The system has been fully implemented using **Supabase** as the backend, ensuring **real-time updates, secure data handling, and scalable infrastructure**.
@@ -15,8 +15,13 @@ This module enables hospitals to capture essential **patient** and **companion**
 
 #### 🧩 Implementation Summary
 - Developed a **hospital-facing registration form** structured into two sections:
-  - **Patient Details:** Basic information (name, department, purpose of visit)
-  - **Companion Details:** Name, mobile number (for authentication), location, and consent flag
+  - **Patient Details:** Basic information (name, mobile number, department, purpose of visit)
+  - **Companion Details:** Name, mobile number (for authentication), relationship, location, and consent flag
+- **Form Validation & UX:**
+  - All required field labels marked with asterisks (*) for clarity
+  - **Mandatory Location Fetching:** Companions must fetch their location before submission
+  - Real-time location fetching with visual feedback
+  - Country code selection for international mobile numbers
 - Upon submission:
   - Data is securely stored in a **Supabase table**
   - Each submission generates a **timestamped record** linking patient and companion details
@@ -41,6 +46,11 @@ This module allows registered companions to **log in, join an anonymous chatroom
 - Companions authenticate using their **registered mobile number**
 - System performs a **lookup in Supabase**
 - Only registered companions gain access; **unregistered numbers are blocked**
+- **Single Active Session Enforcement:** Users with the same mobile number cannot stay logged in on two devices simultaneously
+  - New login attempts are blocked if an active session exists
+  - Clear error messages guide users to log out from other devices
+  - Session deactivation on logout ensures proper cleanup
+  - Prevents account sharing and maintains session security
 
 #### 🕵️ Anonymity System
 On first login, each companion is automatically assigned:
@@ -52,6 +62,12 @@ No personal or identifiable information is ever displayed or retrievable during 
 
 #### 💭 Chatroom Experience
 - Real-time message exchange among companions
+- **Reply to Message Functionality:** WhatsApp-style reply feature
+  - **Reply Triggers:** Long-press (500ms) or swipe right on any message
+  - **Reply Preview Bar:** Shows above input with sender name and message snippet
+  - **Reply Headers:** Sent messages display reply context with left border highlight
+  - **Jump to Original:** Click reply header to scroll and highlight the original message
+  - **Smooth Animations:** Yellow highlight fade effect when jumping to replied messages
 - **Virtual Agent** ensures engagement even during low activity:
   - Responds automatically if messages go unanswered
   - Provides **supportive and context-aware** replies
@@ -60,6 +76,11 @@ No personal or identifiable information is ever displayed or retrievable during 
 #### 🧰 Content Moderation
 - Every message is screened by **Gemini 2.5 Flash** via the Gemini API (auto-falling back to **Gemini 2.5 Pro** if the flash tier is unavailable)
 - The moderator blocks harassment, hate, spam, irrelevant or negative rants, unsafe requests, violence/threats, sexual content, self-harm mentions, medical misinformation, and any disturbing or off-topic chatter
+- **Enhanced Privacy Protection:**
+  - **Mobile Number Blocking:** Advanced detection prevents sharing of phone numbers (with or without country codes)
+  - Supports multiple formats: international (+91, +1, etc.), US/Canada, Indian 10-digit, and keyword-based patterns
+  - Email addresses and URLs are also blocked
+  - Clear privacy-focused error messages guide users
 - Blocked attempts return a **clear reason** in the chat UI while keeping the text local for editing
 - Ensures a **safe, respectful, and purpose-driven** chat environment with real-time transparency
 
@@ -73,6 +94,11 @@ No personal or identifiable information is ever displayed or retrievable during 
 - Secure session tokens issued at authentication and invalidated upon:
   - Sign-out
   - Geo-fence breach
+- **Single Active Session Rule:**
+  - Database-backed session tracking via `active_sessions` table
+  - One active session per mobile number enforced at login
+  - Automatic session cleanup on logout
+  - Prevents simultaneous multi-device access for security
 - **Inactivity timeouts** auto-terminate idle sessions
 - Seamless sign-in/out flows ensure data security
 
@@ -123,6 +149,9 @@ All privacy and compliance principles are integrated throughout the implementati
 | **Access Controls** | Hospital staff access limited to operational needs |
 | **Audit Logs** | Registrations, moderation events, and geo-fence exits logged |
 | **Data Retention** | Chatroom data follows defined retention and purge cycles |
+| **Contact Information Protection** | Advanced detection blocks sharing of mobile numbers, email addresses, and URLs in chat |
+| **Single Session Enforcement** | Database-backed session tracking prevents simultaneous multi-device access |
+| **Session Isolation** | Each mobile number can only have one active session at a time |
 
 ---
 
@@ -139,6 +168,9 @@ All privacy and compliance principles are integrated throughout the implementati
 | **Internationalization** | Custom translation system with Zustand state management |
 | **Animations** | Framer Motion for smooth, performant transitions |
 | **Styling** | Tailwind CSS with custom design tokens |
+| **Session Management** | Database-backed active session tracking with Supabase |
+| **Reply System** | JSONB storage for reply context, React refs for scroll-to functionality |
+| **Privacy Protection** | Regex-based pattern matching with multi-format support |
 
 ---
 
@@ -146,14 +178,18 @@ All privacy and compliance principles are integrated throughout the implementati
 - **Mobile-first** and **fast-loading** hospital registration UI  
 - **One-tap authentication** using registered mobile number  
 - **Anonymous yet emotionally engaging** chat experience  
+- **Reply to Messages:** Contextual conversations with WhatsApp-style reply feature
 - **Virtual Agent fallback** to keep conversations active  
 - **Robust moderation** for safe user interactions  
+- **Enhanced Privacy:** Automatic blocking of phone numbers and contact information
 - **Geo-fenced** participation for privacy and relevance  
 - **Multi-language support** (English/Hindi) for inclusive access
 - **Relaxation Corner** with stress-relief micro-games
 - **Soothing visual design** with calming colors and animations
 - **Enhanced button visibility** with borders and hover effects
 - **User feedback collection** for continuous improvement
+- **Clear Form Labels:** Asterisk-marked required fields for better UX
+- **Location Validation:** Mandatory location fetching ensures accurate data
 
 ---
 
@@ -196,7 +232,16 @@ All privacy and compliance principles are integrated throughout the implementati
 
 ## 📝 Recent Updates & Enhancements
 
-### Version 1.1.0 (Latest)
+### Version 1.2.0 (Latest)
+- ✅ **Reply to Message Functionality:** WhatsApp-style reply feature with long-press and swipe gestures
+- ✅ **Single Active Session Enforcement:** Prevents simultaneous logins from multiple devices
+- ✅ **Enhanced Privacy Protection:** Advanced mobile number detection blocks contact sharing
+- ✅ **Form Field Labels:** All required fields marked with asterisks for clarity
+- ✅ **Mandatory Location Fetching:** Location must be fetched before form submission
+- ✅ **Brand Update:** Application title updated to "Communitiful"
+- ✅ **Improved Message Handling:** Better state management for real-time message updates
+
+### Version 1.1.0
 - ✅ **Internationalization System:** Full English/Hindi support across all pages
 - ✅ **Relaxation Corner:** Five micro-games for stress relief and mindfulness
 - ✅ **Enhanced UI/UX:** Improved button visibility, shadows, and visual hierarchy
@@ -205,22 +250,42 @@ All privacy and compliance principles are integrated throughout the implementati
 - ✅ **User Presence:** Enhanced online user count display and notifications
 - ✅ **Accessibility:** Better touch targets, borders, and visual feedback
 
-### Key Improvements
-1. **Accessibility:** Multi-language support makes the app accessible to Hindi-speaking users
-2. **Wellness Focus:** Relaxation Corner provides immediate stress-relief tools
-3. **User Insights:** Feedback system enables continuous improvement
-4. **Visual Polish:** Professional, calming design enhances user trust
-5. **Better Navigation:** Clear visual cues improve usability
+### Key Improvements (v1.2.0)
+1. **Enhanced Chat Experience:** Reply functionality makes conversations more contextual and easier to follow
+2. **Security:** Single active session prevents unauthorized access and account sharing
+3. **Privacy:** Advanced phone number blocking protects user contact information
+4. **Form Usability:** Clear field labels and mandatory location ensure complete data collection
+5. **User Experience:** Smooth animations and intuitive gestures improve interaction quality
+
+---
+
+## 🗄️ Database Schema Updates
+
+### Active Sessions Table
+- **Purpose:** Track active user sessions to enforce single-device login
+- **Schema:** `active_sessions` table with columns:
+  - `mobile_number` (TEXT): User's mobile number
+  - `session_id` (TEXT): Unique session identifier
+  - `is_active` (BOOLEAN): Session status flag
+  - `created_at` (TIMESTAMP): Session creation time
+  - `last_seen_at` (TIMESTAMP): Last activity timestamp
+- **Indexes:** Optimized queries for mobile number and session lookups
+- **Migration:** `active-sessions-migration.sql` (if needed)
+
+### Messages Table Enhancement
+- **New Column:** `reply_to` (JSONB) for storing reply context
+- **Structure:** Stores messageId, text snippet, sender name, and avatar
+- **Migration:** `reply-functionality-migration.sql`
 
 ---
 
 ## 🧩 Summary
-**Companions Anonymous** brings technology, empathy, and privacy together to create a **safe, supportive, and inclusive** experience for hospital companions — a step toward more **human-centered healthcare ecosystems**.
+**Communitiful** brings technology, empathy, and privacy together to create a **safe, supportive, and inclusive** experience for hospital companions — a step toward more **human-centered healthcare ecosystems**.
 
-The application continues to evolve with **multi-language support**, **wellness features**, and **enhanced user experience** to better serve companions during their waiting periods.
+The application continues to evolve with **multi-language support**, **wellness features**, **enhanced chat functionality**, and **improved security** to better serve companions during their waiting periods.
 
 ---
 
 **Built with ❤️ using React + Supabase**
 
-**Last Updated:** December 2024
+**Last Updated:** January 2025

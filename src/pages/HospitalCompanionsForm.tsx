@@ -75,11 +75,15 @@ export function HospitalCompanionsForm({ onBack, onNext }: HospitalCompanionsFor
 
   const handleNext = () => {
     setError('');
-    for (const c of companions) {
+    for (let idx = 0; idx < companions.length; idx++) {
+      const c = companions[idx];
       if (!c.name.trim()) return setError('Companion name is required');
       const cleaned = c.number.replace(/\D/g, '');
       if (cleaned.length !== 10)
         return setError('Each companion must have a valid 10-digit mobile number');
+      if (!locationFetchedStates[idx]) {
+        return setError(`Location must be fetched for Companion ${idx + 1}. Please click "Fetch Location" for all companions.`);
+      }
     }
     onNext(companions);
   };

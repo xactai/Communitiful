@@ -1,0 +1,62 @@
+# Page snapshot
+
+```yaml
+- generic [ref=e3]:
+  - region "Notifications (F8)":
+    - list
+  - region "Notifications alt+T"
+  - generic [ref=e5]:
+    - generic:
+      - generic: ❤️
+      - generic: 🤝
+      - generic: 🕊️
+      - generic: 💚
+      - generic: 🧘
+      - generic: 🌿
+    - button "English ⇄" [ref=e7] [cursor=pointer]:
+      - img
+      - generic [ref=e8]: English
+      - generic [ref=e9]: ⇄
+    - generic [ref=e10]:
+      - img "Brand Logo" [ref=e12]
+      - generic [ref=e16]:
+        - heading "Communitiful" [level=1] [ref=e17]
+        - paragraph [ref=e18]: For every companion who waits — you're not alone
+      - generic [ref=e19]:
+        - generic [ref=e20]:
+          - img "shielded chat" [ref=e22]: 🛡️
+          - generic [ref=e23]:
+            - generic [ref=e24]: Anonymous and Private
+            - generic [ref=e25]: No personal info required
+        - generic [ref=e26]:
+          - img "supportive circle" [ref=e28]: 🤝
+          - generic [ref=e29]:
+            - generic [ref=e30]: Connect with Others
+            - generic [ref=e31]: Share experiences safely
+        - generic [ref=e32]:
+          - generic [ref=e34]: 🧘
+          - generic [ref=e35]:
+            - generic [ref=e36]: Calming Resources
+            - generic [ref=e37]: Relaxation tools included
+      - generic [ref=e38]:
+        - generic [ref=e39]:
+          - img [ref=e40]
+          - text: Companion Mode
+        - switch [checked] [ref=e45] [cursor=pointer]:
+          - img [ref=e47]
+        - generic [ref=e51]:
+          - img [ref=e52]
+          - text: Hospital Mode
+      - generic [ref=e56]:
+        - button "Get Started" [ref=e60] [cursor=pointer]
+        - generic [ref=e61]:
+          - button "What is this?" [ref=e62] [cursor=pointer]
+          - button "Privacy & Terms" [ref=e63] [cursor=pointer]
+        - link "Visit our website Learn more about our mission and impact" [ref=e65] [cursor=pointer]:
+          - /url: https://xactai.github.io/Communitiful/
+          - generic [ref=e66]:
+            - img [ref=e67]
+            - generic [ref=e71]: Visit our website
+          - paragraph [ref=e72]: Learn more about our mission and impact
+    - generic [ref=e73]: Designed for calm, connection, and compassionate waiting.
+```

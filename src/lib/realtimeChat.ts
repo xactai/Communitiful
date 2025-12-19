@@ -80,7 +80,13 @@ export class RealtimeChatManager {
         status: dbMessage.moderation_status,
         reason: dbMessage.moderation_reason
       },
-      companionIdentity: dbMessage.companion_identity ? JSON.parse(dbMessage.companion_identity) : undefined
+      companionIdentity: dbMessage.companion_identity ? JSON.parse(dbMessage.companion_identity) : undefined,
+      replyTo: dbMessage.reply_to 
+        ? (typeof dbMessage.reply_to === 'string' ? JSON.parse(dbMessage.reply_to) : dbMessage.reply_to)
+        : undefined,
+      reactions: dbMessage.reactions
+        ? (typeof dbMessage.reactions === 'string' ? JSON.parse(dbMessage.reactions) : dbMessage.reactions)
+        : undefined
     };
   }
 
@@ -133,7 +139,9 @@ export class RealtimeChatManager {
           created_at: message.createdAt.toISOString(),
           moderation_status: message.moderation.status,
           moderation_reason: message.moderation.reason,
-          companion_identity: message.companionIdentity ? JSON.stringify(message.companionIdentity) : null
+          companion_identity: message.companionIdentity ? JSON.stringify(message.companionIdentity) : null,
+          reply_to: message.replyTo ? JSON.stringify(message.replyTo) : null,
+          reactions: message.reactions ? JSON.stringify(message.reactions) : null
         });
 
       if (error) {
@@ -158,6 +166,10 @@ export class RealtimeChatManager {
       
       if (updates.text) {
         updateData.text = updates.text;
+      }
+      
+      if (updates.reactions !== undefined) {
+        updateData.reactions = updates.reactions ? JSON.stringify(updates.reactions) : null;
       }
 
       const { error } = await supabase
