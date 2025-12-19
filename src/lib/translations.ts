@@ -4,7 +4,7 @@ export const translations = {
   en: {
     // Landing Page
     landing: {
-      title: "Communitiful",
+      title: "The Communitiful",
       subtitle: "For every companion who waits — you're not alone",
       feature1Title: "Anonymous and Private",
       feature1Desc: "No personal info required",
@@ -50,11 +50,11 @@ export const translations = {
       information: "Information",
       privacyPolicy: "Privacy Policy",
       termsOfService: "Terms of Service",
-      aboutCompanions: "About Companions Anonymous",
+      aboutCompanions: "About Communitiful",
       leaveRoom: "Leave Room",
       leaveRoomDesc: "Leaving will end your current session. You'll need to verify your location and go through setup again to rejoin.",
       leaveChatRoom: "Leave Chat Room",
-      version: "Companions Anonymous v1.0.0",
+      version: "Communitiful v1.0.0",
       feedbackTitle: "How was your chat experience?",
       feedbackDesc: "Your feedback helps us make this space calmer and kinder.",
       feedbackPlaceholder: "Anything we could improve? (optional)",
@@ -242,7 +242,7 @@ export const translations = {
   hi: {
     // Landing Page
     landing: {
-      title: "गोपनीय सहचर",
+      title: "The Communitiful",
       subtitle: "हर उस साथी के लिए जो इंतज़ार करता है — आप अकेले नहीं हैं।",
       feature1Title: "गुमनाम और निजी",
       feature1Desc: "कोई व्यक्तिगत जानकारी आवश्यक नहीं",
@@ -288,11 +288,11 @@ export const translations = {
       information: "जानकारी",
       privacyPolicy: "गोपनीयता नीति",
       termsOfService: "सेवा की शर्तें",
-      aboutCompanions: "गोपनीय सहचर के बारे में",
+      aboutCompanions: "Communitiful के बारे में",
       leaveRoom: "कमरा छोड़ें",
       leaveRoomDesc: "छोड़ने से आपका वर्तमान सत्र समाप्त हो जाएगा। पुन: शामिल होने के लिए आपको अपना स्थान सत्यापित करना होगा और सेटअप से फिर से गुजरना होगा।",
       leaveChatRoom: "चैट रूम छोड़ें",
-      version: "गोपनीय सहचर v1.0.0",
+      version: "Communitiful v1.0.0",
       feedbackTitle: "आपका चैट अनुभव कैसा था?",
       feedbackDesc: "आपकी प्रतिक्रिया हमें इस स्थान को शांत और दयालु बनाने में मदद करती है।",
       feedbackPlaceholder: "क्या हम सुधार कर सकते हैं? (वैकल्पिक)",
