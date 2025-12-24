@@ -4,7 +4,7 @@ export const translations = {
   en: {
     // Landing Page
     landing: {
-      title: "The Communitiful",
+      title: "Communitiful",
       subtitle: "For every companion who waits — you're not alone",
       feature1Title: "Anonymous and Private",
       feature1Desc: "No personal info required",
@@ -242,7 +242,7 @@ export const translations = {
   hi: {
     // Landing Page
     landing: {
-      title: "The Communitiful",
+      title: "Communitiful",
       subtitle: "हर उस साथी के लिए जो इंतज़ार करता है — आप अकेले नहीं हैं।",
       feature1Title: "गुमनाम और निजी",
       feature1Desc: "कोई व्यक्तिगत जानकारी आवश्यक नहीं",
