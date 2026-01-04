@@ -1,11 +1,11 @@
-# 🏥 Communitiful — README
+# 🏥 The Communitiful — README
 
 ## 📘 Overview
-Communitiful (formerly Companions Anonymous) is a privacy-first, geo-aware chat app that supports companions waiting in hospital lobbies. The experience is anonymous, safety-moderated, and optimized for mobile. The app runs in two modes:
+**The Communitiful** (formerly Companions Anonymous) is a privacy-first, geo-aware chat app that supports companions waiting in hospital lobbies. The experience is anonymous, safety-moderated, and optimized for mobile. The app runs in two modes:
 - Hospital Mode: registration desk captures patient and companion details
 - Companion Mode: verified companions access a moderated, anonymous chatroom on-site
 
-Backend services are powered by Supabase (database + realtime). Content moderation is enforced via Google Gemini before messages are posted.
+Backend services are powered by Supabase (database + realtime). Content moderation is enforced via Google Gemini before messages are posted. The app supports bilingual interface (English and Hindi) with seamless language switching.
 
 ---
 
@@ -57,6 +57,24 @@ Accessible only to companions registered via Hospital Mode and physically presen
   - Reply preview bar shows above input with original message context
   - Reply headers in sent messages with clickable jump-to-original feature
   - Smooth scroll and highlight animation when jumping to replied messages
+- **Relaxation Corner:** Accessible stress-relief activities including:
+  - Breathing exercises (4-7-8 technique with visual timer)
+  - Grounding exercises (5-4-3-2-1 sensory technique)
+  - Memory match games (emoji pair-matching)
+  - Gratitude journaling
+  - Color focus activities
+
+---
+
+## 🌐 Internationalization & Language Support
+
+The app provides full bilingual support for a diverse user base:
+- **Supported Languages:** English (en) and Hindi (हिंदी)
+- **Language Toggle:** Prominent language switcher on landing page with visual indicator
+- **Complete Translation Coverage:** All UI elements, messages, and content translated
+- **Persistent Language Preference:** User's language choice saved in settings
+- **Seamless Switching:** Language can be changed at any time from settings
+- **Brand Consistency:** Brand name "The Communitiful" maintained across languages
 
 ---
 
@@ -106,6 +124,8 @@ Dedicated Privacy & Terms page is accessible from Landing and Settings.
 | Session Management | Database-backed active session tracking |
 | Reply System | JSONB storage for reply context, React refs for scroll-to |
 | Privacy Protection | Regex-based pattern matching with multi-format support |
+| Internationalization | Bilingual support (English/Hindi) with translation system |
+| State Management | Zustand with persistence middleware |
 
 ---
 
@@ -143,11 +163,13 @@ Realtime updates listen to Supabase `INSERT/UPDATE/DELETE` on `messages`. Duplic
 
 ## 🎨 UX Highlights
 
-- Landing: gentle animations, clean visual hierarchy, clear entry points
-- Location Scan: animated radar/sweep, Maps credit, auto-continue
-- Companion Auth: international phone input (flag + code + number)
-- Settings: direct navigation to Privacy & Terms and About Companions pages
-- About & Privacy: minimalist cards with calm motion and clear purpose statements
+- **Landing Page:** Gentle animations, clean visual hierarchy, clear entry points, prominent language toggle (English/Hindi), website integration link
+- **Language Support:** Bilingual interface with seamless language switching and persistent preferences
+- **Location Scan:** Animated radar/sweep, Maps credit, auto-continue
+- **Companion Auth:** International phone input (flag + code + number)
+- **Settings:** Direct navigation to Privacy & Terms and About Companions pages, feedback collection system
+- **About & Privacy:** Minimalist cards with calm motion and clear purpose statements
+- **Relaxation Corner:** Multiple stress-relief activities accessible from chat interface
 
 ---
 
@@ -156,18 +178,26 @@ Realtime updates listen to Supabase `INSERT/UPDATE/DELETE` on `messages`. Duplic
 ✅ Location scan and on-site access flow integrated  
 ✅ Moderation enforced pre-post via Gemini  
 ✅ Realtime chat, presence, and typing indicators  
+✅ **Bilingual interface** (English/Hindi) with language toggle  
 ✅ **Reply to Message functionality** with gesture support  
 ✅ **Single Active Session enforcement** for security  
 ✅ **Enhanced privacy protection** (mobile number blocking)  
 ✅ **Form improvements** (asterisk labels, mandatory location)  
+✅ **Relaxation Corner** with multiple stress-relief activities  
+✅ **Website integration** for mission and impact information  
+✅ **Feedback collection system** for continuous improvement  
 ✅ Ready for pilot deployment with hospital partners  
 
-## 📝 Recent Updates (v1.2.0)
+## 📝 Recent Updates (v1.3.0)
+- ✅ **Brand Update:** Application title updated to "The Communitiful"
+- ✅ **Bilingual Support:** Full English and Hindi translations with language toggle on landing page
+- ✅ **Website Integration:** Direct link to project website from landing page
+- ✅ **Relaxation Corner:** Expanded stress-relief activities (breathing, grounding, memory match, gratitude, color focus)
+- ✅ **Settings Enhancements:** Feedback collection system for user experience improvement
 - ✅ Reply to Message: WhatsApp-style reply with long-press and swipe gestures
 - ✅ Single Active Session: Database-backed enforcement prevents multi-device access
 - ✅ Privacy Protection: Advanced phone number detection blocks contact sharing
 - ✅ Form Enhancements: Clear field labels and mandatory location fetching
-- ✅ Brand Update: Application title updated to "Communitiful"
 
 ---
 
