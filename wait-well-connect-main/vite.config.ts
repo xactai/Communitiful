@@ -6,7 +6,11 @@ import { componentTagger } from "lovable-tagger";
 // https://vitejs.dev/config/
 export default defineConfig(({ mode }) => ({
   // Base path for GitHub Pages deployment at xactai.github.io/Communitiful
-  base: process.env.NODE_ENV === 'production' ? "/Communitiful/" : "/",
+
+  //-------------------------
+//base: process.env.NODE_ENV === 'production' ? "/Communitiful/" : "/", (commenting just to resolve github pages issue)
+  base: "./",   // ✅ Works on Netlify + GitHub Pages
+  //--------------------------
   server: {
     host: "::",
     port: 8080,
