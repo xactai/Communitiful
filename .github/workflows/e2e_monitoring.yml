@@ -1,39 +1,50 @@
-name: Periodic E2E Monitoring
+name: Health Check E2E Monitoring
 
 on:
   schedule:
     # Runs every 6 hours (4 times a day)
     - cron: '0 */6 * * *'
-  workflow_dispatch:
-    # Allows manual triggering of the workflow
+  workflow_dispatch: {} # Allows manual triggering
 
 jobs:
   test:
     name: Run Playwright Tests
-    timeout-minutes: 60
     runs-on: ubuntu-latest
+    timeout-minutes: 60
+
     steps:
+      # 1. Checkout repository
       - uses: actions/checkout@v4
-      
+
+      # 2. Setup Node.js
       - uses: actions/setup-node@v4
         with:
           node-version: lts/*
-          
+
+      # 3. Install dependencies including @playwright/test
       - name: Install dependencies
-        run: npm ci || npm install
-        
+        run: npm ci
+
+      # 4. Install Playwright browsers
       - name: Install Playwright Browsers
         run: npx playwright install --with-deps
-        
+
+      # 5. Verify Playwright installation
+      - name: Verify Playwright
+        run: npx playwright --version
+
+      # 6. Run Playwright tests
       - name: Run Playwright tests
         id: playwright
         run: |
           npx playwright test \
             tests/health_check/communitiful_main.test.ts \
             tests/health_check/github_page.test.ts \
-            tests/health_check/user-journey_spec_netlify.test.ts
+            tests/health_check/user-journey_spec_netlify.test.ts \
+            --reporter=list,html
           
-      - name: Upload Report
+      # 7. Upload HTML report as artifact
+      - name: Upload Playwright Report
         uses: actions/upload-artifact@v4
         if: always()
         with:
@@ -41,20 +52,18 @@ jobs:
           path: playwright-report/
           retention-days: 30
 
+      # 8. Send Email Notification
       - name: Send Email Notification
         uses: dawidd6/action-send-mail@v3
         if: always()
         with:
-          # SMTP settings from secrets
           server_address: ${{ secrets.SMTP_SERVER }}
           server_port: ${{ secrets.SMTP_PORT }}
           username: ${{ secrets.SMTP_USERNAME }}
           password: ${{ secrets.SMTP_PASSWORD }}
-          # Recipient and sender
-          subject: "E2E Monitoring Report: ${{ job.status }} - ${{ github.repository }}"
           to: ${{ secrets.MAIL_TO }}
           from: "Communitiful Monitoring <${{ secrets.SMTP_USERNAME }}>"
-          # Email body
+          subject: "E2E Monitoring Report: ${{ job.status }} - ${{ github.repository }}"
           body: |
             E2E Monitoring result: ${{ job.status }}
             
@@ -68,7 +77,5 @@ jobs:
             - tests/health_check/user-journey_spec_netlify.test.ts
             
             You can view and download the Playwright HTML report from the artifacts section of the action run linked above.
-          # Optional: send as HTML
           convert_markdown: true
-          # Optional: ignore certifications (useful for some SMTP servers)
           ignore_cert: true
