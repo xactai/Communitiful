@@ -1,18 +1,5 @@
 import { test, expect } from '@playwright/test';
 
-/**
- * E2E smoke test for the Communitiful GitHub Page (Marketing Site):
- * https://xactai.github.io/Communitiful/
- *
- * Verifies:
- * - Page load, URL, and title
- * - Hero headline and sub-headline
- * - Primary CTAs
- * - Navigation to "How It Works"
- * - Steps and feature content
- * - Footer visibility
- * - Basic mobile responsiveness
- */
 test('Communitiful GitHub Page – full landing page verification', async ({ page }) => {
     // -------------------------
     // Page load
