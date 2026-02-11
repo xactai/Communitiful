@@ -1,259 +1,156 @@
 import { test, expect } from '@playwright/test';
 
 /**
- * Comprehensive End-to-End Test Suite
- * Tests the complete user journey through the application
+ * E2E test suite for the complete user journey:
+ * 1. Landing Page validation
+ * 2. Hospital Registration with autofill validation
+ * 3. Fetch Location and save companion number
+ * 4. Submit Hospital Registration
+ * 5. Return to Landing Page with success
+ * 6. Switch to Companion Mode
+ * 7. Authenticate with saved mobile number
+ * 8. Navigate through disclaimer (with checkbox) and avatar selection
+ * 9. Chat interaction (Sending message)
+ * 10. Logout and Feedback submission
+ * 11. Final Landing Page validation
  */
-test.describe('Complete E2E Flow', () => {
-  test('should complete full companion journey from landing to chat interaction', async ({ page }) => {
-    // ========== STEP 1: Landing Page ==========
-    await page.goto('/');
-    await page.waitForLoadState('networkidle');
-    
-    // Verify landing page loaded
-    await expect(page).toHaveTitle(/Communitiful/);
-    const root = page.locator('#root');
-    await expect(root).toBeVisible();
-    
-    // Verify landing page has main content
-    await page.waitForSelector('body', { timeout: 10000 });
-    const bodyText = await page.textContent('body');
-    expect(bodyText).toBeTruthy();
-    
-    // ========== STEP 2: Start Companion Mode ==========
-    const companionButton = page.locator('button, a, [role="button"]')
-      .filter({ hasText: /Companion|Start as Companion|Companion Mode/i })
-      .first();
-    
-    const companionVisible = await companionButton.isVisible({ timeout: 10000 }).catch(() => false);
-    
-    if (companionVisible) {
-      await companionButton.click();
-      await page.waitForTimeout(2000);
-    } else {
-      // If button not found, try clicking anywhere that might start the flow
-      // This handles cases where the UI might be different
-      test.info().annotations.push({ type: 'note', description: 'Companion button not found, flow may vary' });
-    }
-    
-    // ========== STEP 3: Location Scan ==========
-    // Location scan auto-completes after ~6.8 seconds
-    // Wait for location scan page to appear
-    await page.waitForTimeout(1000);
-    
-    const scanningIndicator = page.locator('text=/Scanning|Verifying|Location|Access/i');
-    const hasScanning = await scanningIndicator.isVisible({ timeout: 5000 }).catch(() => false);
-    
-    if (hasScanning) {
-      test.info().annotations.push({ type: 'note', description: 'Location scan detected' });
-      // Wait for location scan to complete (auto-completes)
-      await page.waitForTimeout(8000);
-    } else {
-      // May have skipped location scan or already passed
-      await page.waitForTimeout(2000);
-    }
-    
-    // ========== STEP 4: Companion Authentication ==========
-    // Look for phone number input or OTP input
-    const phoneInput = page.locator('input[type="tel"], input[placeholder*="phone"], input[placeholder*="mobile"], input[placeholder*="number"]').first();
-    const otpInput = page.locator('input[type="text"][maxlength="6"], input[placeholder*="OTP"], input[placeholder*="code"]').first();
-    
-    const hasPhoneInput = await phoneInput.isVisible({ timeout: 5000 }).catch(() => false);
-    const hasOtpInput = await otpInput.isVisible({ timeout: 5000 }).catch(() => false);
-    
-    if (hasPhoneInput) {
-      // Fill phone number
-      await phoneInput.fill('1234567890');
-      await page.waitForTimeout(500);
-      
-      // Try to submit
-      const submitButton = page.locator('button[type="submit"], button')
-        .filter({ hasText: /Continue|Submit|Verify|Send|Next/i })
-        .first();
-      
-      if (await submitButton.isVisible({ timeout: 3000 }).catch(() => false)) {
-        await submitButton.click();
-        await page.waitForTimeout(2000);
-      }
-    } else if (hasOtpInput) {
-      // If OTP input is visible, fill it
-      await otpInput.fill('123456');
-      await page.waitForTimeout(500);
-      
-      const verifyButton = page.locator('button').filter({ hasText: /Verify|Submit|Continue/i }).first();
-      if (await verifyButton.isVisible({ timeout: 3000 }).catch(() => false)) {
-        await verifyButton.click();
-        await page.waitForTimeout(2000);
-      }
-    }
-    
-    // ========== STEP 5: Disclaimer ==========
-    const disclaimerAccept = page.locator('button')
-      .filter({ hasText: /Accept|I Agree|Agree|Continue|I Understand/i })
-      .first();
-    
-    const hasDisclaimer = await disclaimerAccept.isVisible({ timeout: 5000 }).catch(() => false);
-    
-    if (hasDisclaimer) {
-      await disclaimerAccept.click();
-      await page.waitForTimeout(2000);
-    }
-    
-    // ========== STEP 6: Avatar Display ==========
-    const avatarContinue = page.locator('button')
-      .filter({ hasText: /Continue|Next|Start Chat|Enter Chat/i })
-      .first();
-    
-    const hasAvatar = await avatarContinue.isVisible({ timeout: 5000 }).catch(() => false);
-    
-    if (hasAvatar) {
-      // Verify avatar is displayed
-      const avatarImage = page.locator('img[alt*="avatar"], img[src*="avatar"], [class*="avatar"]').first();
-      const avatarVisible = await avatarImage.isVisible().catch(() => false);
-      
-      if (avatarVisible) {
-        test.info().annotations.push({ type: 'note', description: 'Avatar displayed successfully' });
-      }
-      
-      await avatarContinue.click();
-      await page.waitForTimeout(2000);
-    }
-    
-    // ========== STEP 7: Chat Interface ==========
-    // Wait for chat interface to load
-    await page.waitForTimeout(2000);
-    
-    // Look for chat input
-    const chatInput = page.locator(
-      'input[placeholder*="message" i], textarea[placeholder*="message" i], input[type="text"], textarea'
-    ).first();
-    
-    const chatContainer = page.locator('[class*="chat" i], [id*="chat" i], [class*="message" i]').first();
-    const sendButton = page.locator('button').filter({ hasText: /Send|Submit/i }).first();
-    
-    const hasChatInput = await chatInput.isVisible({ timeout: 10000 }).catch(() => false);
-    const hasChatContainer = await chatContainer.isVisible({ timeout: 10000 }).catch(() => false);
-    
-    // Verify we're in chat
-    expect(hasChatInput || hasChatContainer).toBeTruthy();
-    
-    // ========== STEP 8: Send a Message ==========
-    if (hasChatInput) {
-      await chatInput.fill('Hello, this is a test message from E2E test');
-      await page.waitForTimeout(500);
-      
-      if (await sendButton.isVisible().catch(() => false)) {
-        await sendButton.click();
-        await page.waitForTimeout(2000);
-        
-        // Message may appear after moderation/processing
-        test.info().annotations.push({ type: 'note', description: 'Message sent, may be processed by moderation' });
-      }
-    }
-    
-    // ========== STEP 9: Navigate to Settings ==========
-    const settingsButton = page.locator('button, [role="button"]')
-      .filter({ hasText: /Settings|⚙️/i })
-      .first();
-    
-    const hasSettingsButton = await settingsButton.isVisible({ timeout: 5000 }).catch(() => false);
-    
-    if (hasSettingsButton) {
-      await settingsButton.click();
-      await page.waitForTimeout(1000);
-      
-      // Verify settings page
-      const settingsContent = page.locator('text=/Settings|Language|Leave|About/i');
-      const hasSettings = await settingsContent.isVisible({ timeout: 3000 }).catch(() => false);
-      expect(hasSettings).toBeTruthy();
-      
-      // Navigate back to chat
-      const backButton = page.locator('button').filter({ hasText: /Back|←|Return/i }).first();
-      if (await backButton.isVisible().catch(() => false)) {
-        await backButton.click();
-        await page.waitForTimeout(1000);
-      }
-    }
-    
-    // ========== STEP 10: Navigate to Relaxation ==========
-    const relaxationButton = page.locator('button, [role="button"]')
-      .filter({ hasText: /Relax|Relaxation|Calm|Breathe/i })
-      .first();
-    
-    const hasRelaxationButton = await relaxationButton.isVisible({ timeout: 5000 }).catch(() => false);
-    
-    if (hasRelaxationButton) {
-      await relaxationButton.click();
-      await page.waitForTimeout(1000);
-      
-      // Verify relaxation page
-      const relaxationContent = page.locator('text=/Relax|Breathe|Calm|Meditation/i');
-      const hasRelaxation = await relaxationContent.isVisible({ timeout: 3000 }).catch(() => false);
-      expect(hasRelaxation).toBeTruthy();
-      
-      // Navigate back
-      const backButton = page.locator('button').filter({ hasText: /Back|←|Return/i }).first();
-      if (await backButton.isVisible().catch(() => false)) {
-        await backButton.click();
-        await page.waitForTimeout(1000);
-      }
-    }
-    
-    // ========== VERIFICATION: Complete Flow ==========
-    // Verify we've successfully navigated through the app
-    const finalPageContent = await page.textContent('body');
-    expect(finalPageContent).toBeTruthy();
-    expect(finalPageContent!.length).toBeGreaterThan(0);
-    
-    test.info().annotations.push({ 
-      type: 'note', 
-      description: 'Complete E2E flow executed successfully' 
+test.describe('Full User Journey', () => {
+    test('should complete the entire registration and chat flow', async ({ page }) => {
+        // Increase timeout for this long-running flow
+        test.setTimeout(180000); // 3 minutes
+
+        // ========== STEP 1: Landing Page ==========
+        await page.goto('https://communitiful-xinthe.netlify.app/');
+        await page.waitForLoadState('networkidle');
+
+        // Check title
+        await expect(page).toHaveTitle(/Communitiful/);
+
+        // ========== STEP 2: Hospital Registration ==========
+        // Ensure Hospital Mode is selected (default)
+        await expect(page.getByText('Hospital Mode').first()).toBeVisible();
+
+        // Click Get Started
+        await page.getByRole('button', { name: /Get Started/i }).click();
+
+        // Wait for the Hospital Form to load
+        await expect(page.getByText('Patient Details').first()).toBeVisible({ timeout: 15000 });
+
+        // Wait for autofill animations to complete
+        await page.waitForTimeout(10000);
+
+        // Validate that details are autofilled
+        await expect(page.locator('#patient-name')).not.toHaveValue('', { timeout: 15000 });
+        const patientName = await page.locator('#patient-name').inputValue();
+        console.log(`Autofilled patient name: ${patientName}`);
+
+        // Save companion mobile number
+        await expect(page.locator('#companion-number-0')).not.toHaveValue('', { timeout: 15000 });
+        const savedCompanionNumber = await page.locator('#companion-number-0').inputValue();
+        console.log(`Saved companion number: ${savedCompanionNumber}`);
+
+        // Click Fetch Location for Companion 1
+        const fetchLocationBtn = page.getByText('Fetch Location').first();
+        await fetchLocationBtn.click();
+
+        // Wait for "Location Fetched"
+        await expect(page.getByText('Location Fetched').first()).toBeVisible({ timeout: 15000 });
+
+        // Submit Hospital Registration
+        const submitBtn = page.getByText('Submit Registration').first();
+        await submitBtn.click();
+
+        // ========== STEP 3: Return to Landing with Success ==========
+        // Wait for landing page to appear again
+        await expect(page.getByRole('heading', { name: 'Communitiful' })).toBeVisible({ timeout: 30000 });
+
+        // ========== STEP 4: Companion Mode Toggle ==========
+        const modeToggle = page.locator('#mode-toggle');
+        await modeToggle.click();
+
+        // Start as Companion
+        await page.getByRole('button', { name: /Get Started/i }).click();
+
+        // ========== STEP 5: Location Scan ==========
+        // Location scan auto-completes after ~6.8 seconds
+        await expect(page.getByText(/Scanning|Verifying/i).first()).toBeVisible({ timeout: 15000 });
+        // Wait for auto-transition to the authentication page
+        await page.waitForSelector('input[type="tel"]', { timeout: 30000 });
+
+        // ========== STEP 6: Companion Authentication ==========
+        const phoneInput = page.locator('input[type="tel"]').first();
+        await phoneInput.fill(savedCompanionNumber);
+
+        // Click Continue
+        await page.getByRole('button', { name: /Continue/i }).click();
+
+        // ========== STEP 7: Disclaimer & Avatar ==========
+        // Wait for disclaimer page
+        await expect(page.getByText(/Anonymous|Respectful/i).first()).toBeVisible({ timeout: 15000 });
+
+        // Click the checkbox
+        const disclaimerCheckbox = page.locator('#accept');
+        await disclaimerCheckbox.click();
+
+        // Now click continue/agree
+        await page.getByRole('button', { name: /Accept|Agree|Continue/i }).click();
+
+        // Avatar Selection/Display
+        await expect(page.getByRole('button', { name: /Continue|Start Chat|Enter/i }).first()).toBeVisible({ timeout: 15000 });
+
+        // Record the assigned identity
+        const identityText = await page.locator('h1, h2').last().textContent();
+        console.log(`Identity assigned: ${identityText}`);
+
+        await page.getByRole('button', { name: /Continue|Start Chat|Enter/i }).first().click();
+
+        // ========== STEP 8: Chat Page ==========
+        // Wait for chat input - using the correct placeholder from lib/translations.ts
+        const chatInput = page.getByPlaceholder(/fellow companions/i);
+        await expect(chatInput).toBeVisible({ timeout: 20000 });
+
+        const testMessage = 'Hello from E2E test! 👋';
+
+        // Fill the message
+        await chatInput.click();
+        await chatInput.fill(testMessage);
+        await page.waitForTimeout(500); // Wait for state update
+
+        // Send message - targeting the button with the send icon specifically
+        const sendBtn = page.locator('button').filter({ has: page.locator('svg[class*="lucide-send"]') }).first();
+        await sendBtn.click();
+
+        // Wait for message to appear in the chat stream
+        await expect(page.getByText(testMessage).first()).toBeVisible({ timeout: 10000 });
+
+        // ========== STEP 9: Logout & Feedback ==========
+        // Logout button has an aria-label "Leave chat"
+        const leaveBtn = page.getByLabel('Leave chat');
+        await expect(leaveBtn).toBeVisible({ timeout: 10000 });
+        await leaveBtn.click();
+
+        // Feedback dialog appears
+        await expect(page.getByText(/How was your chat experience/i).first()).toBeVisible({ timeout: 10000 });
+
+        // Click a rating emoji (Rate 5 is the best)
+        const rating5 = page.getByLabel('Rate 5');
+        await expect(rating5).toBeVisible({ timeout: 5000 });
+        await rating5.click();
+
+        // Feedback text
+        const feedbackArea = page.getByPlaceholder(/Anything we could improve/i);
+        if (await feedbackArea.isVisible()) {
+            await feedbackArea.fill('E2E test feedback: App is working smoothly!');
+        }
+
+        // Submit and Exit
+        const finalSubmit = page.getByRole('button', { name: /Submit & Exit/i }).first();
+        await finalSubmit.click();
+
+        // Wait for the "Thank you" transition
+        await expect(page.getByText(/Thank you for your feedback/i)).toBeVisible({ timeout: 10000 });
+
+        // Final redirect to landing
+        await expect(page.getByRole('heading', { name: 'Communitiful' })).toBeVisible({ timeout: 20000 });
     });
-  });
-
-  test('should handle hospital registration flow', async ({ page }) => {
-    await page.goto('/');
-    await page.waitForLoadState('networkidle');
-    
-    // Find Hospital Mode button
-    const hospitalButton = page.locator('button, a, [role="button"]')
-      .filter({ hasText: /Hospital|Register Hospital|Hospital Mode/i })
-      .first();
-    
-    const hasHospitalButton = await hospitalButton.isVisible({ timeout: 10000 }).catch(() => false);
-    
-    if (hasHospitalButton) {
-      await hospitalButton.click();
-      await page.waitForTimeout(2000);
-      
-      // Verify form is displayed
-      const formInputs = page.locator('input, textarea, select').first();
-      const hasForm = await formInputs.isVisible({ timeout: 5000 }).catch(() => false);
-      expect(hasForm).toBeTruthy();
-      
-      // Fill form fields
-      const nameInput = page.locator('input[placeholder*="name" i], input[name*="name" i]').first();
-      if (await nameInput.isVisible({ timeout: 3000 }).catch(() => false)) {
-        await nameInput.fill('Test Hospital E2E');
-      }
-      
-      // Try to submit (may require more fields)
-      const submitButton = page.locator('button[type="submit"], button')
-        .filter({ hasText: /Submit|Register|Continue/i })
-        .first();
-      
-      if (await submitButton.isVisible({ timeout: 3000 }).catch(() => false)) {
-        await submitButton.click();
-        await page.waitForTimeout(3000);
-        
-        // May reach confirmation or stay on form with validation errors
-        const confirmationText = page.locator('text=/Confirm|Success|Thank|Complete/i');
-        const hasConfirmation = await confirmationText.isVisible({ timeout: 3000 }).catch(() => false);
-        
-        // Either confirmation or validation error is acceptable
-        expect(hasConfirmation || !(await nameInput.isVisible({ timeout: 2000 }).catch(() => false))).toBeTruthy();
-      }
-    }
-  });
 });
-
