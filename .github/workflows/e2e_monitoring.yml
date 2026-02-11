@@ -1,54 +1,41 @@
-name: Health Check E2E Monitoring
+name: Periodic E2E Monitoring
 
 on:
   push:
     branches:
-      - main   # Runs when code is pushed to main
-
+      - main
   schedule:
-    - cron: '0 */6 * * *'  # Runs every 6 hours
-
-  workflow_dispatch: {}   # Allows manual trigger
+  - cron: '30 0,6,12,18 * * *'
+  workflow_dispatch:
+    # Allows manual triggering of the workflow
 
 jobs:
   test:
     name: Run Playwright Tests
-    runs-on: ubuntu-latest
     timeout-minutes: 60
-
+    runs-on: ubuntu-latest
     steps:
-      # 1. Checkout repository
       - uses: actions/checkout@v4
-
-      # 2. Setup Node.js
+      
       - uses: actions/setup-node@v4
         with:
           node-version: lts/*
-
-      # 3. Install dependencies including @playwright/test
+          
       - name: Install dependencies
-        run: npm ci
-
-      # 4. Install Playwright browsers
+        run: npm ci || npm install
+        
       - name: Install Playwright Browsers
         run: npx playwright install --with-deps
-
-      # 5. Verify Playwright installation
-      - name: Verify Playwright
-        run: npx playwright --version
-
-      # 6. Run Playwright tests
+        
       - name: Run Playwright tests
         id: playwright
         run: |
           npx playwright test \
-            tests/health_check/communitiful_main.test.ts \
-            tests/health_check/github_page.test.ts \
-            tests/health_check/user-journey_spec_netlify.test.ts \
-            --reporter=list,html
+            tests/communitiful_main.test.ts \
+            tests/github_page.test.ts \
+            tests/user-journey_spec_netlify.test.ts
           
-      # 7. Upload HTML report as artifact
-      - name: Upload Playwright Report
+      - name: Upload Report
         uses: actions/upload-artifact@v4
         if: always()
         with:
@@ -56,30 +43,58 @@ jobs:
           path: playwright-report/
           retention-days: 30
 
-      # 8. Send Email Notification
-      - name: Send Email Notification
+      - name: Send E2E Email Notification
         uses: dawidd6/action-send-mail@v3
         if: always()
         with:
+          # SMTP configuration
           server_address: ${{ secrets.SMTP_SERVER }}
           server_port: ${{ secrets.SMTP_PORT }}
           username: ${{ secrets.SMTP_USERNAME }}
           password: ${{ secrets.SMTP_PASSWORD }}
-          to: ${{ secrets.MAIL_TO }}
+      
+          # Email metadata
           from: "Communitiful Monitoring <${{ secrets.SMTP_USERNAME }}>"
-          subject: "E2E Monitoring Report: ${{ job.status }} - ${{ github.repository }}"
+          to: ${{ secrets.MAIL_TO }}
+          subject: "Health Check Report — Communitiful"
+    
+          
+          # Email body (Plain text / minimal Markdown)
           body: |
-            E2E Monitoring result: ${{ job.status }}
-            
-            The periodic E2E tests for Communitiful have completed.
-            
-            Action Run: https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}
-            
-            Included Tests:
-            - tests/health_check/communitiful_main.test.ts
-            - tests/health_check/github_page.test.ts
-            - tests/health_check/user-journey_spec_netlify.test.ts
-            
-            You can view and download the Playwright HTML report from the artifacts section of the action run linked above.
+            End-to-End Monitoring Report
+          
+            Overall Status: Overall Status: ${{ job.status == 'success' && '🟢 SUCCESS' || '🔴 FAILURE' }}
+
+            ${{ job.status == 'success'
+            && 'All health checks have passed successfully. No issues were detected during this monitoring run.'
+            || 'One or more health checks have failed during this monitoring run. Immediate attention may be required.' }}
+
+          
+            The scheduled end-to-end monitoring Health Check tests for Communitiful have completed.
+            Below is a summary of the health checks executed during this run.
+          
+            Test Results Summary
+          
+            Communitiful Main Website
+            Test File: tests/health_check/communitiful_main.test.ts
+            Purpose: Verifies that https://communitiful.com is reachable and responding correctly.
+          
+            GitHub Pages Availability
+            Test File: tests/health_check/github_page.test.ts
+            Purpose: Ensures that the GitHub Pages site is accessible and loading as expected.
+          
+            Netlify End-to-End User Journey
+            Test File: tests/health_check/user-journey_spec_netlify.test.ts
+            Purpose: Validates that the complete end-to-end user flow on Netlify is functioning correctly.
+          
+            Action Run Details
+            https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}
+          
+            The Playwright HTML report can be viewed and downloaded from the Artifacts section of the action run.
+          
+            This is an automated monitoring notification from Communitiful.
+
+      
           convert_markdown: true
           ignore_cert: true
+      
