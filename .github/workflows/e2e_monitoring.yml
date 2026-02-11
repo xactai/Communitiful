@@ -1,10 +1,14 @@
 name: Health Check E2E Monitoring
 
 on:
+  push:
+    branches:
+      - main   # Runs when code is pushed to main
+
   schedule:
-    # Runs every 6 hours (4 times a day)
-    # - cron: '0 */6 * * *'
-  workflow_dispatch: {} # Allows manual triggering
+    - cron: '0 */6 * * *'  # Runs every 6 hours
+
+  workflow_dispatch: {}   # Allows manual trigger
 
 jobs:
   test:
