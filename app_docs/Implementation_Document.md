@@ -1,10 +1,10 @@
-# 🏥 Communitiful — Implementation Document
+# 🏥 The Communitiful — Implementation Document
 
 ## 📘 Overview
-**Communitiful** (formerly Companions Anonymous) is an end-to-end application built to support companions of hospital patients through a **safe, anonymous, and moderated digital environment**.  
-The application has two core modules — **Hospital Mode** and **Companion Mode** — that work together to enable **secure registration, authentication, and peer-to-peer engagement** within a hospital’s premises.
+**The Communitiful** (formerly Companions Anonymous) is an end-to-end application built to support companions of hospital patients through a **safe, anonymous, and moderated digital environment**.  
+The application has two core modules — **Hospital Mode** and **Companion Mode** — that work together to enable **secure registration, authentication, and peer-to-peer engagement** within a hospital's premises.
 
-The system has been fully implemented using **Supabase** as the backend, ensuring **real-time updates, secure data handling, and scalable infrastructure**.
+The system has been fully implemented using **Supabase** as the backend, ensuring **real-time updates, secure data handling, and scalable infrastructure**. The app features **bilingual support** (English/Hindi) with seamless language switching and comprehensive internationalization.
 
 ---
 
@@ -104,31 +104,40 @@ No personal or identifiable information is ever displayed or retrievable during 
 
 #### 🧘 Relaxation Corner
 A dedicated space offering **micro-games and calming activities** to help companions manage stress and anxiety while waiting:
-- **Breathing Exercise:** Guided 4-7-8 breathing technique with visual timer
+- **Breathing Exercise:** Guided 4-7-8 breathing technique with visual timer and total time tracking
 - **Grounding 5-4-3-2-1:** Interactive sensory grounding exercise
 - **Memory Match:** Simple emoji pair-matching game for distraction
-- **Gratitude Moment:** Rotating prompts to encourage positive reflection
+- **Gratitude Journaling:** Prompts to encourage positive reflection and gratitude
 - **Color Focus:** Soothing color panels for visual meditation
-- **Minimalist UI:** Clean, intuitive game selection interface
-- All activities are **translated** and accessible in both English and Hindi
+- **Minimalist UI:** Clean, intuitive game selection interface with smooth transitions
+- All activities are **fully translated** and accessible in both English and Hindi
+- Accessible from both Chatroom and Settings for convenience
 
 #### 🌐 Internationalization (i18n)
 Comprehensive **multi-language support** for broader accessibility:
-- **Language Toggle:** Prominently placed on Landing Page
+- **Language Toggle:** Prominently placed at top of Landing Page with visual indicator
 - **Dynamic Translation:** All content updates instantly when language changes
 - **Supported Languages:** English (default) and Hindi (हिंदी)
-- **Complete Coverage:** All pages, buttons, labels, and messages are translated
-- **Translation System:** Custom hook (`useTranslation`) with fallback to English
-- **Consistent Experience:** Language preference persists across sessions
+- **Complete Coverage:** All pages, buttons, labels, messages, and features are translated
+- **Translation System:** Custom hook (`useTranslation`) with Zustand state management and fallback to English
+- **Persistent Preference:** Language choice saved in settings and persists across sessions
+- **Brand Consistency:** Brand name "The Communitiful" maintained across all languages
+- **Seamless Switching:** Language can be changed at any time from Settings page
 
 #### 📊 User Feedback System
 **Exit feedback modal** to gather user experience insights:
-- Triggered when users click "Leave Chat Room" button
+- Triggered when users click "Leave Chat Room" button in Settings
 - **Rating System:** 1-5 emoji-based rating scale (😞 to 😊)
 - **Optional Text Feedback:** Free-form suggestions and comments
-- **Thank You Screen:** Acknowledgment with smooth transition
+- **Thank You Screen:** Acknowledgment with smooth transition and redirect message
 - **Auto-redirect:** Returns to landing page after submission
 - **Non-intrusive Design:** Clean, friendly, and visually appealing
+- **Bilingual Support:** Feedback interface available in both English and Hindi
+
+#### 🌐 Website Integration
+- **Landing Page Link:** Direct link to project website for mission and impact information
+- **External Navigation:** Opens in new tab with proper security attributes (noopener, noreferrer)
+- **User Education:** Provides additional context about The Communitiful's purpose and values
 
 #### 👥 Enhanced User Presence
 - **Online User Count:** Prominently displayed badge showing active companions
@@ -178,18 +187,20 @@ All privacy and compliance principles are integrated throughout the implementati
 - **Mobile-first** and **fast-loading** hospital registration UI  
 - **One-tap authentication** using registered mobile number  
 - **Anonymous yet emotionally engaging** chat experience  
-- **Reply to Messages:** Contextual conversations with WhatsApp-style reply feature
+- **Reply to Messages:** Contextual conversations with WhatsApp-style reply feature (long-press/swipe)
 - **Virtual Agent fallback** to keep conversations active  
 - **Robust moderation** for safe user interactions  
-- **Enhanced Privacy:** Automatic blocking of phone numbers and contact information
+- **Enhanced Privacy:** Automatic blocking of phone numbers, emails, and URLs
 - **Geo-fenced** participation for privacy and relevance  
-- **Multi-language support** (English/Hindi) for inclusive access
-- **Relaxation Corner** with stress-relief micro-games
+- **Bilingual Interface:** Full English/Hindi support with prominent language toggle
+- **Relaxation Corner** with multiple stress-relief activities (breathing, grounding, memory, gratitude, color)
 - **Soothing visual design** with calming colors and animations
 - **Enhanced button visibility** with borders and hover effects
 - **User feedback collection** for continuous improvement
 - **Clear Form Labels:** Asterisk-marked required fields for better UX
 - **Location Validation:** Mandatory location fetching ensures accurate data
+- **Website Integration:** Direct link to project website from landing page
+- **Single Active Session:** Secure session management prevents multi-device access
 
 ---
 
@@ -201,6 +212,9 @@ All privacy and compliance principles are integrated throughout the implementati
 - **Abstract Shapes:** Gentle pulsing circular borders for depth
 - **Logo Effects:** Enhanced shadow effects with layered depth and brand-colored glow
 - **Smooth Animations:** Fade-in, slide-up, and pulse effects for premium feel
+- **Language Toggle:** Prominent language switcher at top with visual indicator (EN ⇄ HI)
+- **Website Link:** Integrated link to project website with hover effects and clear call-to-action
+- **Brand Identity:** "The Communitiful" prominently displayed with consistent branding
 
 ### Navigation & Buttons
 - **Enhanced Visibility:** All navigation buttons feature prominent borders (2px, primary color)
@@ -232,13 +246,21 @@ All privacy and compliance principles are integrated throughout the implementati
 
 ## 📝 Recent Updates & Enhancements
 
-### Version 1.2.0 (Latest)
+### Version 1.3.0 (Latest)
+- ✅ **Brand Update:** Application title updated to "The Communitiful" across all interfaces
+- ✅ **Bilingual Support Enhancement:** Prominent language toggle on landing page with persistent preferences
+- ✅ **Website Integration:** Direct link to project website from landing page for mission and impact information
+- ✅ **Relaxation Corner Expansion:** Enhanced activities with improved UI and smooth transitions
+- ✅ **Settings Enhancements:** Feedback collection system with bilingual support
+- ✅ **Translation Coverage:** Complete translation of all new features and UI elements
+- ✅ **Brand Consistency:** Unified brand name "The Communitiful" across all languages
+
+### Version 1.2.0
 - ✅ **Reply to Message Functionality:** WhatsApp-style reply feature with long-press and swipe gestures
 - ✅ **Single Active Session Enforcement:** Prevents simultaneous logins from multiple devices
 - ✅ **Enhanced Privacy Protection:** Advanced mobile number detection blocks contact sharing
 - ✅ **Form Field Labels:** All required fields marked with asterisks for clarity
 - ✅ **Mandatory Location Fetching:** Location must be fetched before form submission
-- ✅ **Brand Update:** Application title updated to "Communitiful"
 - ✅ **Improved Message Handling:** Better state management for real-time message updates
 
 ### Version 1.1.0
@@ -250,12 +272,12 @@ All privacy and compliance principles are integrated throughout the implementati
 - ✅ **User Presence:** Enhanced online user count display and notifications
 - ✅ **Accessibility:** Better touch targets, borders, and visual feedback
 
-### Key Improvements (v1.2.0)
-1. **Enhanced Chat Experience:** Reply functionality makes conversations more contextual and easier to follow
-2. **Security:** Single active session prevents unauthorized access and account sharing
-3. **Privacy:** Advanced phone number blocking protects user contact information
-4. **Form Usability:** Clear field labels and mandatory location ensure complete data collection
-5. **User Experience:** Smooth animations and intuitive gestures improve interaction quality
+### Key Improvements (v1.3.0)
+1. **Brand Identity:** Unified brand name "The Communitiful" creates consistent user experience
+2. **Accessibility:** Enhanced language support with prominent toggle improves inclusivity
+3. **User Education:** Website integration provides additional context and mission information
+4. **Wellness:** Expanded Relaxation Corner offers more stress-relief options
+5. **Feedback:** Bilingual feedback system enables better user experience insights
 
 ---
 
@@ -280,12 +302,12 @@ All privacy and compliance principles are integrated throughout the implementati
 ---
 
 ## 🧩 Summary
-**Communitiful** brings technology, empathy, and privacy together to create a **safe, supportive, and inclusive** experience for hospital companions — a step toward more **human-centered healthcare ecosystems**.
+**The Communitiful** brings technology, empathy, and privacy together to create a **safe, supportive, and inclusive** experience for hospital companions — a step toward more **human-centered healthcare ecosystems**.
 
-The application continues to evolve with **multi-language support**, **wellness features**, **enhanced chat functionality**, and **improved security** to better serve companions during their waiting periods.
+The application continues to evolve with **comprehensive bilingual support**, **wellness features**, **enhanced chat functionality**, **improved security**, and **unified brand identity** to better serve companions during their waiting periods. With features like reply functionality, relaxation corner, single active session enforcement, and privacy protection, The Communitiful provides a holistic solution for emotional support in hospital waiting areas.
 
 ---
 
-**Built with ❤️ using React + Supabase**
+**Built with ❤️ using React + Supabase + Gemini**
 
 **Last Updated:** January 2025

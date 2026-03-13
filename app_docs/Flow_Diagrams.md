@@ -1,4 +1,4 @@
-# Leadership Flow Diagrams — Companions Anonymous
+# Leadership Flow Diagrams — The Communitiful
 
 This document summarizes key user journeys and system flows for leadership review. Diagrams use Mermaid for clarity and can be previewed in Markdown viewers that support Mermaid.
 
@@ -8,14 +8,14 @@ This document summarizes key user journeys and system flows for leadership revie
 
 ```mermaid
 flowchart LR
-  A[Landing] -->|Companion Mode| B(Location Scan)
+  A[Landing<br/>Language Toggle EN/HI] -->|Companion Mode| B(Location Scan)
   A -->|Hospital Mode| H(Hospital Registration)
 
   subgraph Companion Journey
-    B --> C(Companion Auth)
+    B --> C(Companion Auth<br/>Single Session Check)
     C --> D(Disclaimer)
     D --> E(Avatar Display)
-    E --> F(Chatroom)
+    E --> F(Chatroom<br/>Relaxation Corner)
   end
 
   subgraph Hospital Desk
@@ -24,6 +24,7 @@ flowchart LR
   end
 
   F <-- Realtime --> K[Supabase: messages]
+  F --> L[Settings<br/>Feedback Collection]
 ```
 
 ---
@@ -72,7 +73,7 @@ sequenceDiagram
 
 ---
 
-## 4) Companion Verification — Authentication
+## 4) Companion Verification — Authentication with Single Session Check
 
 ```mermaid
 sequenceDiagram
@@ -81,14 +82,25 @@ sequenceDiagram
   participant DB as Supabase
 
   U->>App: Enter phone (+CC + local)
-  App->>DB: companions.number IN [formatted, legacy 10-digit]
+  App->>DB: Check companions.number IN [formatted, legacy 10-digit]
   DB-->>App: Match or No match
   alt match
-    App-->>U: Proceed to Disclaimer
+    App->>DB: Check active_sessions for existing session
+    DB-->>App: Active session status
+    alt No active session
+      App->>DB: Create new active session
+      App-->>U: Proceed to Disclaimer
+    else Active session exists
+      App-->>U: Session already active on another device
+    end
   else no match
     App-->>U: Not found (contact desk)
   end
 ```
+
+Notes:
+- Single active session enforcement prevents multi-device access per mobile number.
+- Database-backed session tracking via `active_sessions` table.
 
 ---
 
@@ -97,15 +109,19 @@ sequenceDiagram
 ```mermaid
 flowchart LR
   A[Disclaimer (no medical advice)] --> B[Anonymous Identity]
-  B -->|nickname + avatar| C[Chatroom]
+  B -->|nickname + avatar| C[Avatar Display]
+  C --> D[Chatroom]
+  D --> E[Relaxation Corner]
+  D --> F[Settings]
 ```
 
 Avatar:
 - Session assigns an emoji-based avatar and nickname (non-editable per session).
+- Avatar display shown before entering chatroom.
 
 ---
 
-## 6) Message Lifecycle with Moderation
+## 6) Message Lifecycle with Moderation & Reply Support
 
 ```mermaid
 sequenceDiagram
@@ -114,13 +130,13 @@ sequenceDiagram
   participant Mod as Gemini API
   participant RT as Supabase Realtime
 
-  U->>App: Type & Send Message
-  App->>Mod: Pre-post moderation request
+  U->>App: Type & Send Message<br/>(or Reply to message)
+  App->>Mod: Pre-post moderation request<br/>(includes privacy checks: phone/email/URL)
   alt Allowed
     Mod-->>App: { allowed: true }
-    App->>RT: Insert message (status: allowed)
+    App->>RT: Insert message (status: allowed)<br/>(with reply_to JSONB if replying)
     RT-->>App: Realtime broadcast
-    App-->>U: Message visible
+    App-->>U: Message visible<br/>(with reply context if applicable)
   else Blocked
     Mod-->>App: { allowed: false, reason }
     App-->>U: Show reason, do not post
@@ -133,6 +149,12 @@ Block criteria (non-exhaustive):
 - Medical misinformation
 - Spam/ads/links, off-topic or religious/political preaching
 - Excessively disturbing/negative content
+- **Privacy violations:** Mobile numbers, email addresses, URLs
+
+Reply functionality:
+- Long-press (500ms) or swipe right to reply to any message
+- Reply context stored in `reply_to` JSONB field (messageId, text snippet, sender info)
+- Clickable jump-to-original message with smooth scroll animation
 
 ---
 
@@ -157,14 +179,22 @@ Presence:
 ```mermaid
 flowchart LR
   A[Chat Settings] --> B[Privacy & Terms page]
-  A --> C[About Companions Anonymous]
+  A --> C[About The Communitiful]
+  A --> D[Language Toggle<br/>EN/HI]
+  A --> E[Feedback Collection]
+  A --> F[Relaxation Corner]
 
   B -->|read-only| A
   C -->|read-only| A
+  D -->|persist preference| A
+  E -->|submit & exit| G[Landing]
 ```
 
 Notes:
-- Settings navigates to Privacy & Terms or About Companions pages (read-only).
+- Settings navigates to Privacy & Terms or About The Communitiful pages (read-only).
+- Language preference persists across sessions.
+- Feedback collection allows users to share experience before exiting.
+- Relaxation Corner accessible from both Settings and Chatroom.
 
 ---
 
@@ -198,8 +228,21 @@ erDiagram
     timestamptz created_at
     string moderation_status
     string moderation_reason
+    jsonb reply_to
+  }
+  active_sessions {
+    uuid id PK
+    string mobile_number
+    string session_id
+    boolean is_active
+    timestamptz created_at
+    timestamptz last_seen_at
   }
 ```
+
+Notes:
+- `messages.reply_to` stores reply context as JSONB (messageId, text snippet, sender name, avatar).
+- `active_sessions` enforces single active session per mobile number.
 
 ---
 
@@ -210,14 +253,46 @@ flowchart TD
   A[Moderation API Error] --> B[Log + allow message cautiously]
   C[Realtime DB Error] --> D[Fallback to local shared chat]
   E[Auth No Match] --> F[Inform user to register at desk]
+  G[Active Session Exists] --> H[Block login, inform user]
+  I[Location Fetch Failed] --> J[Show error, retry option]
 ```
+
+Notes:
+- Single session enforcement blocks concurrent logins gracefully.
+- Location fetching failures provide clear user feedback.
+
+---
+
+## 10.5) Landing Page Features
+
+```mermaid
+flowchart TD
+  A[Landing Page] --> B[Language Toggle<br/>EN ⇄ HI]
+  A --> C[Mode Selection<br/>Companion/Hospital]
+  A --> D[Website Link<br/>Mission & Impact]
+  A --> E[About & Privacy Links]
+  
+  B -->|Persist| F[Settings Store]
+  C -->|Navigate| G[Selected Mode Flow]
+  D -->|External| H[Project Website]
+  E -->|Read-only| I[Info Pages]
+```
+
+Notes:
+- Language toggle prominently displayed at top of landing page.
+- Language preference persists across sessions via Zustand store.
+- Website integration provides external link to project information.
+- All features accessible before mode selection.
 
 ---
 
 ## 11) Branding & Partner Context
 
+- **The Communitiful** brand name displayed on landing page and throughout app.
 - Apollo Hospital branding appears in chatroom header.
-- “Powered by Google Maps” displayed in the location scan step UI.
+- "Powered by Google Maps" displayed in the location scan step UI.
+- Website integration link on landing page for mission and impact information.
+- Bilingual interface (English/Hindi) with prominent language toggle.
 
 ---
 
@@ -226,6 +301,12 @@ flowchart TD
 - Pre-post moderation guarantees harmful content never lands in the room.
 - International phone format ensures future scalability and consistency.
 - Animated, calm UI elements are chosen to reduce stress during waiting.
+- **Single active session** prevents security issues and ensures one user per account.
+- **Bilingual support** (English/Hindi) improves accessibility for diverse user base.
+- **Reply functionality** enhances conversation context and user engagement.
+- **Relaxation Corner** provides stress-relief tools during waiting periods.
+- **Privacy protection** blocks contact sharing (phone/email/URL) automatically.
+- **Feedback collection** enables continuous improvement based on user experience.
 
 ---
 
