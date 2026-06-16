@@ -207,3 +207,5 @@ Provide a calm, anonymous space that supports companions emotionally during hosp
 ---
 
 Built with ❤️ using React + Supabase + Gemini
+
+Thanks
